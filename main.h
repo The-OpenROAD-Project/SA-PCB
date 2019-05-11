@@ -12,13 +12,13 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <regex>
+//#include <regex>
 #include <map>
 #include <cmath>
 #include <stdio.h>
 #include <unistd.h>
-#include<ctype.h>
-#include<stdlib.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include "readFiles.h"
 
 void printEverything();
@@ -32,10 +32,11 @@ double cost(int temp_debug = 0);
 double cellOverlap();
 double wireLength();
 float timberWolfAlgorithm();
+float multistart();
 void update_Temperature();
 void initiateMove();
 bool checkMove(long int prevCost);
-void crandomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
+void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
 map < string, Node > ::iterator random_node();
 
 

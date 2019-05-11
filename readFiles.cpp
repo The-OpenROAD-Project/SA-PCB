@@ -4,19 +4,22 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim_all.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <string>
 #include <iostream>
-#include <regex>
+#include <boost/regex.hpp>
 #include <map>
 #include "readFiles.h"
 #include "readScl.h"
 
 using namespace std;
+using boost::is_any_of;
 
-void readNodesFile() {
+void readNodesFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -24,12 +27,17 @@ void readNodesFile() {
   using boost::is_any_of;
   int value = 2;
 
-  file.open("apte.nodes", ios:: in );
+  //file.open("apte.nodes", ios:: in );
+  file.open(fname, ios:: in );
 
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
+      //boost::trim(buf);
       boost::algorithm::split(strVec, buf, is_any_of("\t, "), boost::token_compress_on);
+      if (strVec[0] == ""){
+        continue;
+      }
       Node n;
       if (strVec[3] == "terminal" || strVec[3] == "terminal_NI") {
         value = 0;
@@ -43,7 +51,7 @@ void readNodesFile() {
   file.close();
 }
 
-void readWtsFile() {
+void readWtsFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -51,10 +59,12 @@ void readWtsFile() {
   using boost::is_any_of;
   map < string, Node > ::iterator itr;
 
-  file.open("ibm01.wts", ios:: in );
+  //file.open("ibm01.wts", ios:: in );
+  file.open(fname, ios:: in );
 
   while (getline(file, buf)) {
     i++;
+    //boost::trim(buf);
     if (i > 5) {
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
       nodeId[strVec[1]].setParameterWts(atof(strVec[2].c_str()));
@@ -63,7 +73,7 @@ void readWtsFile() {
   file.close();
 }
 
-void readPlFile() {
+void readPlFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -71,12 +81,15 @@ void readPlFile() {
   vector < string > strVec;
   using boost::is_any_of;
 
-  file.open("apte.pl", ios:: in );
+  //file.open("apte.pl", ios:: in );
+  file.open(fname, ios:: in );
 
   while (getline(file, buf)) {
     i++;
     if (i > 4) {
+      //boost::trim(buf);
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
+
       if (strVec[0] == ""){
         continue;
       }
@@ -91,50 +104,93 @@ void readPlFile() {
   file.close();
 }
 
-void readNetsFile() {
+void readNetsFile(string fname) {
   fstream file;
   string buf;
   int i = 0, a = 0, j = 0, NetId = 1;
   vector < string > strVec;
 
-  regex find("\\b(NetDegree : )");
-  smatch match;
+  boost::regex pattern("\\b(NetDegree : )");
+  boost::smatch match;
   string Out;
 
-  file.open("apte.nets", ios:: in );
+  //file.open("apte.nets", ios:: in );
+  file.open(fname, ios:: in );
 
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
+      //boost::trim_all(buf);
       using boost::is_any_of;
-      regex_search(buf, match, find);
-      Out = match.suffix();
+      //regex_search(buf, match, pattern);
+      //Out = match.suffix();
+      if(boost::regex_search(buf, match, pattern)) {
+        Out = match.suffix();
+      } else {
+        continue;
+      }
       a = atof(Out.c_str());
-      vector < string > strTemp;
-      for (j = 0; j < a; j++) {
 
+      vector < string > strTemp;
+      vector < Pin > pinTemp;
+      for (j = 0; j < a; j++) {
         getline(file, buf);
+        boost::trim_all(buf);
         boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on); // a1213	 I : 0.5 0.5
         strTemp.push_back(strVec[0]);
         nodeId[strVec[0]].setNetList(NetId);
+        Pin p;
+        if(strVec.size() > 2) {
+          p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()));
+        } else {
+          p.set_params(strVec[0].c_str(), 0, 0);
+        }
+        pinTemp.push_back(p);
       }
-      netToCell.insert(pair < int, vector < string > > (NetId, strTemp));
+      //netToCell.insert(pair < int, vector < string > > (NetId, strTemp));
+      netToCell.insert(pair < int, vector< Pin > > (NetId, pinTemp));
       NetId++;
     }
   }
 }
 
-void writePlFile(int idx) {
+void writePlFile(string fname) {
+  vector < string > strVec;
   fstream file;
   string buf;
-  int i = 0;
-  vector < string > strVec;
-  using boost::is_any_of;
+  ofstream myfile (fname);
+  if (myfile.is_open()) {
+    myfile << "\n\n\n\n";
+    map < string, Node > ::iterator itNode;
 
-  file.open("out.pl", ios:: in );
-  file.close();
+    //components
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(itNode->second.terminal) {
+        myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate <<  " : " << itNode->second.orientation_str;
+        if (itNode->second.fixed) {
+          myfile << " /FIXED_NI\n";
+        } else {
+          myfile << "\n";
+        }
+      }
+    }
+
+      myfile << "\n";
+      //terminals
+      for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+        if(!itNode->second.terminal) {
+          myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate << " : " << itNode->second.orientation_str;
+          if (itNode->second.fixed) {
+            myfile << " /FIXED_NI\n";
+          } else {
+            myfile << "\n";
+          }
+        }
+      }
+    myfile.close();
+  } else{ cout << "Unable to open file"; }
 }
-
+/*
 void printMap() {
   map < int, vector < string > > ::iterator itr;
   vector < string > ::iterator itr1;
@@ -150,4 +206,4 @@ void printMap() {
     cout << endl;
   }
   cout << "\n" << endl;
-}
+}*/

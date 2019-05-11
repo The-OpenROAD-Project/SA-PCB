@@ -1,20 +1,21 @@
-CC = g++
-CFLAGS = -g -Wall -Wextra
+CC := g++
+CFLAGS := -g -std=c++17 -O2 -pthread -Wall -Wextra
+LIBS := -lboost_regex
 
-sa : main2.o readFiles.o readScl.o
-	$(CC) $(CFLAGS) -o sa main2.o readFiles.o  readScl.o
+sa : main.o readFiles.o readScl.o
+	$(CC) $(CFLAGS) $(LIBS) -o sa main.o readFiles.o  readScl.o
 
-main2.o : main.h readFiles.h readScl.h main2.cpp
-	$(CC) $(CFLAGS) -c main2.cpp
+main.o : main.h readFiles.h readScl.h main.cpp
+	$(CC) $(CFLAGS) $(LIBS) -c main.cpp
 
 readFiles.o : readFiles.h readScl.h readFiles.cpp
-	$(CC) $(CFLAGS) -c readFiles.cpp
+	$(CC) $(CFLAGS) $(LIBS) -c readFiles.cpp
 
 #readNets.o : readFiles.h readNets.h readNets.cpp
-#	$(CC) $(CFLAGS) -c readNets.cpp
+#	$(CC) $(CFLAGS) $(LIBS) -c readNets.cpp
 
 readScl.o : readFiles.h readScl.h readScl.cpp
-	$(CC) $(CFLAGS) -c readScl.cpp
+	$(CC) $(CFLAGS) $(LIBS) -c readScl.cpp
 
 clean :
 	-rm *.o

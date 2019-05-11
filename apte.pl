@@ -10,6 +10,7 @@ cc_21	49.26	38.28	: N
 clk	86.93	35.23	: N
 cc_24	33.11	19.64	: N
 cc_14	68.13	0.0	: N
+cc_13	-1.09	0.0	 : N
 
 new64	105.0	69.0	 : N	/FIXED_NI
 new62	105.0	61.0	 : N	/FIXED_NI
@@ -27,14 +28,10 @@ new6	0.0	49.0	 : N	/FIXED_NI
 new7	0.0	53.0	 : N	/FIXED_NI
 new4	0.0	41.0	 : N	/FIXED_NI
 new5	0.0	45.0	 : N	/FIXED_NI
-cc_13	-1.09	0.0	 : N	/FIXED_NI
-cc_12	-1.09	0.0	 : N	/FIXED_NI
-cc_11	-1.09	0.0	 : N	/FIXED_NI
 new31	45.0	0.0	 : N	/FIXED_NI
 new50	85.0	0.0	 : N	/FIXED_NI
 new51	105.0	25.0	 : N	/FIXED_NI
 new52	105.0	29.0	 : N	/FIXED_NI
-clk	0.0	1.23	 : N	/FIXED_NI
 new10	0.0	61.0	 : N	/FIXED_NI
 new11	0.0	65.0	 : N	/FIXED_NI
 new12	0.0	69.0	 : N	/FIXED_NI
@@ -69,14 +66,9 @@ new33	53.0	0.0	 : N	/FIXED_NI
 Phi	81.0	105.0	 : N	/FIXED_NI
 new21	25.0	0.0	 : N	/FIXED_NI
 new20	21.0	0.0	 : N	/FIXED_NI
-cc_24	-1.09	0.0	 : N	/FIXED_NI
 VSS	0.0	93.0	 : N	/FIXED_NI
-cc_22	-1.09	0.0	 : N	/FIXED_NI
-cc_23	-1.09	0.0	 : N	/FIXED_NI
-cc_21	-1.09	0.0	 : N	/FIXED_NI
 new29	37.0	0.0	 : N	/FIXED_NI
 new28	33.0	0.0	 : N	/FIXED_NI
-cc_14	-1.09	0.0	 : N	/FIXED_NI
 new60	105.0	57.0	 : N	/FIXED_NI
 new67	105.0	81.0	 : N	/FIXED_NI
 new85	73.0	105.0	 : N	/FIXED_NI

@@ -71,9 +71,7 @@ class row {
 
     xLast = nodeId[cellList[cellList.size() - 1]].xCoordinate;
     widthLast = nodeId[cellList[cellList.size() - 1]].width;
-    overlap = xLast + widthLast - (RowWidth + xLimit);
-
-    this -> overlap = overlap;
+    this->overlap = xLast + widthLast - (RowWidth + xLimit);
   }
 
   void printParameter() {

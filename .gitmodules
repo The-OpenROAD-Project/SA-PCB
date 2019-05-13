@@ -1,0 +1,3 @@
+[submodule "cpp-taskflow"]
+	path = cpp-taskflow
+	url = https://github.com/cpp-taskflow/cpp-taskflow.git

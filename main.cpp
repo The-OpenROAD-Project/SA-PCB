@@ -1,6 +1,19 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
-#include <vector>
 #include <fstream>
+#include <sstream>
+#include <ctype.h>
+#include <map>
+#include <vector>
+#include <string>
+#include <numeric>
+#include <cmath>
+#include <unistd.h>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/geometry.hpp>
@@ -13,29 +26,16 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_01.hpp>
 #include <boost/foreach.hpp>
-#include <string>
-#include <iostream>
-#include <numeric>
-#include <sstream>
-#include <map>
-#include <cmath>
-#include <unistd.h>
+
+#include "taskflow/taskflow.hpp"
+
 #include "main.h"
 #include "time.h"
 #include "readScl.h"
 
-#include "taskflow/taskflow.hpp"
-
-#include <ctime>
-#include <ratio>
-#include <chrono>
-
 using namespace std::chrono;
-
-/*
-TODO: accept/reject ratio - differen parameter
-*/
 
 BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
@@ -50,23 +50,22 @@ int RowWidth;
 map<int, vector<Pin> > netToCell;
 map < string, Node > nodeId;
 boundaries b;
-//float l1 = 0.999;
-//float l2 = 0.001;
+
 float l1 = 0.8;
 float l2 = 1-l1;
 
 int debug = 0;
-
 int idx = -1;
 
 vector< int > accept_history;
 float accept_ratio = 0;
 
+boost::mt19937 rng;
+
 int main(int argc, char *argv[]) {
   // parser and entry point into the program
   // TODO add wirelength flag
   srand(time(NULL));
-  int x = -1;
   int opt;
   int i, j, t, k, s, w;
   i=j=t=k=1;
@@ -119,7 +118,8 @@ int main(int argc, char *argv[]) {
         cout << "./main: option requires an argument -- f\n";
         exit(1);
       }*/
-      if (parg == "") {
+      //if (parg == "") {
+      if(strncmp(parg,"",1) == 0) {
         cout << "./main: option requires an argument -- p\n";
         exit(1);
       }
@@ -189,6 +189,10 @@ void CalcBoundaries() {
   }
 }
 
+void rudy() {
+
+}
+
 int macroPlacement() {
   // macro placement [depreceiated]
   int xValue = b.minX, yValue = 0;
@@ -219,16 +223,21 @@ int macroPlacement() {
 
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
   // randomly place node
-  int nx = n.xCoordinate;
-  int ny = n.yCoordinate;
-  int rx = rand()%(xmax-xmin + 1) + xmin;
-  int ry = rand()%(ymax-ymin + 1) + ymin;
 
-  int dx = rx - nx;
-  int dy = ry - ny;
-  int ro = rand()%4;
+  boost::uniform_int<> uni_distx(xmin,xmax);
+  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
+  int rx = unix();
+
+  boost::uniform_int<> uni_disty(ymin,ymax);
+  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uniy(rng, uni_disty);
+  int ry = uniy();
+
+  boost::uniform_int<> uni_disto(0,4);
+  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
+  int ro = unio();
+
   string ostr = n.orient2str(ro);
-  n.setParameterPl(nx + dx, ny +dy,ostr , n.fixed);
+  n.setParameterPl(rx,ry,ostr , n.fixed);
 }
 
 void initialPlacement() {
@@ -244,9 +253,7 @@ void initialPlacement() {
 
 double wireLength() {
   // compute HPWL
-  //map < int, vector < string > > ::iterator itNet;
   map<int, vector < Pin > > ::iterator itNet;
-  //vector < string > ::iterator itCellList;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
   int minXW = b.minX, minYW = b.minY, maxXW = b.maxX, maxYW = b.maxY;
@@ -332,9 +339,24 @@ double cost(int temp_debug) {
 map < string, Node > ::iterator random_node() {
   map < string, Node > ::iterator itNode = nodeId.begin();
   int size = nodeId.size();
-  int randint = rand() % static_cast<int>(size + 1);
+  boost::uniform_int<> uni_dist(0,size-1);
+  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
+  int randint = uni();
   std::advance(itNode, randint);
   return itNode;
+}
+
+void validateMove(Node* node, double rx, double ry) {
+  double width = node->width;
+  double height = node->height;
+
+  rx = max(static_cast<int>(rx), static_cast<int>(b.minX));
+  ry = max(static_cast<int>(ry), static_cast<int>(b.minX));
+
+  rx = min(static_cast<int>(rx), static_cast<int>(b.maxX - width));
+  ry = min(static_cast<int>(ry), static_cast<int>(b.maxY - height));
+
+  node->setPos(rx,ry);
 }
 
 void initiateMove() {
@@ -351,14 +373,20 @@ void initiateMove() {
   while(rand_node1->second.terminal != 1 || rand_node1->second.name == "") {
     rand_node1 = random_node();
   }
-  int orig_x = rand_node1->second.xCoordinate;
-  int orig_y = rand_node1->second.yCoordinate;
+  double rand_node1_orig_x = rand_node1->second.xCoordinate;
+  double rand_node1_orig_y = rand_node1->second.yCoordinate;
+  double rand_node2_orig_x = 0.0;
+  double rand_node2_orig_y = 0.0;
 
   if(debug > 1) {
     cout << "=======" << endl;
     cout <<  "name: " << rand_node1->second.name << endl;
   }
-  float i = ((double) rand() / (RAND_MAX));
+
+  boost::uniform_real<> uni_dist(0,1);
+  boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
+  double i = uni();
+
   if (i<0.15) { // swap
     state = 0;
     if(debug > 1) {
@@ -368,73 +396,59 @@ void initiateMove() {
     while(rand_node2->second.terminal != 1 || rand_node2->first == rand_node1->first || rand_node1->second.name == "") {
       rand_node2 = random_node();
     }
-    int rand_node1_x = rand_node1->second.xCoordinate;
-    int rand_node1_y = rand_node1->second.yCoordinate;
-    int rand_node2_x = rand_node2->second.xCoordinate;
-    int rand_node2_y = rand_node2->second.yCoordinate;
+    rand_node2_orig_x = rand_node2->second.xCoordinate;
+    rand_node2_orig_y = rand_node2->second.yCoordinate;
 
-    rand_node1->second.setPos(rand_node2_x,rand_node2_y);
-    rand_node2->second.setPos(rand_node1_x,rand_node1_y);
-
+    validateMove(&rand_node1->second, rand_node2_orig_x, rand_node2_orig_y);
+    validateMove(&rand_node2->second, rand_node1_orig_x, rand_node1_orig_y);
   } else if (i < 0.75) { // shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
     }
-
-    double x_coord = rand_node1->second.xCoordinate;
-    double y_coord = rand_node1->second.yCoordinate;
-    double width = rand_node1->second.width;
-    double height = rand_node1->second.height;
     double sigma = rand_node1->second.sigma;
 
-    boost::mt19937 rng;
     boost::normal_distribution<> nd(0.0, sigma);
     boost::variate_generator<boost::mt19937&,
                              boost::normal_distribution<> > var_nor(rng, nd);
+
     double dx = var_nor();
     double dy = var_nor();
 
-    double rx = x_coord + dx;
-    double ry = y_coord + dy;
+    double rx = rand_node1_orig_x + dx;
+    double ry = rand_node1_orig_y + dy;
+
+    double width = rand_node1->second.width;
+    double height = rand_node1->second.height;
 
     rx = max(static_cast<int>(rx), static_cast<int>(b.minX));
     ry = max(static_cast<int>(ry), static_cast<int>(b.minX));
-    if(rx + width > b.maxX) {
-      rx = b.maxX - width;
-    }
-    if(ry + height > b.maxY) {
-      ry = b.maxY - height;
-    }
 
-    rx = b.minX + (rand() % static_cast<int>(b.maxX - b.minX + 1));
-    ry = b.minY + (rand() % static_cast<int>(b.maxY - b.minY + 1));
-
-    rand_node1->second.setPos(rx,ry);
+    rx = min(static_cast<int>(rx), static_cast<int>(b.maxX - width));
+    ry = min(static_cast<int>(ry), static_cast<int>(b.maxY - height));
+    validateMove(&rand_node1->second, rx, ry);
   } else if (i < 0.2) { // rotate
     state = 2;
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-    r = (rand() % static_cast<int>(3 + 1));
+    boost::uniform_int<> uni_dist(0,3);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
+    int r = uni();
     rand_node1->second.setRotation(r);
   }
   bool accept = checkMove(prevCost);
+
   if (!accept) {
     if(debug > 1) {
       cout << "reject" << endl;
     }
     // revert state
     if (state == 0) {
-      int rand_node1_x = rand_node1->second.xCoordinate;
-      int rand_node1_y = rand_node1->second.yCoordinate;
-      int rand_node2_x = rand_node2->second.xCoordinate;
-      int rand_node2_y = rand_node2->second.yCoordinate;
-
-      rand_node1->second.setPos(rand_node2_x,rand_node2_y);
-      rand_node2->second.setPos(rand_node1_x,rand_node1_y);
+      rand_node1->second.setPos(rand_node1_orig_x,rand_node1_orig_y);
+      rand_node2->second.setPos(rand_node2_orig_x,rand_node2_orig_y);
     } else if (state == 1) {
-      rand_node1->second.setPos(orig_x,orig_y);
+      rand_node1->second.setPos(rand_node1_orig_x,rand_node1_orig_y);
     } else if (state == 2) {
       rand_node1->second.setRotation(-r);
     }
@@ -467,7 +481,9 @@ bool checkMove(long int prevCost) {
   // either accept or reject the move based on temperature & cost
   double newCost = cost();
   int delCost = 0;
-  double prob = ((double) rand() / (RAND_MAX));
+  boost::uniform_real<> uni_dist(0,1);
+  boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
+  double prob = uni();
   if(debug > 1) {
     cout << "new cost: " << newCost << endl;
   }
@@ -542,8 +558,11 @@ float timberWolfAlgorithm() {
     }
     update_temperature();
     ii += 1;
-    writePlFile("./cache/"+std::to_string( idx )+".pl");
+    if (ii % 200 == 0) {
+      writePlFile("./cache/"+std::to_string( ii )+".pl");
+    }
   }
+  writePlFile("./cache/"+std::to_string( idx )+".pl");
   return cost();
 }
 /*

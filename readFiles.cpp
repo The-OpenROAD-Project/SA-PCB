@@ -1,6 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <string>
+#include <boost/regex.hpp>
+#include <map>
+
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
@@ -9,10 +13,7 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <string>
-#include <iostream>
-#include <boost/regex.hpp>
-#include <map>
+
 #include "readFiles.h"
 #include "readScl.h"
 
@@ -27,15 +28,13 @@ void readNodesFile(string fname) {
   using boost::is_any_of;
   int value = 2;
 
-  //file.open("apte.nodes", ios:: in );
   file.open(fname, ios:: in );
-
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
-      //boost::trim(buf);
+      boost::trim(buf);
       boost::algorithm::split(strVec, buf, is_any_of("\t, "), boost::token_compress_on);
-      if (strVec[0] == ""){
+      if (strVec[0] == "" || strVec[0] == " "){
         continue;
       }
       Node n;
@@ -59,12 +58,10 @@ void readWtsFile(string fname) {
   using boost::is_any_of;
   map < string, Node > ::iterator itr;
 
-  //file.open("ibm01.wts", ios:: in );
   file.open(fname, ios:: in );
-
   while (getline(file, buf)) {
     i++;
-    //boost::trim(buf);
+    boost::trim(buf);
     if (i > 5) {
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
       nodeId[strVec[1]].setParameterWts(atof(strVec[2].c_str()));
@@ -81,13 +78,11 @@ void readPlFile(string fname) {
   vector < string > strVec;
   using boost::is_any_of;
 
-  //file.open("apte.pl", ios:: in );
   file.open(fname, ios:: in );
-
   while (getline(file, buf)) {
     i++;
     if (i > 4) {
-      //boost::trim(buf);
+      boost::trim(buf);
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
 
       if (strVec[0] == ""){
@@ -114,16 +109,12 @@ void readNetsFile(string fname) {
   boost::smatch match;
   string Out;
 
-  //file.open("apte.nets", ios:: in );
   file.open(fname, ios:: in );
-
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
-      //boost::trim_all(buf);
+      boost::trim_all(buf);
       using boost::is_any_of;
-      //regex_search(buf, match, pattern);
-      //Out = match.suffix();
       if(boost::regex_search(buf, match, pattern)) {
         Out = match.suffix();
       } else {
@@ -147,7 +138,6 @@ void readNetsFile(string fname) {
         }
         pinTemp.push_back(p);
       }
-      //netToCell.insert(pair < int, vector < string > > (NetId, strTemp));
       netToCell.insert(pair < int, vector< Pin > > (NetId, pinTemp));
       NetId++;
     }

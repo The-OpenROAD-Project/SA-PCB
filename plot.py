@@ -142,15 +142,14 @@ bversion = 1
 boarddimmin = None
 boarddim = None
 figname = ''
-circuitname = './benchmarks/pcb_benchmark_devel-master/bm3'
-#circuitname = './apte'
-#plfile = './35653.pl'
-plfile = circuitname + '.pl'
+#circuitname = './benchmarks/pcb_benchmark_devel-master/bm3'
+circuitname = './apte'
+plfile = './cache/410.pl'
+#plfile = circuitname + '.pl'
 nodesfile = circuitname + '.nodes'
 netsfile = circuitname + '.nets'
 board_pins = {}
 #plfile2 = 'bm32.pl' #'./bm12.pl'
-plfile2 = './12607.pl'
 """
 from os import walk
 from tqdm import tqdm
@@ -203,8 +202,8 @@ if bversion == 0: # old version of bookshelf
 	plot_circuit(plfile.split('.')[0], components,{},nets,board_dim,figname)
 elif bversion == 1: # new version of bookshelf
 	components = load_bookshelf.read_nodes(nodesfile)
-	_,comp2rot,board_pins,_ = load_bookshelf.read_pl2(plfile,components)
-	components,_= load_bookshelf.read_pl(plfile2)
+	components,comp2rot,board_pins,_ = load_bookshelf.read_pl2(plfile,components)
+	#components,_= load_bookshelf.read_pl(plfile2)
 	nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
 	if boarddimmin is None:
 		if board_pins is not None and len(board_pins) > 0:

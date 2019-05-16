@@ -1,6 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <string>
+#include <regex>
+#include <map>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/geometry.hpp>
@@ -9,10 +13,6 @@
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
-#include <string>
-#include <iostream>
-#include <regex>
-#include <map>
 
 using namespace std;
 using namespace boost::geometry;
@@ -96,7 +96,7 @@ class Node {
     this -> init_orientation = str2orient(orientation_str);
     this -> orientation = this -> init_orientation;
     this -> fixed = fixed;
-    this -> sigma = 10.0;
+    this -> sigma = 10.0; // this -> width * this -> height; //10.0;
   }
 
   void setNetList(int NetId) {

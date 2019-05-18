@@ -2,7 +2,6 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <boost/regex.hpp>
 #include <map>
 
 #include <boost/regex.hpp>
@@ -25,7 +24,6 @@ void readNodesFile(string fname) {
   string buf;
   int i = 0;
   vector < string > strVec;
-  using boost::is_any_of;
   int value = 2;
 
   file.open(fname, ios:: in );
@@ -38,12 +36,13 @@ void readNodesFile(string fname) {
         continue;
       }
       Node n;
-      if (strVec[3] == "terminal" || strVec[3] == "terminal_NI") {
+
+      if (strVec.size() > 3 && (strVec[3] == "terminal" || strVec[3] == "terminal_NI")) {
         value = 0;
       } else {
         value = 1;
       }
-      n.setParameterNodes(strVec[0],atof(strVec[1].c_str()), atof(strVec[2].c_str()), value);
+      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value);
       nodeId.insert(pair < string, Node > (strVec[0], n));
     }
   }
@@ -55,7 +54,6 @@ void readWtsFile(string fname) {
   string buf;
   int i = 0;
   vector < string > strVec;
-  using boost::is_any_of;
   map < string, Node > ::iterator itr;
 
   file.open(fname, ios:: in );
@@ -76,7 +74,6 @@ void readPlFile(string fname) {
   int i = 0;
   int value = 0;
   vector < string > strVec;
-  using boost::is_any_of;
 
   file.open(fname, ios:: in );
   while (getline(file, buf)) {
@@ -105,8 +102,9 @@ void readNetsFile(string fname) {
   int i = 0, a = 0, j = 0, NetId = 1;
   vector < string > strVec;
 
-  boost::regex pattern("\\b(NetDegree : )");
-  boost::smatch match;
+  //boost::regex pattern("\\b(NetDegree : )");
+  //boost::smatch match;
+  string pat = "NetDegree : ";
   string Out;
 
   file.open(fname, ios:: in );
@@ -114,14 +112,16 @@ void readNetsFile(string fname) {
     i++;
     if (i > 7) {
       boost::trim_all(buf);
-      using boost::is_any_of;
-      if(boost::regex_search(buf, match, pattern)) {
-        Out = match.suffix();
+      //if(boost::regex_search(buf, match, pattern)) {
+      //  Out = match.suffix();
+      std::size_t found = buf.find(pat);
+      if(found!=std::string::npos) {
+        Out = buf.substr(buf.rfind(" ") + 1);
       } else {
         continue;
       }
-      a = atof(Out.c_str());
-
+      //a = atof(Out.c_str());
+      a = stoi(Out);
       vector < string > strTemp;
       vector < Pin > pinTemp;
       for (j = 0; j < a; j++) {

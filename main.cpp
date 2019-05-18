@@ -14,6 +14,7 @@
 #include <ratio>
 #include <chrono>
 
+// boost version 1.69.0
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/geometry.hpp>
@@ -29,7 +30,7 @@
 #include <boost/random/uniform_01.hpp>
 #include <boost/foreach.hpp>
 
-#include "taskflow/taskflow.hpp"
+//#include "taskflow/taskflow.hpp"
 
 #include "main.h"
 #include "time.h"
@@ -46,7 +47,6 @@ double Temperature;
 int xLimit;
 map < int, row > rowId;
 int RowWidth;
-//map<int, vector<string> > netToCell;
 map<int, vector<Pin> > netToCell;
 map < string, Node > nodeId;
 boundaries b;
@@ -55,7 +55,7 @@ float l1 = 0.8;
 float l2 = 1-l1;
 
 int debug = 0;
-int idx = -1;
+long long int idx = -1;
 
 vector< int > accept_history;
 float accept_ratio = 0;
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   i=j=t=k=1;
   string f = "";
   char *parg;
-  while ((opt = getopt(argc,argv,"i:x:j:t:k:s:w:f:h:p::d")) != EOF) {
+  /*while ((opt = getopt(argc,argv,"i:x:j:t:k:s:w:f:h:p::d")) != EOF) {
       switch(opt) {
           case 'p': parg=strdup(optarg); break;
           case 'd': debug=1; break;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
                                     -f <str> : for denoting number output pl \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 40000 -k 0 -s -w 0 -f output.pl for the standard single instance timberwolf algorithm");
           default: cout<<endl; abort();
-      }
+      }*/
       /*if (idx == -1) {
         cout << "./main: option requires an argument -- x\n";
         exit(1);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
         exit(1);
       }*/
       //if (parg == "") {
-      if(strncmp(parg,"",1) == 0) {
+      /*if(strncmp(parg,"",1) == 0) {
         cout << "./main: option requires an argument -- p\n";
         exit(1);
       }
@@ -128,13 +128,13 @@ int main(int argc, char *argv[]) {
   // optind is for the extra arguments which are not parsed
   for(; optind < argc; optind++){
     printf("extra arguments: %s\n", argv[optind]);
-  }
+  }*/
   cout << "idx: " << idx << endl;
-  std::string p = std::string(parg);
+  //std::string p = std::string(parg);
+  string p = "apte";
   cout << "circuit: " << p << endl;
 
   debug = 1;
-  if(debug) { cout << "idx: " << idx << endl; }
 
   string nodesfname = p +".nodes";
   string netsfname = p +".nets";
@@ -256,8 +256,8 @@ double wireLength() {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
-  int minXW = b.minX, minYW = b.minY, maxXW = b.maxX, maxYW = b.maxY;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
+    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
@@ -281,16 +281,19 @@ double wireLength() {
 
       if (xVal < minXW)
         minXW = xVal;
-      if (xVal > maxXW)
-        maxXW = xVal;
+      if (xVal > maxXW) {
+        if (xVal > 10000) {
+        cout << maxXW << " " << xVal << endl;
+        nodeId[itCellList->name].printParameter();}
+        maxXW = xVal;}
       if (yVal < minYW)
         minYW = yVal;
       if (yVal > maxYW)
         maxYW = yVal;
     }
+    //cout << maxXW - minXW + maxYW - minYW << " " << maxXW << endl;
     wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(itNet -> second.size() - 1);
   }
-
   return wireLength;
 }
 
@@ -524,7 +527,7 @@ float timberWolfAlgorithm() {
   Temperature = pow(10,14);
   int i; // n * 20, n is number of nodes
   int cnt = 0;
-  int ii = 0;
+  long long int ii = 0;
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;

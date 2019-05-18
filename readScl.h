@@ -52,7 +52,7 @@ class row {
     int x = 0;
     map < int, string > sortx;
     map < int, string > ::iterator it;
-    vector < string > ::iterator itl;
+    //vector < string > ::iterator itl;
     vector < string > list;
     for (unsigned long i = 0; i < this -> cellList.size(); i++) {
       x = nodeId.find(cellList[i]) -> second.xCoordinate;
@@ -66,7 +66,7 @@ class row {
   }
 
   void calcRowOverlap() {
-    vector < string > ::iterator it1;
+    //vector < string > ::iterator it1;
     int xLast = 0, widthLast = 0;
 
     xLast = nodeId[cellList[cellList.size() - 1]].xCoordinate;

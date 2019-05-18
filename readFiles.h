@@ -59,8 +59,8 @@ class Node {
   double sigma;
   double xCoordinate;
   double yCoordinate;
-  int xBy2;
-  int yBy2; // change to floats
+  double xBy2;
+  double yBy2; // change to floats
   string orientation_str;
   int init_orientation;
   int orientation;
@@ -88,15 +88,21 @@ class Node {
     this -> weight = weight;
   }
 
-  void setParameterPl(int xCoordinate, int yCoordinate, string orientation_str, int fixed) {
+  void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
     // Sets parameters given an entry in Pl file
-    this -> xCoordinate = xCoordinate;
-    this -> yCoordinate = yCoordinate;
+    //this -> xCoordinate = xCoordinate;
+    //this -> yCoordinate = yCoordinate;
+    this -> xCoordinate = 0.0;
+    this -> yCoordinate = 0.0;
     this -> orientation_str = orientation_str;
     this -> init_orientation = str2orient(orientation_str);
+    this -> orientation = 0;
     this -> orientation = this -> init_orientation;
     this -> fixed = fixed;
     this -> sigma = 10.0; // this -> width * this -> height; //10.0;
+
+    this -> setPos(xCoordinate, yCoordinate);
+    this -> setRotation(this->init_orientation);
   }
 
   void setNetList(int NetId) {
@@ -104,13 +110,21 @@ class Node {
     Netlist.push_back(NetId);
   }
 
-  void setPos(int x, int y) {
+  //double validateMove() {
+  //}
+
+  void setPos(double x, double y) {
     // Sets position of a node object (lower-left corner)
+    if(this->terminal == 1) {
     trans::translate_transformer<double, 2, 2> translate(x - this->xCoordinate, y - this->yCoordinate);
     model::polygon<model::d2::point_xy<double> > tmp;
     boost::geometry::transform(this->poly, tmp, translate);
     this->poly = tmp;
-    updateCoordinates();
+    updateCoordinates();}
+else {
+    this->xCoordinate = x;
+    this->yCoordinate = y;
+}
   }
 
   int str2orient(string o) {
@@ -166,6 +180,7 @@ class Node {
 
   // TODO fix rotation origin?
   void setRotation(int r) {
+    if(this->terminal == 0){return;}
     // rotates Node
     int o = this->orientation;
     int rot_deg = 90*r;//orient2degree(r);
@@ -185,10 +200,15 @@ class Node {
     this -> yCoordinate = bg::get<1>(*it);
 
     // centroid
-    boost::geometry::model::d2::point_xy<double> centroid;
-    boost::geometry::centroid(this->poly, centroid);
-    this -> xBy2 = centroid.get<0>();
-    this -> yBy2 = centroid.get<1>();
+    if(this->terminal) {
+        this -> xBy2 = this->xCoordinate;
+        this -> yBy2 = this->yCoordinate;
+    } else {
+        boost::geometry::model::d2::point_xy<double> centroid;
+        boost::geometry::centroid(this->poly, centroid);
+        this -> xBy2 = centroid.get<0>();
+        this -> yBy2 = centroid.get<1>();
+    }
   }
 
   void printExterior() {

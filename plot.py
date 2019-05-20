@@ -55,7 +55,7 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
 					cy = pin[1][1]
 			else:
 				cx, cy = pin_pos2(pin,components,comp2rot)
-				#cx, cy = pin_pos(pin,components)
+				##cx, cy = pin_pos(pin,components)
 				#label = ax.annotate(pin, xy=(cx, cy), fontsize=5, ha="right", va="top", )
 			netlist.append([cx,cy])
 		xmax = max([p[0] for p in netlist])
@@ -64,18 +64,18 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
 		ymin = min([p[1] for p in netlist])
 		center =  [(xmax + xmin)/2,(ymax + ymin)/2]
 		# centroid - star
-		#for i in range(len(netlist)):
-		#	ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
+		for i in range(len(netlist)):
+			ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
 		xs= [ x[0] for x in netlist ]
 		ys= [ x[1] for x in netlist ]
-		#ax.scatter(xs,ys,marker='.',c=c)
-		#ax.scatter(center[0],center[1],marker='.',c=c)
+		ax.scatter(xs,ys,marker='.',c=c)
+		ax.scatter(center[0],center[1],marker='.',c=c)
 	plt.xlim(board_lower_left_corner[0] - 5,board_upper_right_corner[0] + 5)
 	plt.ylim(board_lower_left_corner[1] - 5,board_upper_right_corner[1] + 5)
 	plt.gca().set_aspect('equal', adjustable='box')
-	#plt.savefig(figname)
-	#plt.close()
-	plt.show()
+	plt.savefig(figname)
+	plt.close()
+	#plt.show()
 
 def pin_pos2(pin_loc, modules,comp2rot):
 	"""
@@ -144,13 +144,13 @@ boarddim = None
 figname = ''
 #circuitname = './benchmarks/pcb_benchmark_devel-master/bm3'
 circuitname = './apte'
-plfile = './cache/410.pl'
-#plfile = circuitname + '.pl'
+#plfile = './cache/600.pl'
+plfile = circuitname + '.pl'
 nodesfile = circuitname + '.nodes'
 netsfile = circuitname + '.nets'
 board_pins = {}
 #plfile2 = 'bm32.pl' #'./bm12.pl'
-"""
+
 from os import walk
 from tqdm import tqdm
 
@@ -160,17 +160,17 @@ for (dirpath, dirnames, filenames) in walk('./cache/'):
 f = sorted(f, key=lambda x: float(x.split('.')[0]))
 
 components = load_bookshelf.read_nodes(nodesfile)
-_,comp2rot,_,board_pins = load_bookshelf.read_pl2(plfile,components)
-
+#_,comp2rot,_,board_pins = load_bookshelf.read_pl2(plfile,components)
 for i,ff in enumerate(tqdm(f)):
-  if i > 10000:
-      break
-  if i % 20 == 0:
-	  components,_= load_bookshelf.read_pl('./cache/'+ff)
-	  nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
-	  board_dim = [[-10,100],[-5,55]]
-	  plot_circuit(ff.split('.')[0], components,comp2rot,nets,board_dim,'./cache/img/'+ff.split('.')[0]+'.png')
-
+	if i > 10000:
+		break
+	if i % 20 == 0:
+		#components,_= load_bookshelf.read_pl('./cache/'+ff)
+		components,comp2rot,board_pins,_ = load_bookshelf.read_pl2('./cache/'+ff,components)
+		nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
+		#board_dim = [[-10,100],[-5,55]]
+		board_dim = [[0,105],[0,89]] # apte
+		plot_circuit(ff.split('.')[0], components,comp2rot,nets,board_dim,'./cache/img/'+ff.split('.')[0]+'.png')
 
 f = []
 for (dirpath, dirnames, filenames) in walk('./cache/img/'):
@@ -178,11 +178,17 @@ for (dirpath, dirnames, filenames) in walk('./cache/img/'):
 f = sorted(f, key=lambda x: float(x.split('.')[0]))
 
 import imageio
-with imageio.get_writer('./cache/img/anim.gif', mode='I') as writer:
-    for ff in tqdm(f):
-        ff = './cache/img/' + ff
-        image = imageio.imread(ff)
-        writer.append_data(image)
+with imageio.get_writer('./anim.gif', mode='I') as writer:
+	for ff in tqdm(f):
+		try:
+			if ff == "" or ff == "anim":
+				continue
+			ff = './cache/img/' + ff
+			image = imageio.imread(ff)
+			writer.append_data(image)
+		except:
+			tqdm.write("exception: " + ff)
+			continue
 
 """
 
@@ -220,3 +226,4 @@ elif bversion == 1: # new version of bookshelf
 
 else:
 	print('bookshelf version must be 0 or 1')
+"""

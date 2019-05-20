@@ -7,20 +7,22 @@ void printCellMap();
 void printRowMap();
 void updateCenter();
 void CalcBoundaries();
+void SetInitParameters();
 int macroPlacement();
 void validateMove(Node* node, double rx, double ry);
 double cost(int temp_debug = 0);
 double cellOverlap();
 double wireLength();
+double rudy();
 float timberWolfAlgorithm();
 float multistart();
 void update_Temperature();
 void initiateMove();
-bool checkMove(long int prevCost);
+bool checkMove(double prevCost);
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
 map < string, Node > ::iterator random_node();
 
 
 struct boundaries {
-  int minX, maxX, minY, maxY;
+  double minX, maxX, minY, maxY;
 };

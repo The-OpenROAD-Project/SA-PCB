@@ -77,8 +77,10 @@ def manhattan(components, board_pins, nets):
 #plfile = sys.argv[2]
 #netsfile = sys.argv[3]
 
-circuitname = './benchmarks/pcb_benchmark_devel-master/bm1'
-plfile = circuitname + '.pl'
+#circuitname = './benchmarks/pcb_benchmark_devel-master/bm1'
+#plfile = circuitname + '.pl'
+circuitname = 'apte'
+plfile = 'cache/400.pl'
 nodesfile = circuitname + '.nodes'
 netsfile = circuitname + '.nets'
 board_pins = {}

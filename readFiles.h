@@ -73,7 +73,7 @@ class Node {
     this -> height = height;
     this -> terminal = terminal;
     this->orientation_str = "N";
-    if (terminal == 1) {
+    if (!terminal) {
       double points[][2] = {{0.0, 0.0}, {width, 0.0}, {width, height}, {0.0, height}};
       model::polygon< model::d2::point_xy<double> > poly;
       append(poly, points);
@@ -90,19 +90,18 @@ class Node {
 
   void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
     // Sets parameters given an entry in Pl file
-    //this -> xCoordinate = xCoordinate;
-    //this -> yCoordinate = yCoordinate;
     this -> xCoordinate = 0.0;
     this -> yCoordinate = 0.0;
+    this -> setPos(xCoordinate, yCoordinate);
+
     this -> orientation_str = orientation_str;
     this -> init_orientation = str2orient(orientation_str);
     this -> orientation = 0;
-    this -> orientation = this -> init_orientation;
+    //this -> orientation = this -> init_orientation;
+    this -> setRotation(this->init_orientation);
+
     this -> fixed = fixed;
     this -> sigma = 10.0; // this -> width * this -> height; //10.0;
-
-    this -> setPos(xCoordinate, yCoordinate);
-    this -> setRotation(this->init_orientation);
   }
 
   void setNetList(int NetId) {
@@ -110,21 +109,18 @@ class Node {
     Netlist.push_back(NetId);
   }
 
-  //double validateMove() {
-  //}
-
   void setPos(double x, double y) {
     // Sets position of a node object (lower-left corner)
-    if(this->terminal == 1) {
-    trans::translate_transformer<double, 2, 2> translate(x - this->xCoordinate, y - this->yCoordinate);
-    model::polygon<model::d2::point_xy<double> > tmp;
-    boost::geometry::transform(this->poly, tmp, translate);
-    this->poly = tmp;
-    updateCoordinates();}
-else {
-    this->xCoordinate = x;
-    this->yCoordinate = y;
-}
+    if(!this->terminal) {
+        trans::translate_transformer<double, 2, 2> translate(x - this->xCoordinate, y - this->yCoordinate);
+        model::polygon<model::d2::point_xy<double> > tmp;
+        boost::geometry::transform(this->poly, tmp, translate);
+        this->poly = tmp;
+        updateCoordinates();
+    } else {
+        this->xCoordinate = x;
+        this->yCoordinate = y;
+      }
   }
 
   int str2orient(string o) {
@@ -154,21 +150,7 @@ else {
     }
     return "";
   }
-/*
-  int orient2degree(int o) {
-    // converts an orientation int to degrees
-    if(o == 0) {
-      return 0;
-    } else if(o == 1) {
-      return 90;
-    } else if(o == 2) {
-      return 180;
-    } else if(o == 3) {
-      return 270;
-    }
-    return -1;
-  }
-*/
+
   int wrap_orientation(int kX, int const kLowerBound, int const kUpperBound) {
     // wraps an orientation int post rotation
     int range_size = kUpperBound - kLowerBound + 1;
@@ -180,7 +162,7 @@ else {
 
   // TODO fix rotation origin?
   void setRotation(int r) {
-    if(this->terminal == 0){return;}
+    if(this->terminal || this->fixed){return;}
     // rotates Node
     int o = this->orientation;
     int rot_deg = 90*r;//orient2degree(r);

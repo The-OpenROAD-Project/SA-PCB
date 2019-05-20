@@ -61,7 +61,7 @@ def read_pl2(fname,components):
 	board_pins = {}
 	static_components = []
 	for line in lines:
-		if line == '':
+		if line.strip() == '':
 			bp = 1
 			continue
 		else:

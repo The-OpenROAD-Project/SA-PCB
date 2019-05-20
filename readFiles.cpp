@@ -38,9 +38,9 @@ void readNodesFile(string fname) {
       Node n;
 
       if (strVec.size() > 3 && (strVec[3] == "terminal" || strVec[3] == "terminal_NI")) {
-        value = 0;
-      } else {
         value = 1;
+      } else {
+        value = 0;
       }
       n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value);
       nodeId.insert(pair < string, Node > (strVec[0], n));
@@ -85,7 +85,7 @@ void readPlFile(string fname) {
       if (strVec[0] == ""){
         continue;
       }
-      if (strVec[4] == "/FIXED" || strVec[4] == "/FIXED_NI") {
+      if (strVec.size() > 5 && (strVec[5] == "/FIXED" || strVec[5] == "/FIXED_NI")) {
         value = 1;
       } else {
         value = 0;
@@ -155,8 +155,8 @@ void writePlFile(string fname) {
 
     //components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-      if(itNode->second.terminal) {
-        myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate <<  " : " << itNode->second.orientation_str;
+      if(!itNode->second.terminal) {
+        myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate <<  " : " << itNode->second.orient2str(itNode->second.orientation);
         if (itNode->second.fixed) {
           myfile << " /FIXED_NI\n";
         } else {
@@ -168,7 +168,7 @@ void writePlFile(string fname) {
       myfile << "\n";
       //terminals
       for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-        if(!itNode->second.terminal) {
+        if(itNode->second.terminal) {
           myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate << " : " << itNode->second.orientation_str;
           if (itNode->second.fixed) {
             myfile << " /FIXED_NI\n";

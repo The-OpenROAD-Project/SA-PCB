@@ -53,6 +53,8 @@ boundaries b;
 
 float l1 = 0.8;
 float l2 = 1-l1;
+std::pair <double,double> wl_normalization;
+std::pair <double,double> area_normalization;
 
 int debug = 0;
 long long int idx = -1;
@@ -131,7 +133,7 @@ int main(int argc, char *argv[]) {
   }*/
   cout << "idx: " << idx << endl;
   //std::string p = std::string(parg);
-  string p = "apte";
+  string p = "bm3";
   cout << "circuit: " << p << endl;
 
   debug = 1;
@@ -155,18 +157,78 @@ int main(int argc, char *argv[]) {
   //readSclFile();
   if(debug) { cout << "calculating boundaries..." << endl; }
   CalcBoundaries();
+  SetInitParameters();
   if(debug) { cout << "annealing" << endl; }
   float cost = timberWolfAlgorithm();
   writePlFile("./"+std::to_string( idx )+".pl");
   return cost;
 }
 
-void CalcBoundaries() {
-  // calculate boundaries from terminal nodes
-  int xval, yval;
+//vector < std::pair <double,double> > SetInitParameters() { // (x - min) / (max - min)
+void SetInitParameters() { // (x - min) / (max - min)
+  vector < std::pair <double,double> > normalization_terms;
+
+  int num_components = 0;
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if (itNode -> second.terminal == 0) {
+    if(!itNode -> second.terminal) {
+      num_components += 1;
+    }
+  }
+
+  // min/max wl
+  std::pair <double,double> wl;
+  double min_wl = std::numeric_limits<double>::max();
+  double max_wl = 0.0;
+
+  // min/max overlap area
+  std::pair <double,double> area;
+  double min_area = 0.0;
+  double max_area = 0.0;
+
+  map < string, Node > ::iterator nodeit1 = nodeId.begin();
+  map < string, Node > ::iterator nodeit2 = nodeId.begin();
+  vector < string > hist;
+  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
+    if(nodeit1->second.terminal) {
+      continue;
+    } else {
+        hist.push_back(nodeit1->second.name);
+        double cell_wl = nodeit1->second.width + nodeit1->second.height;
+        if (cell_wl < min_wl) {
+          min_wl = cell_wl;
+        }
+
+        for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
+          if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
+            max_area += pow(min(nodeit1->second.width, nodeit2->second.width) * min(nodeit1->second.height, (nodeit2->second.width)), 2);
+          }
+        }
+      }
+  }
+  min_wl = min_wl*num_components;
+  max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
+  wl.first = min_wl;
+  wl.second = max_wl;
+
+  area.first = min_area;
+  area.second = max_area;
+
+  normalization_terms.push_back(wl);
+  normalization_terms.push_back(area);
+
+  wl_normalization = normalization_terms[0];
+  area_normalization = normalization_terms[1];
+
+  //return normalization_terms;
+}
+
+void CalcBoundaries() {
+  // calculate boundaries from terminal nodes
+  double xval, yval;
+  map < string, Node > ::iterator itNode;
+  for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+    if (itNode -> second.terminal) {
       xval = itNode -> second.xCoordinate;
       yval = itNode -> second.yCoordinate;
       if (xval < b.minX) {
@@ -183,14 +245,14 @@ void CalcBoundaries() {
       }
     }
   }
+  b.minX = -10.0;
+  b.maxX = 100.0;
+  b.minY = -15.0;
+  b.maxY = 60.0;
   if(debug) {
     cout << "min: " << b.minX << " " << b.minY << endl;
     cout << "max: " << b.maxX << " " << b.maxY << endl;
   }
-}
-
-void rudy() {
-
 }
 
 int macroPlacement() {
@@ -201,7 +263,7 @@ int macroPlacement() {
   itRow = rowId.begin();
   int rowHeight = itRow -> second.height;
   for (map < string, Node > ::iterator itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if (itNode -> second.terminal == 1 && itNode -> second.height > rowHeight) {
+    if (!itNode -> second.terminal && itNode -> second.height > rowHeight) {
       if (xValue + itNode -> second.width > xLimit) {
         xLimit = xValue + itNode -> second.width + 1;
       }
@@ -223,7 +285,6 @@ int macroPlacement() {
 
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
   // randomly place node
-
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -245,7 +306,7 @@ void initialPlacement() {
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     Node n = itNode -> second;
-    if (n.fixed == 0) {
+    if (!n.fixed) {
       randomPlacement(b.minX, b.maxX - n.width, b.minY, b.maxY - n.height, n);
     }
   }
@@ -281,34 +342,30 @@ double wireLength() {
 
       if (xVal < minXW)
         minXW = xVal;
-      if (xVal > maxXW) {
-        if (xVal > 10000) {
-        cout << maxXW << " " << xVal << endl;
-        nodeId[itCellList->name].printParameter();}
-        maxXW = xVal;}
+      if (xVal > maxXW)
+        maxXW = xVal;
       if (yVal < minYW)
         minYW = yVal;
       if (yVal > maxYW)
         maxYW = yVal;
     }
-    //cout << maxXW - minXW + maxYW - minYW << " " << maxXW << endl;
-    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(itNet -> second.size() - 1);
+    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
   }
   return wireLength;
 }
 
 double cellOverlap() {
   // compute sum squared overlap
-  double overlap = 0;
+  double overlap = 0.0;
   map < string, Node > ::iterator nodeit = nodeId.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
 
   vector < string > hist;
   for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
     hist.push_back(nodeit->second.name);
-    if (nodeit->second.terminal == 1) {
+    if (!nodeit->second.terminal) {
       for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
-        if (nodeit2->second.terminal == 1 && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
+        if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
           if(!intersects(nodeit->second.poly, nodeit2->second.poly)) {
             continue;
           } else {
@@ -326,19 +383,68 @@ double cellOverlap() {
   return overlap;
 }
 
+double rudy() {
+  // compute magnitude of routability matrix
+  map<int, vector < Pin > > ::iterator itNet;
+  vector < Pin > ::iterator itCellList;
+  double rudy = 0;
+  for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
+    double xVal, yVal, wireLength = 0;
+    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+    for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
+      if(itCellList->name == "") {
+        continue;
+      }
+      int orient = nodeId[itCellList->name].orientation;
+      xVal = nodeId[itCellList->name].xBy2;
+      yVal = nodeId[itCellList->name].yBy2;
+      if(orient == 0) {
+        xVal = xVal + itCellList->x_offset;
+        yVal = yVal + itCellList->y_offset;
+      } else if(orient == 1) {
+        xVal = xVal + itCellList->y_offset;
+        yVal = yVal - itCellList->x_offset;
+      } else if(orient == 2) {
+        xVal = xVal - itCellList->x_offset;
+        yVal = yVal - itCellList->y_offset;
+      } else if(orient == 3) {
+        xVal = xVal - itCellList->y_offset;
+        yVal = yVal + itCellList->x_offset;
+      }
+
+      if (xVal < minXW)
+        minXW = xVal;
+      if (xVal > maxXW) {
+        if (xVal > 10000) {
+        cout << maxXW << " " << xVal << endl;
+        nodeId[itCellList->name].printParameter();}
+        maxXW = xVal;}
+      if (yVal < minYW)
+        minYW = yVal;
+      if (yVal > maxYW)
+        maxYW = yVal;
+    }
+    wireLength = (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(itNet -> second.size() - 1);
+    rudy += wireLength / ((maxXW - minXW)*(maxYW - minYW));
+  }
+  return rudy;
+}
+
 double cost(int temp_debug) {
   if(debug > 1 || temp_debug == -1) {
     cout << "wirelength: " << wireLength() << endl;
     cout << "overlap: " << cellOverlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
-    cout << "l1wirelength: " << l1*wireLength() << endl;
-    cout << "l2overlap: " << l2*cellOverlap() << endl;
-    cout << "cost: " << l1*wireLength() + l2*cellOverlap() << endl;
+    cout << "wirelength_cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
+    cout << "overlap_cost: " << l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+                        l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
   }
-
-  return l1*wireLength() + l2*cellOverlap();
+  return l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
 }
 
+double sigma = 40.0;
 map < string, Node > ::iterator random_node() {
   map < string, Node > ::iterator itNode = nodeId.begin();
   int size = nodeId.size();
@@ -353,11 +459,11 @@ void validateMove(Node* node, double rx, double ry) {
   double width = node->width;
   double height = node->height;
 
-  rx = max(static_cast<int>(rx), static_cast<int>(b.minX));
-  ry = max(static_cast<int>(ry), static_cast<int>(b.minX));
+  rx = max(rx, b.minX);
+  ry = max(ry, b.minX);
 
-  rx = min(static_cast<int>(rx), static_cast<int>(b.maxX - width));
-  ry = min(static_cast<int>(ry), static_cast<int>(b.maxY - height));
+  rx = min(rx, b.maxX - width);
+  ry = min(ry, b.maxY - height);
 
   node->setPos(rx,ry);
 }
@@ -373,7 +479,7 @@ void initiateMove() {
   map < string, Node > ::iterator rand_node2;
   int r = 0;
   rand_node1 = random_node();
-  while(rand_node1->second.terminal != 1 || rand_node1->second.name == "") {
+  while(rand_node1->second.terminal || rand_node1->second.name == "" || rand_node1->second.fixed) {
     rand_node1 = random_node();
   }
   double rand_node1_orig_x = rand_node1->second.xCoordinate;
@@ -396,7 +502,7 @@ void initiateMove() {
       cout << "swap" << endl;
     }
     rand_node2 = random_node();
-    while(rand_node2->second.terminal != 1 || rand_node2->first == rand_node1->first || rand_node1->second.name == "") {
+    while(rand_node2->second.terminal || rand_node2->first == rand_node1->first || rand_node2->second.name == "" || rand_node2->second.fixed) {
       rand_node2 = random_node();
     }
     rand_node2_orig_x = rand_node2->second.xCoordinate;
@@ -409,7 +515,7 @@ void initiateMove() {
     if(debug > 1) {
       cout << "shift" << endl;
     }
-    double sigma = rand_node1->second.sigma;
+    //double sigma = rand_node1->second.sigma;
 
     boost::normal_distribution<> nd(0.0, sigma);
     boost::variate_generator<boost::mt19937&,
@@ -421,14 +527,6 @@ void initiateMove() {
     double rx = rand_node1_orig_x + dx;
     double ry = rand_node1_orig_y + dy;
 
-    double width = rand_node1->second.width;
-    double height = rand_node1->second.height;
-
-    rx = max(static_cast<int>(rx), static_cast<int>(b.minX));
-    ry = max(static_cast<int>(ry), static_cast<int>(b.minX));
-
-    rx = min(static_cast<int>(rx), static_cast<int>(b.maxX - width));
-    ry = min(static_cast<int>(ry), static_cast<int>(b.maxY - height));
     validateMove(&rand_node1->second, rx, ry);
   } else if (i < 0.2) { // rotate
     state = 2;
@@ -466,24 +564,25 @@ void initiateMove() {
 void update_temperature() {
   // update the temperature according to annealing schedule
   if (Temperature > 50000) {
-    Temperature = (1-10e-5) * Temperature;
+    Temperature = (0.9992) * Temperature;
   } else if (Temperature <= 50000 && Temperature > 5000) {
-    Temperature = (1-10e-5) * Temperature;
+    Temperature = (0.9992) * Temperature;
   } else if (Temperature < 5000) {
-    Temperature = (1-10e-4) * Temperature;
+    Temperature = (0.999) * Temperature;
   } else if (Temperature < 1) {
-    Temperature = (1-10e-4) * Temperature;
+    Temperature = (0.999) * Temperature;
   }
-  if (l1 > 0.2) {
-    l1 -= 0.00004;
-    l2 += 0.00004;
+  if (l1 > 0.01) {
+    l1 -= 0.00005;
+    l2 += 0.00005;
   }
+  sigma = max(sigma  - 0.002,0.01);
 }
 
-bool checkMove(long int prevCost) {
+bool checkMove(double prevCost) {
   // either accept or reject the move based on temperature & cost
   double newCost = cost();
-  int delCost = 0;
+  double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double prob = uni();
@@ -491,8 +590,7 @@ bool checkMove(long int prevCost) {
     cout << "new cost: " << newCost << endl;
   }
   delCost = newCost - prevCost;
-
-  if (delCost <= 0 || prob > (exp(-delCost/Temperature))) {
+  if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
     prevCost = newCost;
     accept_history.push_back(1);
     if (accept_history.size() > 100) {
@@ -524,7 +622,8 @@ float timberWolfAlgorithm() {
 
   initialPlacement();
 
-  Temperature = pow(10,14);
+  //Temperature = pow(8,5);
+  Temperature = 1.0;
   int i; // n * 20, n is number of nodes
   int cnt = 0;
   long long int ii = 0;
@@ -532,15 +631,16 @@ float timberWolfAlgorithm() {
   int num_components = 0;
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if(itNode -> second.terminal == 1) {
+    if(!itNode -> second.terminal && !itNode -> second.fixed) {
       num_components += 1;
     }
   }
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //while (Temperature > 0.1) {
-  while (ii < 20000) {
-
+  while (ii < 25000) {
+    //i = num_components;
+    i = 20;
     if(ii % 100 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
@@ -548,12 +648,13 @@ float timberWolfAlgorithm() {
       cout << "******" << ii << "******" << endl;
       cout << "iteration: " << ii << endl;
       cout << "time: " <<  time_span.count() << " (s)" << endl;
+      cout << "move/time: " <<  i*ii/time_span.count() << endl;
+      cout << "time remaining: " <<  time_span.count()/ii * (20000-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
       cost(-1);
     }
 
-    i = 10*num_components;
     while (i > 0) {
       initiateMove();
       i -= 1;
@@ -561,7 +662,7 @@ float timberWolfAlgorithm() {
     }
     update_temperature();
     ii += 1;
-    if (ii % 200 == 0) {
+    if (ii % 10 == 0) {
       writePlFile("./cache/"+std::to_string( ii )+".pl");
     }
   }

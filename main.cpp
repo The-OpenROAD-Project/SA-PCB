@@ -32,6 +32,9 @@
 
 //#include "taskflow/taskflow.hpp"
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
 #include "main.h"
 #include "time.h"
 #include "readScl.h"
@@ -41,6 +44,7 @@ using namespace std::chrono;
 BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 namespace bg = boost::geometry;
+namespace bnu = boost::numeric::ublas;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
 double Temperature;
@@ -61,6 +65,7 @@ long long int idx = -1;
 
 vector< int > accept_history;
 float accept_ratio = 0;
+vector< double > accept_ratio_history;
 
 boost::mt19937 rng;
 
@@ -245,10 +250,10 @@ void CalcBoundaries() {
       }
     }
   }
-  b.minX = -10.0;
-  b.maxX = 100.0;
-  b.minY = -15.0;
-  b.maxY = 60.0;
+  b.minX = -4.0;
+  b.maxX = 58.0;
+  b.minY = 0.0;
+  b.maxY = 48.0;
   if(debug) {
     cout << "min: " << b.minX << " " << b.minY << endl;
     cout << "max: " << b.maxX << " " << b.maxY << endl;
@@ -349,7 +354,8 @@ double wireLength() {
       if (yVal > maxYW)
         maxYW = yVal;
     }
-    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
+    //wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
+    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
   }
   return wireLength;
 }
@@ -383,14 +389,18 @@ double cellOverlap() {
   return overlap;
 }
 
+long long int iii = 0;
 double rudy() {
-  // compute magnitude of routability matrix
+  bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
+  bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
+
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
-  double rudy = 0;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
-    double xVal, yVal, wireLength = 0;
+    double xVal, yVal, hpwl = 0.0;
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+    double rudy = 0.0;
+    bnu::matrix<double> D_net (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
@@ -414,20 +424,44 @@ double rudy() {
 
       if (xVal < minXW)
         minXW = xVal;
-      if (xVal > maxXW) {
-        if (xVal > 10000) {
-        cout << maxXW << " " << xVal << endl;
-        nodeId[itCellList->name].printParameter();}
-        maxXW = xVal;}
+      if (xVal > maxXW)
+        maxXW = xVal;
       if (yVal < minYW)
         minYW = yVal;
       if (yVal > maxYW)
         maxYW = yVal;
+    } // now have boundary of net
+    //hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(max(static_cast<int>(itNet -> second.size() - 1) ,1));
+    hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)));
+    rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0));
+
+    // set read_net
+    for (unsigned i = minYW; i < maxYW; ++ i) {
+        for (unsigned j = minXW; j < maxXW; ++ j) {
+          D (i,j) += rudy;
+        }
     }
-    wireLength = (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(itNet -> second.size() - 1);
-    rudy += wireLength / ((maxXW - minXW)*(maxYW - minYW));
   }
-  return rudy;
+  double r = 0.0;
+  for (unsigned i = 0; i < D.size1 (); ++ i) {
+      for (unsigned j = 0; j < D.size2 (); ++ j) {
+        D(i,j) = exp((D(i,j) - D_route_sup(i,j))/D_route_sup(i,j));
+        r += D(i,j);
+      }
+  }
+
+  if(iii % 10 == 0) {
+      ofstream dat("cache_rudy/"+std::to_string(iii) + ".txt");
+      for (auto i = 0; i < D.size1() ; i++) {
+          for (auto j = 0; j < D.size2(); j++) {
+              dat << D(i, j) << "\t"; // Must seperate with Tab
+          }
+          dat << endl; // Must write on New line
+      }
+  }
+
+  r = r/(wl_normalization.second * D.size1() * D.size2()); // normalize r
+  return r;
 }
 
 double cost(int temp_debug) {
@@ -436,15 +470,18 @@ double cost(int temp_debug) {
     cout << "overlap: " << cellOverlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
     cout << "wirelength_cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
-    cout << "overlap_cost: " << l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "overlap_cost: " << l2/2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "routability_cost: " << l2/2 * rudy() << endl;
     cout << "cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-                        l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+                        l2/2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
+                        l2/2*rudy() << endl;
   }
-  return l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
+  return l1 * (wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2 * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+		     l2 * 0.1 * rudy();
 }
 
-double sigma = 40.0;
+double sigma = 25.0;
 map < string, Node > ::iterator random_node() {
   map < string, Node > ::iterator itNode = nodeId.begin();
   int size = nodeId.size();
@@ -468,7 +505,8 @@ void validateMove(Node* node, double rx, double ry) {
   node->setPos(rx,ry);
 }
 
-void initiateMove() {
+double c = 0.0;
+double initiateMove() {
   // Initate a transition
   int state = -1;
   double prevCost = cost();
@@ -539,7 +577,7 @@ void initiateMove() {
     rand_node1->second.setRotation(r);
   }
   bool accept = checkMove(prevCost);
-
+  accept_ratio_history.push_back(accept_ratio);
   if (!accept) {
     if(debug > 1) {
       cout << "reject" << endl;
@@ -553,35 +591,38 @@ void initiateMove() {
     } else if (state == 2) {
       rand_node1->second.setRotation(-r);
     }
+    return prevCost;
   }
   else {
     if(debug > 1) {
       cout << "accept" << endl;
     }
+    return c;
   }
 }
 
 void update_temperature() {
   // update the temperature according to annealing schedule
-  if (Temperature > 50000) {
-    Temperature = (0.9992) * Temperature;
-  } else if (Temperature <= 50000 && Temperature > 5000) {
-    Temperature = (0.9992) * Temperature;
-  } else if (Temperature < 5000) {
-    Temperature = (0.999) * Temperature;
-  } else if (Temperature < 1) {
-    Temperature = (0.999) * Temperature;
+  if (Temperature > 0.6) {
+    Temperature = (0.99985) * Temperature;
+  } else if (Temperature <= 0.6 && Temperature > 0.1) {
+    Temperature = (0.9998) * Temperature;
+  } else if (Temperature < 0.1) {
+    Temperature = (0.9965) * Temperature;
+  } else if (Temperature < 0.01) {
+    Temperature = (0.995) * Temperature;
   }
-  if (l1 > 0.01) {
-    l1 -= 0.00005;
-    l2 += 0.00005;
+  if (l1 > 0.00035) {
+    l1 -= 0.0000255;
+    l2 += 0.0000255;
   }
-  sigma = max(sigma  - 0.002,0.01);
+  sigma = max(sigma  - 0.002,0.08);
 }
 
 bool checkMove(double prevCost) {
   // either accept or reject the move based on temperature & cost
   double newCost = cost();
+  c = newCost;
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -623,13 +664,21 @@ float timberWolfAlgorithm() {
   initialPlacement();
 
   //Temperature = pow(8,5);
-  Temperature = 1.0;
+  Temperature = 0.8;
   int i; // n * 20, n is number of nodes
   int cnt = 0;
   long long int ii = 0;
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
+  vector < double > cost_hist;
+  vector < double > wl_hist;
+  vector < double > oa_hist;
+  double cst;
+
+  double w;
+  double o;
+
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if(!itNode -> second.terminal && !itNode -> second.fixed) {
       num_components += 1;
@@ -639,8 +688,8 @@ float timberWolfAlgorithm() {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //while (Temperature > 0.1) {
   while (ii < 25000) {
-    //i = num_components;
-    i = 20;
+    i = 2*num_components;
+    //i = 20;
     if(ii % 100 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
@@ -656,17 +705,44 @@ float timberWolfAlgorithm() {
     }
 
     while (i > 0) {
-      initiateMove();
+      cst = initiateMove();
+      cost_hist.push_back(cst);
+
+      wl_hist.push_back((wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
+      oa_hist.push_back((cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+
       i -= 1;
       cnt += 1;
     }
     update_temperature();
+    iii += 1;
     ii += 1;
     if (ii % 10 == 0) {
       writePlFile("./cache/"+std::to_string( ii )+".pl");
     }
   }
   writePlFile("./cache/"+std::to_string( idx )+".pl");
+
+  std::ofstream f("cost.txt");
+  for(vector<double>::const_iterator i = cost_hist.begin(); i != cost_hist.end(); ++i) {
+      f << *i << '\n';
+  }
+
+  std::ofstream f2("wl.txt");
+  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+      f2 << *i << '\n';
+  }
+
+  std::ofstream f3("oa.txt");
+  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+      f3 << *i << '\n';
+  }
+
+  std::ofstream f4("accept_ratio.txt");
+  for(vector<double>::const_iterator i = accept_ratio_history.begin(); i != accept_ratio_history.end(); ++i) {
+      f4 << *i << '\n';
+  }
+
   return cost();
 }
 /*

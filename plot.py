@@ -143,9 +143,7 @@ boarddimmin = None
 boarddim = None
 figname = ''
 #circuitname = './benchmarks/pcb_benchmark_devel-master/bm3'
-circuitname = './apte'
-#plfile = './cache/600.pl'
-plfile = circuitname + '.pl'
+circuitname = './bm3'
 nodesfile = circuitname + '.nodes'
 netsfile = circuitname + '.nets'
 board_pins = {}
@@ -159,17 +157,16 @@ for (dirpath, dirnames, filenames) in walk('./cache/'):
     f.extend(filenames)
 f = sorted(f, key=lambda x: float(x.split('.')[0]))
 
-components = load_bookshelf.read_nodes(nodesfile)
 #_,comp2rot,_,board_pins = load_bookshelf.read_pl2(plfile,components)
 for i,ff in enumerate(tqdm(f)):
 	if i > 10000:
 		break
 	if i % 20 == 0:
-		#components,_= load_bookshelf.read_pl('./cache/'+ff)
+		components = load_bookshelf.read_nodes(nodesfile)
 		components,comp2rot,board_pins,_ = load_bookshelf.read_pl2('./cache/'+ff,components)
 		nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
 		#board_dim = [[-10,100],[-5,55]]
-		board_dim = [[0,105],[0,89]] # apte
+		board_dim = [[-5,60],[-5,50]]
 		plot_circuit(ff.split('.')[0], components,comp2rot,nets,board_dim,'./cache/img/'+ff.split('.')[0]+'.png')
 
 f = []

@@ -151,28 +151,39 @@ class Node {
     return "";
   }
 
-  int wrap_orientation(int kX, int const kLowerBound, int const kUpperBound) {
-    // wraps an orientation int post rotation
-    int range_size = kUpperBound - kLowerBound + 1;
-    if (kX < kLowerBound)
-        kX += range_size * ((kLowerBound - kX) / range_size + 1);
+  int entation(int kX) {
+    if (kX <= 3) {
+      return kX;
+    } else {
+      return kX - 4;
+    }
+  }
 
-    return kLowerBound + (kX - kLowerBound) % range_size;
+  int wrap_orientation(int kX) {
+    if (kX <= 3) {
+      return kX;
+    } else {
+      return kX - 4;
+    }
   }
 
   // TODO fix rotation origin?
   void setRotation(int r) {
-    if(this->terminal || this->fixed){return;}
+    if(this->terminal){return;}
     // rotates Node
     int o = this->orientation;
     int rot_deg = 90*r;//orient2degree(r);
+    double tmpx = this->xCoordinate;
+    double tmpy = this->yCoordinate;
 
     // rotate polygon about its origin
     model::polygon<model::d2::point_xy<double> > tmp;
     trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
     boost::geometry::transform(this->poly, tmp, rotate);
+    this->poly = tmp;
     updateCoordinates();
-    this->orientation = wrap_orientation(o + r, 0, 4);
+    this->orientation = wrap_orientation(o + r);
+    this->setPos(tmpx, tmpy);
   }
 
   void updateCoordinates() {

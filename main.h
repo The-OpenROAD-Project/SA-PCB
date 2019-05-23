@@ -17,7 +17,7 @@ double rudy();
 float timberWolfAlgorithm();
 float multistart();
 void update_Temperature();
-void initiateMove();
+double initiateMove();
 bool checkMove(double prevCost);
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
 map < string, Node > ::iterator random_node();

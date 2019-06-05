@@ -1,6 +1,8 @@
 cache/*
 cache_rudy/*
+__pycache__
 *.o
 sa
+simple
 bm*
 boost/

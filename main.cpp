@@ -491,12 +491,11 @@ double cellOverlap() {
   }
   return overlap;
 }
-/*
+
 /*
 wireLength_partial
 Compute HPWL for select nets
 */
-/*
 double wireLength_partial(map < string, Node > nodes) {
   // compute HPWL
   map<int, vector < Pin > > ::iterator itNet;
@@ -539,7 +538,6 @@ double wireLength_partial(map < string, Node > nodes) {
   }
   return wireLength;
 }
-*/
 
 /*
 cellOverlap_partial

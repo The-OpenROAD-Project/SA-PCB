@@ -39,6 +39,8 @@ class Pin {
   double x_offset;
   double y_offset;
 
+  double depth;
+
   void set_params(string nn, double xoffset, double yoffset) {
     this -> name = nn;
     this -> x_offset = xoffset;
@@ -50,6 +52,7 @@ class Node {
   public:
   string name;
   model::polygon<model::d2::point_xy<double> > poly;
+  boost::geometry::model::box< model::d2::point_xy<double> > envelope;
   double width;
   double height;
   int weight;
@@ -79,6 +82,7 @@ class Node {
       append(poly, points);
       boost::geometry::correct(poly);
       this -> poly = poly;
+      boost::geometry::envelope(poly, envelope);
     }
   }
 
@@ -188,9 +192,9 @@ class Node {
 
   void updateCoordinates() {
     // Updates parameters of Node class from a geometry object
-    auto it = boost::begin(boost::geometry::exterior_ring(this->poly));
-    this -> xCoordinate = bg::get<0>(*it);
-    this -> yCoordinate = bg::get<1>(*it);
+    //auto it = boost::begin(boost::geometry::exterior_ring(this->poly));
+    //this -> xCoordinate = bg::get<0>(*it);
+    //this -> yCoordinate = bg::get<1>(*it);
 
     // centroid
     if(this->terminal) {
@@ -201,6 +205,9 @@ class Node {
         boost::geometry::centroid(this->poly, centroid);
         this -> xBy2 = centroid.get<0>();
         this -> yBy2 = centroid.get<1>();
+        boost::geometry::envelope(poly, envelope);
+        this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
+        this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
     }
   }
 

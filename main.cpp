@@ -60,6 +60,8 @@ float l2 = 1-l1;
 std::pair <double,double> wl_normalization;
 std::pair <double,double> area_normalization;
 
+long long int iii = 0;
+
 int debug = 0;
 long long int idx = -1;
 
@@ -70,78 +72,48 @@ vector< double > accept_ratio_history;
 boost::mt19937 rng;
 
 int main(int argc, char *argv[]) {
-  // parser and entry point into the program
-  // TODO add wirelength flag
   srand(time(NULL));
   int opt;
-  int i, j, t, k, s, w;
-  i=j=t=k=1;
-  string f = "";
-  char *parg;
-  /*while ((opt = getopt(argc,argv,"i:x:j:t:k:s:w:f:h:p::d")) != EOF) {
+  int d = 1;
+  int i = 2000;
+  int j = 20;
+  double t = 1.0;
+
+  string parg = "";
+  int bound_inc = 0;
+  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:")) != EOF) {
       switch(opt) {
-          case 'p': parg=strdup(optarg); break;
-          case 'd': debug=1; break;
-          case 'i': i = 1; break;
-          case 'j': j = 1; break;
-          case 't': t = 1; break;
-          case 'k': k = 1; break;
-          case 's': s = 1; break;
-          case 'w': w = 1; break;
-          case 'f': f = ""; break;
           case 'x': idx = atoi(optarg); break;
+          case 'p': parg=string(optarg); break;
+          case 'd': d=atoi(optarg); break;
+          case 'i': i = atoi(optarg); break;
+          case 'j': j = atoi(optarg); break;
+          case 't': t = atoi(optarg); break;
+          case 'b':
+            bound_inc += 1;
+            switch(bound_inc) {
+              case 1: b.minX = atof(optarg);
+              case 2: b.minY = atof(optarg);
+              case 3: b.maxX = atof(optarg);
+              case 4: b.maxy = atof(optarg); 
+            }
           case 'h': fprintf(stderr, "./sa usuage is \n \
                                     -i <value> : for denoting # outer iterations PER SA INSTANCE \n \
                                     -j <value> : for denoting 'j'*#nodes inner iterations \n \
                                     -t <value> : for denoting initial temperature \n \
-                                    -k <value> : for denoting parallel instances \n \
-                                    -s <value> : for denoting splits every floor(i/s) iterations. Use s=0 for 'k' independent instances of SA \n \
-                                    -w <value> : for denoting number of winners per splitting \n \
                                     -f <str> : for denoting number output pl \n \
-                                    EXAMPLE: ./sa -i 20000 -j 20 -t 40000 -k 0 -s -w 0 -f output.pl for the standard single instance timberwolf algorithm");
+                                    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -f output.pl for the standard single instance timberwolf algorithm");
           default: cout<<endl; abort();
-      }*/
-      /*if (idx == -1) {
-        cout << "./main: option requires an argument -- x\n";
-        exit(1);
       }
-      if (i == -1) {
-         cout << "./main: option requires an argument -- i\n";
-         exit(1);
-      }
-      if (j == -1) {
-         cout << "./main: option requires an argument -- j\n";
-         exit(1);
-      }
-      if (t == -1) {
-         cout << "./main: option requires an argument -- t\n";
-         exit(1);
-      }
-      if (k == -1) {
-         cout << "./main: option requires an argument -- k\n";
-         exit(1);
-      }
-      if (f == "") {
-        cout << "./main: option requires an argument -- f\n";
-        exit(1);
-      }*/
-      //if (parg == "") {
-      /*if(strncmp(parg,"",1) == 0) {
-        cout << "./main: option requires an argument -- p\n";
-        exit(1);
-      }
-    }
-
-  // optind is for the extra arguments which are not parsed
-  for(; optind < argc; optind++){
-    printf("extra arguments: %s\n", argv[optind]);
-  }*/
-  cout << "idx: " << idx << endl;
-  //std::string p = std::string(parg);
-  string p = "bm3";
+  }
+  if(string(parg) == "")   {
+    cout << "./main: option requires an argument -- p\n";
+    exit(1);
+  }
+  debug = d;
+  string p = string(parg);
+  p = "bm3";
   cout << "circuit: " << p << endl;
-
-  debug = 1;
 
   string nodesfname = p +".nodes";
   string netsfname = p +".nets";
@@ -162,15 +134,18 @@ int main(int argc, char *argv[]) {
   //readSclFile();
   if(debug) { cout << "calculating boundaries..." << endl; }
   CalcBoundaries();
-  SetInitParameters();
   if(debug) { cout << "annealing" << endl; }
   float cost = timberWolfAlgorithm();
   writePlFile("./"+std::to_string( idx )+".pl");
   return cost;
 }
 
-//vector < std::pair <double,double> > SetInitParameters() { // (x - min) / (max - min)
-void SetInitParameters() { // (x - min) / (max - min)
+/*
+SetInitParameters
+Empirically finds normalization parameters for scaling cost terms.
+Currently, we scale by 1/(f) where f is the cost of the inital placement.
+*/
+void SetInitParameters() {
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
@@ -194,6 +169,7 @@ void SetInitParameters() { // (x - min) / (max - min)
   map < string, Node > ::iterator nodeit1 = nodeId.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
   vector < string > hist;
+
   for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
     if(nodeit1->second.terminal) {
       continue;
@@ -206,19 +182,42 @@ void SetInitParameters() { // (x - min) / (max - min)
 
         for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
           if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
-            max_area += pow(min(nodeit1->second.width, nodeit2->second.width) * min(nodeit1->second.height, (nodeit2->second.width)), 2);
+            if(nodeit1->second.fixed && nodeit2->second.fixed) {
+                if(intersects(nodeit1->second.poly, nodeit2->second.poly)) {
+                  double oa = 0.0;
+                  std::deque<polygon> intersect_poly;
+                  boost::geometry::intersection(nodeit1->second.poly, nodeit2->second.poly, intersect_poly);
+
+                  BOOST_FOREACH(polygon const& p, intersect_poly) {
+                      oa += bg::area(p);
+                  }
+                  min_area += pow(oa,2);
+                  max_area += pow(oa,2);
+                }
+              } else {
+                max_area += pow(min(nodeit1->second.width, nodeit2->second.width) * min(nodeit1->second.height, (nodeit2->second.width)), 2);
+              }
           }
         }
       }
   }
+
   min_wl = min_wl*num_components;
   max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
+
+  wl.first = 0.0;
+  wl.second = wireLength();
+
+  area.first = 0.0;
+  area.second = cellOverlap();
+
+/*
   wl.first = min_wl;
   wl.second = max_wl;
 
   area.first = min_area;
   area.second = max_area;
-
+*/
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
 
@@ -228,38 +227,51 @@ void SetInitParameters() { // (x - min) / (max - min)
   //return normalization_terms;
 }
 
+/*
+CalcBoundaries
+Calculate board boundaries by finding the maximum
+rectangular envelop encompasing terminals & fixed modules.
+*/
 void CalcBoundaries() {
   // calculate boundaries from terminal nodes
-  double xval, yval;
+  double xval, yval, width, height;
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if (itNode -> second.terminal) {
+    if (itNode -> second.terminal || itNode->second.fixed) {
       xval = itNode -> second.xCoordinate;
       yval = itNode -> second.yCoordinate;
+      width = itNode -> second.width;
+      height =itNode -> second.height;
       if (xval < b.minX) {
         b.minX = xval;
       }
       if (xval > b.maxX) {
-        b.maxX = xval;
+        b.maxX = xval + width;
       }
       if (xval < b.minY) {
         b.minY = yval;
       }
       if (xval > b.maxY) {
-        b.maxY = yval;
+        b.maxY = yval + height;
       }
     }
   }
+
+/*
   b.minX = -4.0;
   b.maxX = 58.0;
   b.minY = 0.0;
-  b.maxY = 48.0;
+  b.maxY = 48.0;*/
   if(debug) {
     cout << "min: " << b.minX << " " << b.minY << endl;
     cout << "max: " << b.maxX << " " << b.maxY << endl;
   }
 }
 
+/*
+macroPlacement [DEPRECIATED]
+Preplace macros/large components
+*/
 int macroPlacement() {
   // macro placement [depreceiated]
   int xValue = b.minX, yValue = 0;
@@ -288,8 +300,11 @@ int macroPlacement() {
   return xLimit;
 }
 
+/*
+randomPlacement
+Randomly place and orient a single component within a bounded region
+*/
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
-  // randomly place node
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -303,9 +318,13 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
   int ro = unio();
 
   string ostr = n.orient2str(ro);
-  n.setParameterPl(rx,ry,ostr , n.fixed);
+  n.setParameterPl(rx,ry,ostr, n.fixed);
 }
 
+/*
+initialPlacement
+Randomly place and orient all movable components in the board area
+*/
 void initialPlacement() {
   // initially randomly place components on the board
   map < string, Node > ::iterator itNode;
@@ -317,6 +336,80 @@ void initialPlacement() {
   }
 }
 
+/*
+project_soln
+projects the final solution to enforce 0 overlap by iteratively
+shifting overlapped components until cumulative overlap reduces below an eps.
+*/
+void project_soln() {
+  // ensure zero overlap
+  double oa = cellOverlap();
+  double eps = 10.0e-5;
+  map < string, Node > ::iterator nodeit = nodeId.begin();
+  map < string, Node > ::iterator nodeit2 = nodeId.begin();
+
+  boost::geometry::model::box< model::d2::point_xy<double> > env1;
+  boost::geometry::model::box< model::d2::point_xy<double> > env2;
+
+  while (oa > eps) {
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      if (!nodeit->second.terminal) {
+        env1 = nodeit->second.envelope;
+        for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
+          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
+            continue;
+          } else {
+            // Project out of envelope
+            env2 = nodeit2->second.envelope;
+
+            double dx = 0.0;
+            double dy = 0.0;
+            double rx = nodeit->second.xCoordinate;
+            double ry = nodeit->second.yCoordinate;
+            double env1minx = env1.min_corner().x();
+            double env1miny = env1.min_corner().y();
+            double env1maxx = env1.max_corner().x();
+            double env1maxy = env1.max_corner().y();
+
+            double env2minx = env2.min_corner().x();
+            double env2miny = env2.min_corner().y();
+            double env2maxx = env2.max_corner().x();
+            double env2maxy = env2.max_corner().y();
+
+
+            // will get stuck in boundary edge case
+            if (abs(env1maxx - env2minx) < abs(env1minx - env2maxx)) {
+              // shift left
+              dx = env2minx - env1maxx;
+            } else {
+              // shift right
+              dx = env2maxx - env1minx;
+            }
+            if (abs(env1maxy - env2miny) < abs(env1miny - env2maxy)) {
+              // shift down
+              dy = env2miny - env1maxy;
+            } else {
+              // shift up
+              dy = env2maxy - env1miny;
+            }
+            if (dx < dy) {
+              // project in x direction
+              validateMove(&nodeit->second,rx + dx,ry);
+            } else {
+              // project in y direction
+              validateMove(&nodeit->second,rx,ry + dy);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+wireLength
+Computes HPWL for all nets
+*/
 double wireLength() {
   // compute HPWL
   map<int, vector < Pin > > ::iterator itNet;
@@ -360,6 +453,10 @@ double wireLength() {
   return wireLength;
 }
 
+/*
+cellOverlap
+Compute sum squared overlap for all components
+*/
 double cellOverlap() {
   // compute sum squared overlap
   double overlap = 0.0;
@@ -372,15 +469,106 @@ double cellOverlap() {
     if (!nodeit->second.terminal) {
       for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
         if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
-          if(!intersects(nodeit->second.poly, nodeit2->second.poly)) {
+          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
             continue;
           } else {
+            double oa = 0.0;
             std::deque<polygon> intersect_poly;
             boost::geometry::intersection(nodeit->second.poly, nodeit2->second.poly, intersect_poly);
 
             BOOST_FOREACH(polygon const& p, intersect_poly) {
-                overlap +=  pow(bg::area(p),2);
+                oa +=  bg::area(p);
             }
+            if(oa < 1.0) {
+                oa = 1.0;
+            }
+            overlap +=  pow(oa,2);
+          }
+        }
+      }
+    }
+  }
+  return overlap;
+}
+/*
+/*
+wireLength_partial
+Compute HPWL for select nets
+*/
+/*
+double wireLength_partial(map < string, Node > nodes) {
+  // compute HPWL
+  map<int, vector < Pin > > ::iterator itNet;
+  vector < Pin > ::iterator itCellList;
+  double xVal, yVal, wireLength = 0;
+  for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
+    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+    for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
+      if(itCellList->name == "") {
+        continue;
+      }
+      int orient = nodeId[itCellList->name].orientation;
+      xVal = nodeId[itCellList->name].xBy2;
+      yVal = nodeId[itCellList->name].yBy2;
+      if(orient == 0) {
+        xVal = xVal + itCellList->x_offset;
+        yVal = yVal + itCellList->y_offset;
+      } else if(orient == 1) {
+        xVal = xVal + itCellList->y_offset;
+        yVal = yVal - itCellList->x_offset;
+      } else if(orient == 2) {
+        xVal = xVal - itCellList->x_offset;
+        yVal = yVal - itCellList->y_offset;
+      } else if(orient == 3) {
+        xVal = xVal - itCellList->y_offset;
+        yVal = yVal + itCellList->x_offset;
+      }
+
+      if (xVal < minXW)
+        minXW = xVal;
+      if (xVal > maxXW)
+        maxXW = xVal;
+      if (yVal < minYW)
+        minYW = yVal;
+      if (yVal > maxYW)
+        maxYW = yVal;
+    }
+    //wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
+    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
+  }
+  return wireLength;
+}
+*/
+/*
+cellOverlap_partial
+Compute sum squared overlap for select components
+*/
+double cellOverlap_partial(map < string, Node > nodes) {
+  // compute sum squared overlap
+  double overlap = 0.0;
+  map < string, Node > ::iterator nodeit = nodes.begin();
+  map < string, Node > ::iterator nodeit2 = nodeId.begin();
+
+  vector < string > hist;
+  for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+    hist.push_back(nodeit->second.name);
+    if (!nodeit->second.terminal) {
+      for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
+        if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
+          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
+            continue;
+          } else {
+            double oa = 0.0;
+            std::deque<polygon> intersect_poly;
+            boost::geometry::intersection(nodeit->second.poly, nodeit2->second.poly, intersect_poly);
+
+            BOOST_FOREACH(polygon const& p, intersect_poly) {
+                oa +=  bg::area(p);
+            }
+            if(oa < 1.0) {
+                oa = 1.0;
+            }
+            overlap +=  pow(oa,2);
           }
         }
       }
@@ -389,7 +577,10 @@ double cellOverlap() {
   return overlap;
 }
 
-long long int iii = 0;
+/*
+rudy
+Computes a routability score
+*/
 double rudy() {
   bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
   bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
@@ -452,8 +643,8 @@ double rudy() {
 
   if(iii % 10 == 0) {
       ofstream dat("cache_rudy/"+std::to_string(iii) + ".txt");
-      for (auto i = 0; i < D.size1() ; i++) {
-          for (auto j = 0; j < D.size2(); j++) {
+      for (unsigned i = 0; i < D.size1() ; i++) {
+          for (unsigned j = 0; j < D.size2(); j++) {
               dat << D(i, j) << "\t"; // Must seperate with Tab
           }
           dat << endl; // Must write on New line
@@ -470,14 +661,20 @@ double cost(int temp_debug) {
     cout << "overlap: " << cellOverlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
     cout << "wirelength_cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
-    cout << "overlap_cost: " << l2/2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
-    cout << "routability_cost: " << l2/2 * rudy() << endl;
+    cout << "overlap_cost: " << l2  * 0.99 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "routability_cost: " << l2  * 0.01  * rudy() << endl;
     cout << "cost: " << l1*(wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-                        l2/2* (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
-                        l2/2*rudy() << endl;
+                        l2  * 0.99 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
+                        l2 * 0.01*rudy() << endl;
   }
   return l1 * (wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+		     l2 * 0.1 * rudy();
+}
+
+double cost_partial(int temp_debug, map < string, Node > nodes) {
+  return l1 * (wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();
 }
 
@@ -492,12 +689,24 @@ map < string, Node > ::iterator random_node() {
   return itNode;
 }
 
+/*
+validateMove
+validates a shift, project within board boundary
+*/
 void validateMove(Node* node, double rx, double ry) {
-  double width = node->width;
-  double height = node->height;
+  int orient = node->orientation;
+  double width = 0.0;
+  double height = 0.0;
 
+  if (orient == 0 || orient == 2) {
+    width = node->width;
+    height = node->height;
+  } else {
+    width = node->height;
+    height = node->width;
+  }
   rx = max(rx, b.minX);
-  ry = max(ry, b.minX);
+  ry = max(ry, b.minY);
 
   rx = min(rx, b.maxX - width);
   ry = min(ry, b.maxY - height);
@@ -603,20 +812,38 @@ double initiateMove() {
 
 void update_temperature() {
   // update the temperature according to annealing schedule
-  if (Temperature > 0.6) {
-    Temperature = (0.99985) * Temperature;
-  } else if (Temperature <= 0.6 && Temperature > 0.1) {
-    Temperature = (0.9998) * Temperature;
-  } else if (Temperature < 0.1) {
-    Temperature = (0.9965) * Temperature;
-  } else if (Temperature < 0.01) {
-    Temperature = (0.995) * Temperature;
+  if (Temperature > 0.05) {
+    Temperature = (0.99986) * Temperature;
+  if (l1 > 10e-2) {
+    l1 -= 10e-5;
+    l2 += 10e-5;
   }
-  if (l1 > 0.00035) {
-    l1 -= 0.0000255;
-    l2 += 0.0000255;
+  sigma = max(0.9999*sigma,0.5);
+
+  } else if (Temperature <= 0.05 && Temperature > 0.005) {
+    Temperature = (0.999) * Temperature;
+  if (l1 > 25e-4) {
+    l1 -= 25e-4;
+    l2 += 25e-4;
   }
-  sigma = max(sigma  - 0.002,0.08);
+  sigma = max(0.999*sigma,0.25);
+
+  } else if (Temperature < 0.005) {
+    Temperature = (0.9985) * Temperature;
+  if (l1 > 20e-4) {
+    l1 -= 20e-4;
+    l2 += 20e-4;
+  }
+  sigma = max(0.999*sigma,0.18);
+
+  } else if (Temperature < 0.001) {
+    Temperature = (0.998) * Temperature;
+  if (l1 > 10e-5) {
+    l1 -= 10e-5;
+    l2 += 10e-5;
+  }
+  sigma = max(0.999*sigma,0.08);
+  }
 }
 
 bool checkMove(double prevCost) {
@@ -655,16 +882,81 @@ bool checkMove(double prevCost) {
   //return
 //}
 
+/*
+gen_report
+generates a report and outputs files to ./reports/ directory
+*/
+void gen_report(map<string, vector<double> > ) {
+    time_t t = time(0);
+    struct tm * now = localtime( & t );
+
+    char buf [80];
+    strftime (buf,80,"%Y-%m-%d.",now);
+    string buffer = string(buf);
+
+    double wl = wireLength();
+    double oa = cellOverlap();
+    double routability = rudy();
+    double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
+    double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
+    double normalized_routability = routability;
+    //double normalized_routability = (rudy - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+    double cost = l1 * normalized_wl +
+                  l2 * 0.9 * normalized_oa +
+          		    l2 * 0.1 * normalized_routability;
+
+    std::ofstream f0("./reports/"+buffer+"_summary.txt");
+    f0 << "wirelength: " << wl << '\n';
+    f0 << "overlap: " << oa << '\n';
+    f0 << "normalized wirelength: " << normalized_wl << '\n';
+    f0 << "normalized overlap: " << normalized_oa << '\n';
+    f0 << "routability: " << routability << '\n';
+
+    f0 << "cost: " << cost << '\n';
+
+    f0.close();
+
+    writePlFile("./reports/"+buffer+"_pl.pl");
+/*
+    std::ofstream f("./reports/"+buffer+"_cost.txt");
+    for(vector<double>::const_iterator i = cost_hist.begin(); i != cost_hist.end(); ++i) {
+        f << *i << '\n';
+    }
+    f.close();
+
+    std::ofstream f2("./reports/"+buffer+"_wl.txt");
+    for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+        f2 << *i << '\n';
+    }
+    f2.close();
+
+    std::ofstream f3("./reports/"+buffer+"_oa.txt");
+    for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+        f3 << *i << '\n';
+    }
+    f3.close();
+
+    std::ofstream f4("./reports/"+buffer+"_accept_ratio.txt");
+    for(vector<double>::const_iterator i = accept_ratio_history.begin(); i != accept_ratio_history.end(); ++i) {
+        f4 << *i << '\n';
+    }
+    f4.close();*/
+}
+
+/*
+timberWolfAlgorithm
+main loop for sa algorithm
+*/
 float timberWolfAlgorithm() {
   // main driver of the anealer
-  //xLimit = macroPlacement();
+  //limit = macroPlacement();
 
   //varanelli_cohoon();
 
   initialPlacement();
-
+  SetInitParameters();
   //Temperature = pow(8,5);
-  Temperature = 0.8;
+  Temperature = 1;
   int i; // n * 20, n is number of nodes
   int cnt = 0;
   long long int ii = 0;
@@ -676,9 +968,6 @@ float timberWolfAlgorithm() {
   vector < double > oa_hist;
   double cst;
 
-  double w;
-  double o;
-
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if(!itNode -> second.terminal && !itNode -> second.fixed) {
       num_components += 1;
@@ -687,9 +976,8 @@ float timberWolfAlgorithm() {
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //while (Temperature > 0.1) {
-  while (ii < 25000) {
+  while (ii < 1000) {
     i = 2*num_components;
-    //i = 20;
     if(ii % 100 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
@@ -744,30 +1032,4 @@ float timberWolfAlgorithm() {
   }
 
   return cost();
-}
-/*
-float multistart() {
-  auto [A, B, C, D] = taskflow.emplace(
-    [] () { timberWolfAlgorithm(); },
-    [] () { timberWolfAlgorithm(); },
-    [] () { timberWolfAlgorithm(); },
-    [] () { timberWolfAlgorithm(); }
-  );
-
-  taskflow.wait_for_all();  // block until finish
-  return 0;
-}*/
-
-void printCellMap() {
-  map < string, Node > ::iterator itNode;
-  for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    itNode -> second.printParameter();
-  }
-}
-
-void printRowMap() {
-  map < int, row > ::iterator itRow;
-  for (itRow = rowId.begin(); itRow != rowId.end(); ++itRow) {
-    itRow -> second.printParameter();
-  }
 }

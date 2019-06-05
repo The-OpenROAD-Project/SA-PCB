@@ -10,17 +10,20 @@ from shapely import geometry
 import numpy as np
 import load_bookshelf
 
-def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=None, stats = None):
+def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=None, stats = None, ax=None):
 	"""
 	board dim: [[xs],[ys]]
 	"""
 	board_lower_left_corner = [min(board_dim[0]), min(board_dim[1])]
 	board_upper_right_corner = [max(board_dim[0]), max(board_dim[1])]
-	fig, ax = plt.subplots(1)
-	if stats is None:
-		ax.set_title(circuit_name)
+	if ax is None:
+		fig, ax = plt.subplots(1)
 	else:
-		ax.set_title("circuit: " + circuit_name+ " wirelength: " + str(round(stats[0],2)) + " overlap: " + str(round(stats[1],2)))
+		ax.clear()
+	#if stats is None:
+	#	ax.set_title(circuit_name)
+	#else:
+		#ax.set_title("circuit: " + circuit_name+ " wirelength: " + str(round(stats[0],2)) + " overlap: " + str(round(stats[1],2)))
 	boundary = patches.Rectangle((min(board_dim[0]), min(board_dim[1])), \
 								  max(board_dim[0]) - min(board_dim[0]), max(board_dim[1]) - min(board_dim[1]), \
 								  linewidth=1,edgecolor='b',facecolor='none')
@@ -64,17 +67,17 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
 		ymin = min([p[1] for p in netlist])
 		center =  [(xmax + xmin)/2,(ymax + ymin)/2]
 		# centroid - star
-		for i in range(len(netlist)):
-			ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
-		xs= [ x[0] for x in netlist ]
-		ys= [ x[1] for x in netlist ]
-		ax.scatter(xs,ys,marker='.',c=c)
-		ax.scatter(center[0],center[1],marker='.',c=c)
+		#for i in range(len(netlist)):
+		#	ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
+		#xs= [ x[0] for x in netlist ]
+		#ys= [ x[1] for x in netlist ]
+		#ax.scatter(xs,ys,marker='.',c=c)
+		#ax.scatter(center[0],center[1],marker='.',c=c)
 	plt.xlim(board_lower_left_corner[0] - 5,board_upper_right_corner[0] + 5)
 	plt.ylim(board_lower_left_corner[1] - 5,board_upper_right_corner[1] + 5)
-	plt.gca().set_aspect('equal', adjustable='box')
-	plt.savefig(figname)
-	plt.close()
+	#plt.gca().set_aspect('equal', adjustable='box')
+	#plt.savefig(figname)
+	#plt.close()
 	#plt.show()
 
 def pin_pos2(pin_loc, modules,comp2rot):

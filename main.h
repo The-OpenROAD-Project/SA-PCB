@@ -14,7 +14,7 @@ double cost(int temp_debug = 0);
 double cost_partial(int temp_debug, map < string, Node > nodes);
 double cellOverlap();
 double wireLength();
-double cellOverlap(map < string, Node > nodes);
+double cellOverlap_partial(map < string, Node > nodes);
 double wireLength_partial(map < string, Node > nodes);
 double rudy();
 float timberWolfAlgorithm();
@@ -28,5 +28,5 @@ map < string, Node > ::iterator random_node();
 
 
 struct boundaries {
-  double minX, maxX, minY, maxY;
+  double minX, maxX, minY, maxY = 0.0;
 };

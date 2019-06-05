@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
   string parg = "";
   int bound_inc = 0;
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:")) != EOF) {
+  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:m")) != EOF) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
@@ -112,13 +112,13 @@ int main(int argc, char *argv[]) {
   }
   debug = d;
   string p = string(parg);
-  p = "bm3";
+  //p = "bm3";
   cout << "circuit: " << p << endl;
 
-  string nodesfname = p +".nodes";
-  string netsfname = p +".nets";
-  string plfname = p +".pl";
-  string wtsfname = p +".wts";
+  string nodesfname = p + ".nodes";
+  string netsfname  = p + ".nets";
+  string plfname    = p + ".pl";
+  string wtsfname   = p + ".wts";
 
   cout << nodesfname << endl;
   cout << netsfname << endl;
@@ -223,8 +223,6 @@ void SetInitParameters() {
 
   wl_normalization = normalization_terms[0];
   area_normalization = normalization_terms[1];
-
-  //return normalization_terms;
 }
 
 /*
@@ -243,20 +241,20 @@ void CalcBoundaries() {
       width = itNode -> second.width;
       height =itNode -> second.height;
       if (xval < b.minX) {
-        b.minX = xval;
+        b.minX = xval - 2;
       }
       if (xval > b.maxX) {
-        b.maxX = xval + width;
+        b.maxX = xval + width + 2;
       }
-      if (xval < b.minY) {
-        b.minY = yval;
+      if (yval < b.minY) {
+        b.minY = yval - 2;
       }
-      if (xval > b.maxY) {
-        b.maxY = yval + height;
+      if (yval > b.maxY) {
+        b.maxY = yval + height + 2;
       }
     }
   }
-
+//b.minY = -5.0;
 /*
   b.minX = -4.0;
   b.maxX = 58.0;
@@ -539,6 +537,7 @@ double wireLength_partial(map < string, Node > nodes) {
   return wireLength;
 }
 */
+
 /*
 cellOverlap_partial
 Compute sum squared overlap for select components

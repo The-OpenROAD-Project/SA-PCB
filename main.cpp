@@ -59,6 +59,7 @@ float l1 = 0.8;
 float l2 = 1-l1;
 std::pair <double,double> wl_normalization;
 std::pair <double,double> area_normalization;
+std::pair <double,double> routability_normalization;
 
 long long int iii = 0;
 
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
 
   string parg = "";
   int bound_inc = 0;
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:m")) != EOF) {
+  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:")) != EOF) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
@@ -223,6 +224,10 @@ void SetInitParameters() {
 
   wl_normalization = normalization_terms[0];
   area_normalization = normalization_terms[1];
+
+  routability_normalization.first = 0.0;
+  routability_normalization.second = rudy();
+
 }
 
 /*
@@ -254,7 +259,6 @@ void CalcBoundaries() {
       }
     }
   }
-//b.minY = -5.0;
 /*
   b.minX = -4.0;
   b.maxX = 58.0;
@@ -445,7 +449,6 @@ double wireLength() {
       if (yVal > maxYW)
         maxYW = yVal;
     }
-    //wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
     wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
   }
   return wireLength;
@@ -668,7 +671,8 @@ double cost(int temp_debug) {
   }
   return l1 * (wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-		     l2 * 0.1 * rudy();
+         l2 * 0.1 * rudy();
+         //l2 * 0.1 * (rudy() - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
 double cost_partial(int temp_debug, map < string, Node > nodes) {
@@ -985,7 +989,7 @@ float timberWolfAlgorithm() {
       cout << "iteration: " << ii << endl;
       cout << "time: " <<  time_span.count() << " (s)" << endl;
       cout << "move/time: " <<  i*ii/time_span.count() << endl;
-      cout << "time remaining: " <<  time_span.count()/ii * (20000-ii) << " (s)" << endl;
+      cout << "time remaining: " <<  time_span.count()/ii * (1000-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
       cost(-1);

@@ -1,4 +1,5 @@
 cache/*
+cache_rudy/*
 *.o
 sa
 bm*

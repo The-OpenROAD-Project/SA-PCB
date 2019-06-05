@@ -6,7 +6,7 @@ sa : main.o readFiles.o readScl.o
 	$(CC) $(CFLAGS) $(LIBS) -o sa main.o readFiles.o  readScl.o
 
 main.o : main.h readFiles.h readScl.h main.cpp
-	$(CC) $(CFLAGS) $(LIBS) -c main.cpp
+	$(CC) $(CFLAGS) -c main.cpp
 
 readFiles.o : readFiles.h readScl.h readFiles.cpp
 	$(CC) $(CFLAGS) -c readFiles.cpp

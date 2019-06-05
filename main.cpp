@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
               case 1: b.minX = atof(optarg);
               case 2: b.minY = atof(optarg);
               case 3: b.maxX = atof(optarg);
-              case 4: b.maxy = atof(optarg); 
+              case 4: b.maxY = atof(optarg);
             }
           case 'h': fprintf(stderr, "./sa usuage is \n \
                                     -i <value> : for denoting # outer iterations PER SA INSTANCE \n \

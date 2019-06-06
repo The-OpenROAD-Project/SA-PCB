@@ -48,6 +48,7 @@ namespace bnu = boost::numeric::ublas;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
 double Temperature;
+double sigma = 25.0;
 int xLimit;
 map < int, row > rowId;
 int RowWidth;
@@ -77,6 +78,7 @@ int main(int argc, char *argv[]) {
   int opt;
   int outer_loop_iter = 2000;
   int inner_loop_iter = 20;
+  double eps = -1.0;
   double t_0 = 1.0;
 
   string parg = "";
@@ -89,6 +91,7 @@ int main(int argc, char *argv[]) {
           case 'i': outer_loop_iter = atoi(optarg); break;
           case 'j': inner_loop_iter = atoi(optarg); break;
           case 't': t_0 = atoi(optarg); break;
+          case 'e': eps = atof(optarg); break;
           case 'b':
             bound_inc += 1;
             switch(bound_inc) {
@@ -101,7 +104,8 @@ int main(int argc, char *argv[]) {
                                     -i <value> : for denoting # outer iterations PER SA INSTANCE \n \
                                     -j <value> : for denoting 'j'*#nodes inner iterations \n \
                                     -t <value> : for denoting initial temperature \n \
-                                    -f <str> : for denoting number output pl \n \
+                                    -f <str>   : for denoting number output pl \n \
+                                    -e <float> : convergence epsilon \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 1 -f output.pl for the standard single instance timberwolf algorithm");
           default: cout<<endl; abort();
       }
@@ -111,7 +115,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   string p = string(parg);
-  //p = "bm3";
   cout << "circuit: " << p << endl;
 
   string nodesfname = p + ".nodes";
@@ -134,7 +137,7 @@ int main(int argc, char *argv[]) {
   if(debug) { cout << "calculating boundaries..." << endl; }
   CalcBoundaries();
   if(debug) { cout << "annealing" << endl; }
-  float cost = timberWolfAlgorithm();
+  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0);
   writePlFile("./"+std::to_string( idx )+".pl");
   return cost;
 }
@@ -230,11 +233,10 @@ void SetInitParameters() {
 
 /*
 CalcBoundaries
-Calculate board boundaries by finding the maximum
+Calculate board boundaries by finding the maximum-area
 rectangular envelop encompasing terminals & fixed modules.
 */
 void CalcBoundaries() {
-  // calculate boundaries from terminal nodes
   double xval, yval, width, height;
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -257,11 +259,7 @@ void CalcBoundaries() {
       }
     }
   }
-/*
-  b.minX = -4.0;
-  b.maxX = 58.0;
-  b.minY = 0.0;
-  b.maxY = 48.0;*/
+
   if(debug) {
     cout << "min: " << b.minX << " " << b.minY << endl;
     cout << "max: " << b.maxX << " " << b.maxY << endl;
@@ -326,7 +324,6 @@ initialPlacement
 Randomly place and orient all movable components in the board area
 */
 void initialPlacement() {
-  // initially randomly place components on the board
   map < string, Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     Node n = itNode -> second;
@@ -457,7 +454,6 @@ cellOverlap
 Compute sum squared overlap for all components
 */
 double cellOverlap() {
-  // compute sum squared overlap
   double overlap = 0.0;
   map < string, Node > ::iterator nodeit = nodeId.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
@@ -495,11 +491,13 @@ wireLength_partial
 Compute HPWL for select nets
 */
 double wireLength_partial(map < string, Node > nodes) {
-  // compute HPWL
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
+    if (nodes.find("f") == nodes.end()) {
+      continue;
+    }
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
@@ -531,7 +529,6 @@ double wireLength_partial(map < string, Node > nodes) {
       if (yVal > maxYW)
         maxYW = yVal;
     }
-    //wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)))/max(static_cast<int>(itNet -> second.size() - 1) ,1);
     wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
   }
   return wireLength;
@@ -542,7 +539,6 @@ cellOverlap_partial
 Compute sum squared overlap for select components
 */
 double cellOverlap_partial(map < string, Node > nodes) {
-  // compute sum squared overlap
   double overlap = 0.0;
   map < string, Node > ::iterator nodeit = nodes.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
@@ -619,8 +615,8 @@ double rudy() {
         minYW = yVal;
       if (yVal > maxYW)
         maxYW = yVal;
-    } // now have boundary of net
-    //hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)))/(max(static_cast<int>(itNet -> second.size() - 1) ,1));
+    }
+    // now have boundary of net
     hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)));
     rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0));
 
@@ -639,13 +635,14 @@ double rudy() {
       }
   }
 
+  // write tab separated matrix to file
   if(iii % 10 == 0) {
       ofstream dat("cache_rudy/"+std::to_string(iii) + ".txt");
       for (unsigned i = 0; i < D.size1() ; i++) {
           for (unsigned j = 0; j < D.size2(); j++) {
-              dat << D(i, j) << "\t"; // Must seperate with Tab
+              dat << D(i, j) << "\t";
           }
-          dat << endl; // Must write on New line
+          dat << endl;
       }
   }
 
@@ -672,12 +669,15 @@ double cost(int temp_debug) {
 }
 
 double cost_partial(int temp_debug, map < string, Node > nodes) {
-  return l1 * (wireLength() - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+  return l1 * (wireLength_partial(nodes) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();
 }
 
-double sigma = 25.0;
+/*
+random_node
+Select random node from set of nodes
+*/
 map < string, Node > ::iterator random_node() {
   map < string, Node > ::iterator itNode = nodeId.begin();
   int size = nodeId.size();
@@ -809,44 +809,60 @@ double initiateMove() {
   }
 }
 
+/*
+update_Temperature
+Update the SA parameters according to annealing schedule
+*/
 void update_temperature() {
-  // update the temperature according to annealing schedule
+  map < string, Node > ::iterator nodeit = nodeId.begin();
   if (Temperature > 0.05) {
     Temperature = (0.99986) * Temperature;
-  if (l1 > 10e-2) {
-    l1 -= 10e-5;
-    l2 += 10e-5;
-  }
-  sigma = max(0.9999*sigma,0.5);
-
+    if (l1 > 10e-2) {
+      l1 -= 10e-5;
+      l2 += 10e-5;
+    }
+    sigma = max(0.9999*sigma,0.5);
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->second.sigma =  max(0.9999*nodeit->second.sigma,0.5);
+    }
   } else if (Temperature <= 0.05 && Temperature > 0.005) {
     Temperature = (0.999) * Temperature;
-  if (l1 > 25e-4) {
-    l1 -= 25e-4;
-    l2 += 25e-4;
-  }
-  sigma = max(0.999*sigma,0.25);
-
+    if (l1 > 25e-4) {
+      l1 -= 25e-4;
+      l2 += 25e-4;
+    }
+    sigma = max(0.999*sigma,0.25);
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.25);
+    }
   } else if (Temperature < 0.005) {
     Temperature = (0.9985) * Temperature;
-  if (l1 > 20e-4) {
-    l1 -= 20e-4;
-    l2 += 20e-4;
-  }
-  sigma = max(0.999*sigma,0.18);
-
+    if (l1 > 20e-4) {
+      l1 -= 20e-4;
+      l2 += 20e-4;
+    }
+    sigma = max(0.999*sigma,0.18);
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.18);
+    }
   } else if (Temperature < 0.001) {
     Temperature = (0.998) * Temperature;
-  if (l1 > 10e-5) {
-    l1 -= 10e-5;
-    l2 += 10e-5;
-  }
-  sigma = max(0.999*sigma,0.08);
+    if (l1 > 10e-5) {
+      l1 -= 10e-5;
+      l2 += 10e-5;
+    }
+    sigma = max(0.999*sigma,0.08);
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.08);
+    }
   }
 }
 
+/*
+checkMove
+either accept or reject the move based on current & previous temperature & cost
+*/
 bool checkMove(double prevCost) {
-  // either accept or reject the move based on temperature & cost
   double newCost = cost();
   c = newCost;
   double delCost = 0;
@@ -903,7 +919,6 @@ void gen_report(map<string, vector<double>* > report) {
     double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
     double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
     double normalized_routability = routability;
-    //double normalized_routability = (rudy - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
     double cost = l1 * normalized_wl +
                   l2 * 0.9 * normalized_oa +
           		    l2 * 0.1 * normalized_routability;
@@ -914,18 +929,14 @@ void gen_report(map<string, vector<double>* > report) {
     f0 << "normalized wirelength: " << normalized_wl << '\n';
     f0 << "normalized overlap: " << normalized_oa << '\n';
     f0 << "routability: " << routability << '\n';
-
     f0 << "cost: " << cost << '\n';
-
     f0.close();
 
-    writePlFile("./reports/"+buffer+"_pl.pl");
-
-    std::ofstream f("./reports/"+buffer+"_cost.txt");
+    std::ofstream f1("./reports/"+buffer+"_cost.txt");
     for(vector<double>::const_iterator i = cost_hist.begin(); i != cost_hist.end(); ++i) {
-        f << *i << '\n';
+        f1 << *i << '\n';
     }
-    f.close();
+    f1.close();
 
     std::ofstream f2("./reports/"+buffer+"_wl.txt");
     for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
@@ -944,25 +955,22 @@ void gen_report(map<string, vector<double>* > report) {
         f4 << *i << '\n';
     }
     f4.close();
+
+    writePlFile("./reports/"+buffer+"_pl.pl");
 }
 
 /*
 timberWolfAlgorithm
 main loop for sa algorithm
 */
-float timberWolfAlgorithm() {
-  // main driver of the anealer
+float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, double t_0) {
   //limit = macroPlacement();
 
   //varanelli_cohoon();
 
   initialPlacement();
   SetInitParameters();
-  //Temperature = pow(8,5);
-  Temperature = 1;
-  int i; // n * 20, n is number of nodes
-  int cnt = 0;
-  long long int ii = 0;
+  Temperature = t_0;
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
@@ -971,9 +979,9 @@ float timberWolfAlgorithm() {
   vector < double > wl_hist;
   vector < double > oa_hist;
   report["cost_hist"] = &cost_hist;
-  report["wl_hist"] = &cost_hist;
+  report["wl_hist"] = &wl_hist;
   report["oa_hist"] = &oa_hist;
-  double cst;
+  double cst = cost();
 
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if(!itNode -> second.terminal && !itNode -> second.fixed) {
@@ -982,8 +990,10 @@ float timberWolfAlgorithm() {
   }
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //while (Temperature > 0.1) {
-  while (ii < 105) {
+
+  int i; // inner loop iterator
+  long long int ii = 0; // outer loop iterator
+  while (ii < outer_loop_iter) {
     i = 2*num_components;
     if(ii % 100 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -999,7 +1009,7 @@ float timberWolfAlgorithm() {
       cost(-1);
     }
 
-    while (i > 0) {
+    while (inner_loop_iter > 0) {
       cst = initiateMove();
       cost_hist.push_back(cst);
 
@@ -1007,8 +1017,13 @@ float timberWolfAlgorithm() {
       oa_hist.push_back((cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
 
       i -= 1;
-      cnt += 1;
     }
+
+    // convergence criterion
+    if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
+      break;
+    }
+
     update_temperature();
     iii += 1;
     ii += 1;
@@ -1017,6 +1032,5 @@ float timberWolfAlgorithm() {
     }
   }
   gen_report(report);
-
   return cost();
 }

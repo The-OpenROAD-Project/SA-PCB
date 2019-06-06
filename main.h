@@ -17,7 +17,7 @@ double wireLength();
 double cellOverlap_partial(map < string, Node > nodes);
 double wireLength_partial(map < string, Node > nodes);
 double rudy();
-float timberWolfAlgorithm();
+float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, double t_0);
 float multistart();
 void update_Temperature();
 double initiateMove();

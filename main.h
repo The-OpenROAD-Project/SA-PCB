@@ -24,8 +24,8 @@ double initiateMove();
 bool checkMove(double prevCost);
 void project_soln();
 void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
+void gen_report(map<string, vector<double> > report);
 map < string, Node > ::iterator random_node();
-
 
 struct boundaries {
   double minX, maxX, minY, maxY = 0.0;

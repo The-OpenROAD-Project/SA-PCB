@@ -17,5 +17,24 @@ readFiles.o : readFiles.h readScl.h readFiles.cpp
 readScl.o : readFiles.h readScl.h readScl.cpp
 	$(CC) $(CFLAGS) -c readScl.cpp
 
+install :
+	if [ ! -d "./cache" ]; then \
+			echo "creating cache directory"; \
+			mkdir "cache"; \
+	fi
+	if [ ! -d "./cache_rudy" ]; then \
+			echo "creating rudy cache directory"; \
+			mkdir "cache_rudy"; \
+	fi
+	if [ ! -d "./reports" ]; then \
+			echo "creating reports directory"; \
+			mkdir "reports"; \
+	fi
+
 clean :
 	-rm *.o
+	-rm *.pl
+	-rm cache/*.pl
+	-rm cache/img/*.png
+	-rm cache_rudy/*.txt
+	-rm reports/*.txt

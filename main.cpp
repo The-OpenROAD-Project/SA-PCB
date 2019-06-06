@@ -63,7 +63,7 @@ std::pair <double,double> routability_normalization;
 
 long long int iii = 0;
 
-int debug = 0;
+int debug = 1;
 long long int idx = -1;
 
 vector< int > accept_history;
@@ -75,10 +75,9 @@ boost::mt19937 rng;
 int main(int argc, char *argv[]) {
   srand(time(NULL));
   int opt;
-  int d = 1;
-  int i = 2000;
-  int j = 20;
-  double t = 1.0;
+  int outer_loop_iter = 2000;
+  int inner_loop_iter = 20;
+  double t_0 = 1.0;
 
   string parg = "";
   int bound_inc = 0;
@@ -86,10 +85,10 @@ int main(int argc, char *argv[]) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
-          case 'd': d=atoi(optarg); break;
-          case 'i': i = atoi(optarg); break;
-          case 'j': j = atoi(optarg); break;
-          case 't': t = atoi(optarg); break;
+          case 'd': debug=atoi(optarg); break;
+          case 'i': outer_loop_iter = atoi(optarg); break;
+          case 'j': inner_loop_iter = atoi(optarg); break;
+          case 't': t_0 = atoi(optarg); break;
           case 'b':
             bound_inc += 1;
             switch(bound_inc) {
@@ -111,7 +110,6 @@ int main(int argc, char *argv[]) {
     cout << "./main: option requires an argument -- p\n";
     exit(1);
   }
-  debug = d;
   string p = string(parg);
   //p = "bm3";
   cout << "circuit: " << p << endl;
@@ -887,12 +885,16 @@ bool checkMove(double prevCost) {
 gen_report
 generates a report and outputs files to ./reports/ directory
 */
-void gen_report(map<string, vector<double> > ) {
+void gen_report(map<string, vector<double>* > report) {
+    vector < double > cost_hist = *report["cost_hist"];
+    vector < double > wl_hist   = *report["wl_hist"];
+    vector < double > oa_hist   = *report["oa_hist"];
+
     time_t t = time(0);
     struct tm * now = localtime( & t );
 
     char buf [80];
-    strftime (buf,80,"%Y-%m-%d.",now);
+    strftime (buf,80,"%Y-%m-%d-%H-%M-%S",now);
     string buffer = string(buf);
 
     double wl = wireLength();
@@ -918,7 +920,7 @@ void gen_report(map<string, vector<double> > ) {
     f0.close();
 
     writePlFile("./reports/"+buffer+"_pl.pl");
-/*
+
     std::ofstream f("./reports/"+buffer+"_cost.txt");
     for(vector<double>::const_iterator i = cost_hist.begin(); i != cost_hist.end(); ++i) {
         f << *i << '\n';
@@ -941,7 +943,7 @@ void gen_report(map<string, vector<double> > ) {
     for(vector<double>::const_iterator i = accept_ratio_history.begin(); i != accept_ratio_history.end(); ++i) {
         f4 << *i << '\n';
     }
-    f4.close();*/
+    f4.close();
 }
 
 /*
@@ -964,9 +966,13 @@ float timberWolfAlgorithm() {
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
+  map < string, vector < double >* > report;
   vector < double > cost_hist;
   vector < double > wl_hist;
   vector < double > oa_hist;
+  report["cost_hist"] = &cost_hist;
+  report["wl_hist"] = &cost_hist;
+  report["oa_hist"] = &oa_hist;
   double cst;
 
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -977,7 +983,7 @@ float timberWolfAlgorithm() {
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //while (Temperature > 0.1) {
-  while (ii < 1000) {
+  while (ii < 105) {
     i = 2*num_components;
     if(ii % 100 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -1010,27 +1016,7 @@ float timberWolfAlgorithm() {
       writePlFile("./cache/"+std::to_string( ii )+".pl");
     }
   }
-  writePlFile("./cache/"+std::to_string( idx )+".pl");
-
-  std::ofstream f("cost.txt");
-  for(vector<double>::const_iterator i = cost_hist.begin(); i != cost_hist.end(); ++i) {
-      f << *i << '\n';
-  }
-
-  std::ofstream f2("wl.txt");
-  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
-      f2 << *i << '\n';
-  }
-
-  std::ofstream f3("oa.txt");
-  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
-      f3 << *i << '\n';
-  }
-
-  std::ofstream f4("accept_ratio.txt");
-  for(vector<double>::const_iterator i = accept_ratio_history.begin(); i != accept_ratio_history.end(); ++i) {
-      f4 << *i << '\n';
-  }
+  gen_report(report);
 
   return cost();
 }

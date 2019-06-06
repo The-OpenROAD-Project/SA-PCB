@@ -33,6 +33,12 @@ Supports the following:
                                     -w <value> : for denoting number of winners per splitting \n \
                                     -f <str> : for denoting number output pl \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 40000 -k 0 -s -w 0 -f output.pl for the standard single instance timberwolf algorithm"
+				   
+## Details
+Boardfile is only manditory option.
+Partial placements in cache dir.
+Cost over time in reports dir.
+Full placement in base dir, uses index option.
 
 ## TODO
  - Reorganize repository to facilitate better management

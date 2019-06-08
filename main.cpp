@@ -453,7 +453,7 @@ double cellOverlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double wireLength_partial(map < string, Node > nodes) {
+double wireLength_partial(map < string, Node > &nodes) {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
@@ -501,7 +501,7 @@ double wireLength_partial(map < string, Node > nodes) {
 cellOverlap_partial
 Compute sum squared overlap for select components
 */
-double cellOverlap_partial(map < string, Node > nodes) {
+double cellOverlap_partial(map < string, Node > &nodes) {
   double overlap = 0.0;
   map < string, Node > ::iterator nodeit = nodes.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
@@ -539,8 +539,8 @@ rudy
 Computes a routability score
 */
 double rudy() {
-  bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
-  bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
+  static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
+  static bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
 
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
@@ -631,7 +631,7 @@ double cost(int temp_debug) {
          //l2 * 0.1 * (rudy() - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
-double cost_partial(int temp_debug, map < string, Node > nodes) {
+double cost_partial(int temp_debug, map < string, Node > &nodes) {
   return l1 * (wireLength_partial(nodes) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();

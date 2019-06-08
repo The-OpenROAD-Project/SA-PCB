@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -36,9 +35,6 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
-=======
-
->>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
 
 #include "main.h"
 
@@ -687,12 +683,8 @@ double cost(int temp_debug) {
          //l2 * 0.1 * (rudy() - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
-<<<<<<< HEAD
 double cost_partial(int temp_debug, map < string, Node > nodes) {
   double l2 = 1-l1;
-=======
-double cost_partial(int temp_debug, map < string, Node > &nodes) {
->>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
   return l1 * (wireLength_partial(nodes) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();
@@ -938,19 +930,11 @@ double varanelli_cohoon() {
 /*
 gen_report
 generates a report and outputs files to ./reports/ directory
-<<<<<<< HEAD
-*/ // - make streaming
-void gen_report(map<string, vector<double>* > report) { // const map... &report
-    vector < double > cost_hist = *report["cost_hist"];
-    vector < double > wl_hist   = *report["wl_hist"];
-    vector < double > oa_hist   = *report["oa_hist"];
-=======
 */
 void gen_report(map<string, vector<double> > &report) {
     vector < double > cost_hist = report["cost_hist"];
     vector < double > wl_hist   = report["wl_hist"];
     vector < double > oa_hist   = report["oa_hist"];
->>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
 
     time_t t = time(0);
     struct tm * now = localtime( & t );

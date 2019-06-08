@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -35,10 +36,11 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+=======
+
+>>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
 
 #include "main.h"
-#include "time.h"
-#include "readScl.h"
 
 using namespace std::chrono;
 
@@ -494,7 +496,7 @@ double cellOverlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double wireLength_partial(map < string, Node > nodes) {
+double wireLength_partial(map < string, Node > &nodes) {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
@@ -542,7 +544,7 @@ double wireLength_partial(map < string, Node > nodes) {
 cellOverlap_partial
 Compute sum squared overlap for select components
 */
-double cellOverlap_partial(map < string, Node > nodes) {
+double cellOverlap_partial(map < string, Node > &nodes) {
   double overlap = 0.0;
   map < string, Node > ::iterator nodeit = nodes.begin();
   map < string, Node > ::iterator nodeit2 = nodeId.begin();
@@ -580,8 +582,10 @@ rudy
 Computes a routability score
 */
 double rudy() {
-  bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
-  bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
+  static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
+  static bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
+
+  D.clear();
 
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
@@ -591,8 +595,6 @@ double rudy() {
     double xVal, yVal, hpwl = 0.0;
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     double rudy = 0.0;
-    bnu::matrix<double> D_net (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
-    // For each pin in the net
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
@@ -685,8 +687,12 @@ double cost(int temp_debug) {
          //l2 * 0.1 * (rudy() - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
+<<<<<<< HEAD
 double cost_partial(int temp_debug, map < string, Node > nodes) {
   double l2 = 1-l1;
+=======
+double cost_partial(int temp_debug, map < string, Node > &nodes) {
+>>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
   return l1 * (wireLength_partial(nodes) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();
@@ -932,11 +938,19 @@ double varanelli_cohoon() {
 /*
 gen_report
 generates a report and outputs files to ./reports/ directory
+<<<<<<< HEAD
 */ // - make streaming
 void gen_report(map<string, vector<double>* > report) { // const map... &report
     vector < double > cost_hist = *report["cost_hist"];
     vector < double > wl_hist   = *report["wl_hist"];
     vector < double > oa_hist   = *report["oa_hist"];
+=======
+*/
+void gen_report(map<string, vector<double> > &report) {
+    vector < double > cost_hist = report["cost_hist"];
+    vector < double > wl_hist   = report["wl_hist"];
+    vector < double > oa_hist   = report["oa_hist"];
+>>>>>>> 47e4c7ce1e2c70b2e03dfc13bb1f5f6d4495d41f
 
     time_t t = time(0);
     struct tm * now = localtime( & t );
@@ -1008,13 +1022,13 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
-  map < string, vector < double >* > report;
+  map < string, vector < double > > report;
   vector < double > cost_hist;
   vector < double > wl_hist;
   vector < double > oa_hist;
-  report["cost_hist"] = &cost_hist;
-  report["wl_hist"] = &wl_hist;
-  report["oa_hist"] = &oa_hist;
+  report["cost_hist"] = cost_hist;
+  report["wl_hist"] = wl_hist;
+  report["oa_hist"] = oa_hist;
   double cst = cost();
 
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -1029,7 +1043,7 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
   long long int ii = 0; // outer loop iterator
   while (ii < outer_loop_iter) {
     i = 2*num_components;
-    if(ii % 100 == 0 && debug) {
+    if(ii % 1 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 
@@ -1043,7 +1057,7 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
       cost(-1);
     }
 
-    while (inner_loop_iter > 0) {
+    while (i > 0) {
       cst = initiateMove();
       cost_hist.push_back(cst);
 
@@ -1066,5 +1080,6 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
     }
   }
   gen_report(report);
+
   return cost();
 }

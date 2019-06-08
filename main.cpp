@@ -542,13 +542,15 @@ double rudy() {
   static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
   static bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 1);
 
+  D.clear();
+
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     double rudy = 0.0;
-    bnu::matrix<double> D_net (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
+    // bnu::matrix<double> D_net (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;

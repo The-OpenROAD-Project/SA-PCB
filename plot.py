@@ -134,21 +134,21 @@ arg 5: max plot dimension
 
 example:
 """
-#circuitname = sys.argv[1]
-#plfile = circuitname + '.pl'
-#nodesfile = circuitname + '.nodes'
-#netsfile = circuitname + '.nets'
+circuitname = sys.argv[1]
+plfile = circuitname + '.pl'
+nodesfile = circuitname + '.nodes'
+netsfile = circuitname + '.nets'
 #bversion = int(sys.argv[2])
-#figname = sys.argv[3]
+figname = sys.argv[2]
 
 bversion = 1
 boarddimmin = None
 boarddim = None
-figname = ''
-#circuitname = './benchmarks/pcb_benchmark_devel-master/bm3'
-circuitname = './bm3'
-nodesfile = circuitname + '.nodes'
-netsfile = circuitname + '.nets'
+#figname = ''
+#circuitname = './bm3'
+#nodesfile = circuitname + '.nodes'
+#netsfile = circuitname + '.nets'
+
 board_pins = {}
 #plfile2 = 'bm32.pl' #'./bm12.pl'
 
@@ -178,7 +178,7 @@ for (dirpath, dirnames, filenames) in walk('./cache/img/'):
 f = sorted(f, key=lambda x: float(x.split('.')[0]))
 
 import imageio
-with imageio.get_writer('./anim.gif', mode='I') as writer:
+with imageio.get_writer(figname, mode='I') as writer:
 	for ff in tqdm(f):
 		try:
 			if ff == "" or ff == "anim":
@@ -189,7 +189,6 @@ with imageio.get_writer('./anim.gif', mode='I') as writer:
 		except:
 			tqdm.write("exception: " + ff)
 			continue
-
 """
 
 if len(sys.argv) > 4:

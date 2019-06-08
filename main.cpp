@@ -17,6 +17,7 @@
 // boost version 1.69.0
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/geometry/index/rtree.hpp>
 #include <boost/geometry.hpp>
 #include <boost/assign.hpp>
 #include <boost/geometry.hpp>
@@ -57,7 +58,6 @@ map < string, Node > nodeId;
 boundaries b;
 
 float l1 = 0.8;
-float l2 = 1-l1;
 std::pair <double,double> wl_normalization;
 std::pair <double,double> area_normalization;
 std::pair <double,double> routability_normalization;
@@ -83,6 +83,8 @@ int main(int argc, char *argv[]) {
 
   string parg = "";
   int bound_inc = 0;
+  bool var = false;
+  // replace with config
   while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:")) != EOF) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
@@ -92,9 +94,10 @@ int main(int argc, char *argv[]) {
           case 'j': inner_loop_iter = atoi(optarg); break;
           case 't': t_0 = atoi(optarg); break;
           case 'e': eps = atof(optarg); break;
+          case 'v': var = true; break;
           case 'b':
             bound_inc += 1;
-            switch(bound_inc) {
+            switch(bound_inc) { // have 4 different argument flags for each point
               case 1: b.minX = atof(optarg);
               case 2: b.minY = atof(optarg);
               case 3: b.maxX = atof(optarg);
@@ -106,6 +109,7 @@ int main(int argc, char *argv[]) {
                                     -t <value> : for denoting initial temperature \n \
                                     -f <str>   : for denoting number output pl \n \
                                     -e <float> : convergence epsilon \n \
+                                    -v         : varanelli cohoon flag \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 1 -f output.pl for the standard single instance timberwolf algorithm");
           default: cout<<endl; abort();
       }
@@ -137,8 +141,9 @@ int main(int argc, char *argv[]) {
   if(debug) { cout << "calculating boundaries..." << endl; }
   CalcBoundaries();
   if(debug) { cout << "annealing" << endl; }
-  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0);
+  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var);
   writePlFile("./"+std::to_string( idx )+".pl");
+  cout << " " << idx << " " << cost << endl;
   return cost;
 }
 
@@ -228,7 +233,6 @@ void SetInitParameters() {
 
   routability_normalization.first = 0.0;
   routability_normalization.second = rudy();
-
 }
 
 /*
@@ -581,11 +585,14 @@ double rudy() {
 
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
+
+  // For each net
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     double rudy = 0.0;
     bnu::matrix<double> D_net (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
+    // For each pin in the net
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
@@ -593,6 +600,8 @@ double rudy() {
       int orient = nodeId[itCellList->name].orientation;
       xVal = nodeId[itCellList->name].xBy2;
       yVal = nodeId[itCellList->name].yBy2;
+
+      // compute pin position from orientation & offsets
       if(orient == 0) {
         xVal = xVal + itCellList->x_offset;
         yVal = yVal + itCellList->y_offset;
@@ -615,10 +624,17 @@ double rudy() {
         minYW = yVal;
       if (yVal > maxYW)
         maxYW = yVal;
+
+      // set read_net
+      for (unsigned i = xVal-5; i < xVal+5; ++ i) {
+          for (unsigned j = yVal-5; j < yVal+5; ++ j) {
+            D (i,j) += 5;
+          }
+      }
     }
     // now have boundary of net
     hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)));
-    rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0));
+    rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0)); // rudy density
 
     // set read_net
     for (unsigned i = minYW; i < maxYW; ++ i) {
@@ -651,6 +667,7 @@ double rudy() {
 }
 
 double cost(int temp_debug) {
+  double l2 = 1 - l1;
   if(debug > 1 || temp_debug == -1) {
     cout << "wirelength: " << wireLength() << endl;
     cout << "overlap: " << cellOverlap() << endl;
@@ -669,6 +686,7 @@ double cost(int temp_debug) {
 }
 
 double cost_partial(int temp_debug, map < string, Node > nodes) {
+  double l2 = 1-l1;
   return l1 * (wireLength_partial(nodes) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy();
@@ -819,7 +837,6 @@ void update_temperature() {
     Temperature = (0.99986) * Temperature;
     if (l1 > 10e-2) {
       l1 -= 10e-5;
-      l2 += 10e-5;
     }
     sigma = max(0.9999*sigma,0.5);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
@@ -829,7 +846,6 @@ void update_temperature() {
     Temperature = (0.999) * Temperature;
     if (l1 > 25e-4) {
       l1 -= 25e-4;
-      l2 += 25e-4;
     }
     sigma = max(0.999*sigma,0.25);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
@@ -839,7 +855,6 @@ void update_temperature() {
     Temperature = (0.9985) * Temperature;
     if (l1 > 20e-4) {
       l1 -= 20e-4;
-      l2 += 20e-4;
     }
     sigma = max(0.999*sigma,0.18);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
@@ -849,7 +864,6 @@ void update_temperature() {
     Temperature = (0.998) * Temperature;
     if (l1 > 10e-5) {
       l1 -= 10e-5;
-      l2 += 10e-5;
     }
     sigma = max(0.999*sigma,0.08);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
@@ -893,15 +907,33 @@ bool checkMove(double prevCost) {
   }
 }
 
-//void varanelli_cohoon() {
-  //return
-//}
+double varanelli_cohoon() {
+  double t = 0.0;
+  double emax = 0.0;
+  double emin = 0.0;
+  double xt = 1.0;
+  double x0 = 0.84;
+  double p = 2.0;
+  initialPlacement();
+  SetInitParameters();
+  for(int i=1; i<=10; i++){
+    for(int j=1; j<=10; j++){
+      initialPlacement();
+      emax += exp(cost()/t);
+      initiateMove();
+      emin += exp(cost()/t);
+    }
+    xt = emax/emin;
+    t = t * pow(log(xt),1/p)/log(x0);
+  }
+  return t;
+}
 
 /*
 gen_report
 generates a report and outputs files to ./reports/ directory
-*/
-void gen_report(map<string, vector<double>* > report) {
+*/ // - make streaming
+void gen_report(map<string, vector<double>* > report) { // const map... &report
     vector < double > cost_hist = *report["cost_hist"];
     vector < double > wl_hist   = *report["wl_hist"];
     vector < double > oa_hist   = *report["oa_hist"];
@@ -919,6 +951,7 @@ void gen_report(map<string, vector<double>* > report) {
     double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
     double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
     double normalized_routability = routability;
+    double l2 = 1 - l1;
     double cost = l1 * normalized_wl +
                   l2 * 0.9 * normalized_oa +
           		    l2 * 0.1 * normalized_routability;
@@ -963,14 +996,15 @@ void gen_report(map<string, vector<double>* > report) {
 timberWolfAlgorithm
 main loop for sa algorithm
 */
-float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, double t_0) {
+float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, double t_0, bool var) {
   //limit = macroPlacement();
-
-  //varanelli_cohoon();
-
   initialPlacement();
   SetInitParameters();
-  Temperature = t_0;
+  if(var) {
+    Temperature = varanelli_cohoon();
+  } else {
+    Temperature = t_0;
+  }
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
@@ -1019,7 +1053,7 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
       i -= 1;
     }
 
-    // convergence criterion
+    // convergence criterion - avg over last 100-1000
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }

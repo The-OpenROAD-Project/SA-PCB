@@ -22,7 +22,7 @@ except NotImplementedError:
 
 def f(idx):
     res = subprocess.check_output(["./sa", "-x", str(idx)])
-    return res.strip()
+    return res.strip()[-2:]
 
 def worker(args, output):
 	output.put(f(*args))
@@ -43,18 +43,17 @@ def multistart():
             p.join()
             results = [output.get() for p in processes]
             print(results)
-            #best_result = max(results,key=itemgetter(1)) # max result by cost
-            #if best_result[1] < cost:
-            #	cost = best_result[1]
-            #	idx = best_result[0]
-            #else:
-            #	cost_history.extend([best_cost]*1000)
-    print('done')
+            best_result = max(results,key=itemgetter(1)) # max result by cost
+            best_cost = best_result[1]
+            best_idx = best_result[0]
+    print('best result: ')
+    print("idx: " + str(best_idx))
+    print("cost: " + str(best_cost))
     return cost
 
 multistart()
 
-def multistart():
+def nmultistart():
     K = max(4,mp.cpu_count())
     idx = -1
     for k in tqdm(range(K),desc='multistart'):

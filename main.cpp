@@ -864,10 +864,10 @@ bool checkMove(double prevCost) {
 gen_report
 generates a report and outputs files to ./reports/ directory
 */
-void gen_report(map<string, vector<double>* > report) {
-    vector < double > cost_hist = *report["cost_hist"];
-    vector < double > wl_hist   = *report["wl_hist"];
-    vector < double > oa_hist   = *report["oa_hist"];
+void gen_report(map<string, vector<double> > &report) {
+    vector < double > cost_hist = report["cost_hist"];
+    vector < double > wl_hist   = report["wl_hist"];
+    vector < double > oa_hist   = report["oa_hist"];
 
     time_t t = time(0);
     struct tm * now = localtime( & t );
@@ -937,13 +937,13 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
 
   int num_components = 0;
   map < string, Node > ::iterator itNode;
-  map < string, vector < double >* > report;
+  map < string, vector < double > > report;
   vector < double > cost_hist;
   vector < double > wl_hist;
   vector < double > oa_hist;
-  report["cost_hist"] = &cost_hist;
-  report["wl_hist"] = &wl_hist;
-  report["oa_hist"] = &oa_hist;
+  report["cost_hist"] = cost_hist;
+  report["wl_hist"] = wl_hist;
+  report["oa_hist"] = oa_hist;
   double cst = cost();
 
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -958,7 +958,7 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
   long long int ii = 0; // outer loop iterator
   while (ii < outer_loop_iter) {
     i = 2*num_components;
-    if(ii % 100 == 0 && debug) {
+    if(ii % 1 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 
@@ -972,7 +972,7 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
       cost(-1);
     }
 
-    while (inner_loop_iter > 0) {
+    while (i > 0) {
       cst = initiateMove();
       cost_hist.push_back(cst);
 
@@ -995,5 +995,6 @@ float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, 
     }
   }
   gen_report(report);
+
   return cost();
 }

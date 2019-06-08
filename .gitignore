@@ -6,3 +6,8 @@ sa
 simple
 bm*
 boost/
+accept_ratio.txt
+wl.txt
+cost.txt
+oa.txt
+*.gif

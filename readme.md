@@ -4,8 +4,8 @@ Supports the following:
  - Analytical overlap for arbitrary polygons using boost geometries
  - Clique-weighted HPWL
  - Varanelli-cohoon cost-normalization & initial temperature
- - Variable shift window facilitates convergence of placement
- - Geometric temperature updates based on timberwolf schedule
+ - Variable placement shift window, smaller displacement with temperature
+ - Geometric temperature updates (cooling schedule) based on timberwolf schedule
  - Parallel multistart
  - Bookshelf parser
  - Bookshelf version translator

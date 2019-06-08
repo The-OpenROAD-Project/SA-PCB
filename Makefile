@@ -11,11 +11,24 @@ main.o : main.h readFiles.h readScl.h main.cpp
 readFiles.o : readFiles.h readScl.h readFiles.cpp
 	$(CC) $(CFLAGS) -c readFiles.cpp
 
-#readNets.o : readFiles.h readNets.h readNets.cpp
-#	$(CC) $(CFLAGS) -c readNets.cpp
-
 readScl.o : readFiles.h readScl.h readScl.cpp
 	$(CC) $(CFLAGS) -c readScl.cpp
+
+graphs:
+	echo "creating graphs"
+
+plots:
+	echo "creating plots"
+	circuitname = 'bm3'
+	figname = 'plot.gif'
+	echo "creating animation"
+	python3 make_plots.py --brd bm1 --pl bm1.pl --out tst
+
+animation:
+	circuitname = 'bm3'
+	figname = 'plot.gif'
+	echo "creating animation"
+	python3 make_plots.py
 
 install :
 	if [ ! -d "./cache" ]; then \

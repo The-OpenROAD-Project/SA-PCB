@@ -127,7 +127,7 @@ class Node {
       }
   }
 
-  int str2orient(string o) {
+  int str2orient(string o) const{
     // convert a string to an orientation int
     if(o == "N") {
       return 0;
@@ -141,7 +141,7 @@ class Node {
     return -1;
   }
 
-  string orient2str(int o) {
+  string orient2str(int o) const{
     // converts an orientation int to a string
     if(o == 0) {
       return "N";
@@ -211,7 +211,7 @@ class Node {
     }
   }
 
-  void printExterior() {
+  void printExterior() const{
     // print polygon vertices
     for(auto it = boost::begin(boost::geometry::exterior_ring(this->poly)); it != boost::end(boost::geometry::exterior_ring(this->poly)); ++it) {
         double x = bg::get<0>(*it);

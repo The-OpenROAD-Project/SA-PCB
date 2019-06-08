@@ -2,7 +2,7 @@
 Timberwolf-based C++ annealer for simple pcb placement of polygonal components.
 Supports the following:
  - Analytical overlap for arbitrary polygons using boost geometries
- - Clique-weighted HPWL
+ - Clique-weighted wirelength & HPWL
  - Varanelli-cohoon cost-normalization & initial temperature
  - Variable shift window facilitates convergence of placement
  - Geometric temperature updates based on timberwolf schedule

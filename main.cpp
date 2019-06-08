@@ -1,43 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <ctype.h>
-#include <map>
-#include <vector>
-#include <string>
-#include <numeric>
-#include <cmath>
-#include <unistd.h>
-#include <ctime>
-#include <ratio>
-#include <chrono>
 
-// boost version 1.69.0
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/geometry.hpp>
-#include <boost/assign.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/io/io.hpp>
-#include <boost/geometry/algorithms/area.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/random.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_01.hpp>
-#include <boost/foreach.hpp>
-
-//#include "taskflow/taskflow.hpp"
-
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 #include "main.h"
-#include "time.h"
-#include "readScl.h"
 
 using namespace std::chrono;
 

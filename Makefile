@@ -51,3 +51,7 @@ clean :
 	-rm cache/img/*.png
 	-rm cache_rudy/*.txt
 	-rm reports/*.txt
+	-rm wl.txt
+	-rm oa.txt
+	-rm cost.txt
+	-rm anim.gif

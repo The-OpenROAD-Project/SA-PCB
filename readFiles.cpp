@@ -14,7 +14,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "readFiles.h"
-#include "readScl.h"
+//#include "readScl.h"
 
 using namespace std;
 using boost::is_any_of;
@@ -96,11 +96,12 @@ void readPlFile(string fname) {
   file.close();
 }
 
-void readNetsFile(string fname) {
+map<int, vector<Pin> > readNetsFile(string fname) {
   fstream file;
   string buf;
   int i = 0, a = 0, j = 0, NetId = 1;
   vector < string > strVec;
+  map<int, vector<Pin> > netToCell;
 
   //boost::regex pattern("\\b(NetDegree : )");
   //boost::smatch match;
@@ -142,6 +143,7 @@ void readNetsFile(string fname) {
       NetId++;
     }
   }
+  return netToCell;
 }
 
 void writePlFile(string fname) {

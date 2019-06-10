@@ -7,7 +7,7 @@
 #include <iostream>
 #include <map>
 #include "readFiles.h"
-#include "readScl.h"
+//#include "readScl.h"
 
 using namespace std;
 

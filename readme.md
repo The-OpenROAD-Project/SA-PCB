@@ -2,14 +2,28 @@
 Timberwolf-based C++ annealer for simple pcb placement of polygonal components.
 Supports the following:
  - Analytical overlap for arbitrary polygons using boost geometries
- - Clique-weighted wirelength & HPWL
- - Varanelli-cohoon cost-normalization & initial temperature
+ - HPWL cost term for wirelength
+ - BEN-AMEUR et al. cost-normalization & automatic initial temperature
  - Variable placement shift window, smaller displacement with temperature
  - Geometric temperature updates (cooling schedule) based on timberwolf schedule
  - Parallel multistart
  - Bookshelf parser
  - Bookshelf version translator
  - Plotting & animations
+ - rtree spatial indexing for fast overlap computation
+
+ ## Setup and requirements
+ Setup:
+ - Clone repository from github
+ - Run make install to create necessary directories
+ 
+ Requirements:
+ - Boost version >=1.62
+ - python3
+ - shapely
+ - matplotlib
+ - docopt
+ - numpy
 
  ## Files & directories
  - benchmarks/*: benchmarks in new-bookshelf format
@@ -20,22 +34,23 @@ Supports the following:
  - multistart.py: Multistart/GWTW driver for CPP annealer. Temporary replacement for cpp-taskflow which is broken due to recent updates.
  - load_bookshelf.py/utils.py: Implements bookshelf parser & utilities
  - tranlsate.py: Implements translator from older version of bookshelf to newer.
- - plot.py: Implements batch animation & pl plotter
+ - make_plots.py: Implements batch animation for placements and routability, pl plotter, and cost plotter
 
 ## Example
-    "./sa usuage is \n \
-                                    -i <value> : for denoting # outer iterations PER SA INSTANCE \n \
-									-x <value>: denotes idx for parallel multistart
-                                    -j <value> : for denoting 'j'*#nodes inner iterations \n \
-                                    -t <value> : for denoting initial temperature \n \
-                                    -k <value> : for denoting parallel instances \n \
-                                    -s <value> : for denoting splits every floor(i/s) iterations. Use s=0 for 'k' independent instances of SA \n \
-                                    -w <value> : for denoting number of winners per splitting \n \
-                                    -f <str> : for denoting number output pl \n \
-                                    EXAMPLE: ./sa -i 20000 -j 20 -t 40000 -k 0 -s -w 0 -f output.pl for the standard single instance timberwolf algorithm"
-				   
+  ./sa parameters
+           -i <optional, value> : for denoting # outer iterations PER SA INSTANCE
+           -j <optional, value> : for denoting 'j'*#nodes inner iterations
+           -t <optional, value> : for denoting initial temperature
+           -f <optional, str>   : for output filename
+           -e <optional, float> : convergence epsilon
+           -v <optional>        : ben-amur flag
+           -x <optional, int>   : simulated annealing instance index
+           -p <required, string>: input placement board
+           -d <optional, {0-3}> : debug verbosity
+           EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output
+
 ## Usage Details
- - Boardfile is only manditory option.
+ - Boardfile is the only mandatory option.
  - Partial placements in cache dir.
  - Cost over time in reports dir.
  - Full placement in base dir, uses index option.
@@ -46,3 +61,4 @@ Supports the following:
  - Fix experimental framework - i.e. Make it easier to generate plots of experiment statistics
  - Fix cpp-taskflow based multistart & GWTW
  - Figure out a better method for tuning parameters
+ - Fix support for weighted nodes

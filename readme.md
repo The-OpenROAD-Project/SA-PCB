@@ -1,5 +1,5 @@
 ## Description
-Timberwolf-based C++ annealer for simple pcb placement of polygonal components.
+C++ annealer for simple pcb placement of polygonal components.
 Supports the following:
  - Analytical overlap for arbitrary polygons using boost geometries
  - HPWL cost term for wirelength
@@ -37,17 +37,19 @@ Supports the following:
  - make_plots.py: Implements batch animation for placements and routability, pl plotter, and cost plotter
 
 ## Example
-  ./sa parameters
-           -i <optional, value> : for denoting # outer iterations PER SA INSTANCE
-           -j <optional, value> : for denoting 'j'*#nodes inner iterations
-           -t <optional, value> : for denoting initial temperature
-           -f <optional, str>   : for output filename
-           -e <optional, float> : convergence epsilon
-           -v <optional>        : ben-amur flag
-           -x <optional, int>   : simulated annealing instance index
-           -p <required, string>: input placement board
-           -d <optional, {0-3}> : debug verbosity
-           EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output
+    ./sa parameters
+
+    -i <optional, value> : for denoting # outer iterations PER SA INSTANCE
+    -j <optional, value> : for denoting 'j'*#nodes inner iterations
+    -t <optional, value> : for denoting initial temperature
+    -f <optional, str>   : for output filename
+    -e <optional, float> : convergence epsilon
+    -v <optional>        : ben-amur flag
+    -x <optional, int>   : simulated annealing instance index
+    -p <required, string>: input placement board
+    -d <optional, {0-3}> : debug verbosity
+    
+    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output
 
 ## Usage Details
  - Boardfile is the only mandatory option.

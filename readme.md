@@ -1,5 +1,5 @@
 ## Description
-Timberwolf-based C++ annealer for simple pcb placement of polygonal components.
+C++ annealer for simple pcb placement of polygonal components.
 Supports the following:
  - Analytical overlap for arbitrary polygons using boost geometries
  - HPWL cost term for wirelength
@@ -16,7 +16,11 @@ Supports the following:
  Setup:
  - Clone repository from github
  - Run make install to create necessary directories
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> b1f985cdf5d45a4003f40ed4f0cd9b51fc49c0b1
  Requirements:
  - Boost version >=1.62
  - python3
@@ -37,6 +41,7 @@ Supports the following:
  - make_plots.py: Implements batch animation for placements and routability, pl plotter, and cost plotter
 
 ## Example
+
   ./sa parameters
            -i <optional, value> : for denoting # outer iterations PER SA INSTANCE
            -j <optional, value> : for denoting 'j'*#nodes inner iterations

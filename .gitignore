@@ -5,6 +5,7 @@ __pycache__
 sa
 simple
 bm*
+reports/*
 boost/
 accept_ratio.txt
 wl.txt

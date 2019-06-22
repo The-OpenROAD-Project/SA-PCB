@@ -29,6 +29,7 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/foreach.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
 //#include "taskflow/taskflow.hpp"
 
@@ -60,15 +61,15 @@ double cost(
             map<int, vector<Pin> > &netToCell,
             int temp_debug = 0);
 double cost_partial(int temp_debug,
-                    map < string, Node > &nodes,
+                    vector < Node > &nodes,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
                     map<int, vector<Pin> > &netToCell);
 double cellOverlap();
 double wireLength(map<int, vector<Pin> > &netToCell);
-double cellOverlap_partial(map < string, Node > &nodes);
-double wireLength_partial(map < string, Node > &nodes, map<int, vector<Pin> > &netToCell);
+double cellOverlap_partial(vector < Node > &nodes);
+double wireLength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell);
 double rudy(map<int, vector<Pin> > &netToCell);
 float timberWolfAlgorithm(int outer_loop_iter, int inner_loop_iter, double eps, double t_0,bool var, map<int, vector<Pin> > &netToCell);
 float multistart();
@@ -101,7 +102,8 @@ void gen_report(map<string, vector<double> > &report,
                 std::pair <double,double> &routability_normalization,
                 map<int, vector<Pin> > &netToCell);
 void update_accept_history(vector< int > &accept_history, vector< double > *accept_ratio_history, float *accept_ratio);
-map < string, Node > ::iterator random_node();
+void update_rtree(int idx);
+vector < Node > ::iterator random_node();
 
 struct boundaries {
   double minX, maxX, minY, maxY = 0.0;

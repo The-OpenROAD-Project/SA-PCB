@@ -25,6 +25,7 @@ void readNodesFile(string fname) {
   int i = 0;
   vector < string > strVec;
   int value = 2;
+  int idx = 0;
 
   file.open(fname, ios:: in );
   while (getline(file, buf)) {
@@ -42,8 +43,11 @@ void readNodesFile(string fname) {
       } else {
         value = 0;
       }
-      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value);
-      nodeId.insert(pair < string, Node > (strVec[0], n));
+      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value, idx);
+      //nodeId.insert(pair < string, Node > (strVec[0], n));
+      nodeId.push_back(n);
+      name2id.insert(pair < string, int > (strVec[0], idx));
+      idx += 1;
     }
   }
   file.close();
@@ -62,7 +66,8 @@ void readWtsFile(string fname) {
     boost::trim(buf);
     if (i > 5) {
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
-      nodeId[strVec[1]].setParameterWts(atof(strVec[2].c_str()));
+      //nodeId[strVec[1]].setParameterWts(atof(strVec[2].c_str()));
+      nodeId[name2id[strVec[1]]].setParameterWts(atof(strVec[2].c_str()));
     }
   }
   file.close();
@@ -81,8 +86,7 @@ void readPlFile(string fname) {
     if (i > 4) {
       boost::trim(buf);
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
-
-      if (strVec[0] == ""){
+      if (strVec[0] == "" || strVec[0] == " "){
         continue;
       }
       if (strVec.size() > 5 && (strVec[5] == "/FIXED" || strVec[5] == "/FIXED_NI")) {
@@ -90,7 +94,8 @@ void readPlFile(string fname) {
       } else {
         value = 0;
       }
-      nodeId[strVec[0]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
+      //nodeId[strVec[0]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
+      nodeId[name2id[strVec[0]]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
     }
   }
   file.close();
@@ -130,12 +135,12 @@ map<int, vector<Pin> > readNetsFile(string fname) {
         boost::trim_all(buf);
         boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on); // a1213	 I : 0.5 0.5
         strTemp.push_back(strVec[0]);
-        nodeId[strVec[0]].setNetList(NetId);
+        nodeId[name2id[strVec[0]]].setNetList(NetId);
         Pin p;
         if(strVec.size() > 2) {
-          p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()));
+          p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
         } else {
-          p.set_params(strVec[0].c_str(), 0, 0);
+          p.set_params(strVec[0].c_str(), 0, 0, -1);
         }
         pinTemp.push_back(p);
       }
@@ -153,13 +158,13 @@ void writePlFile(string fname) {
   ofstream myfile (fname);
   if (myfile.is_open()) {
     myfile << "\n\n\n\n";
-    map < string, Node > ::iterator itNode;
+    vector <Node> ::iterator itNode;
 
     //components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-      if(!itNode->second.terminal) {
-        myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate <<  " : " << itNode->second.orient2str(itNode->second.orientation);
-        if (itNode->second.fixed) {
+      if(!itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
+        if (itNode->fixed) {
           myfile << " /FIXED_NI\n";
         } else {
           myfile << "\n";
@@ -170,9 +175,9 @@ void writePlFile(string fname) {
       myfile << "\n";
       //terminals
       for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-        if(itNode->second.terminal) {
-          myfile << itNode->second.name << " " << itNode->second.xCoordinate << " " << itNode->second.yCoordinate << " : " << itNode->second.orientation_str;
-          if (itNode->second.fixed) {
+        if(itNode->terminal) {
+          myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orientation_str;
+          if (itNode->fixed) {
             myfile << " /FIXED_NI\n";
           } else {
             myfile << "\n";

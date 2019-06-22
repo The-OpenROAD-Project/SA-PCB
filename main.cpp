@@ -6,14 +6,19 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 namespace bg = boost::geometry;
 namespace bnu = boost::numeric::ublas;
+namespace bgi = boost::geometry::index;
+//typedef bg::model::point<float, 2, bg::cs::cartesian> point;
+typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
 int debug = 1;
 boundaries b;
 boost::mt19937 rng;
 
-//double sigma = 25.0;
-map < string, Node > nodeId;
+//map < string, Node > nodeId;
+vector < Node > nodeId;
+map < string, int > name2id;
+bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
 
 float l1 = 0.8;
 long long int iii = 0;
@@ -25,14 +30,15 @@ int main(int argc, char *argv[]) {
   int inner_loop_iter = 2;
   double eps = -1.0;
   double t_0 = 1.0;
+  string out_file;
 
   long long int idx = -1;
 
   string parg = "";
   int bound_inc = 0;
   bool var = false;
-  // replace with config
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:")) != EOF) {
+  // TODO: replace with config
+  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b::h")) != EOF) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
@@ -42,28 +48,35 @@ int main(int argc, char *argv[]) {
           case 't': t_0 = atoi(optarg); break;
           case 'e': eps = atof(optarg); break;
           case 'v': var = true; break;
+          case 'f': out_file=string(optarg); break;
           case 'b':
             bound_inc += 1;
-            switch(bound_inc) { // have 4 different argument flags for each point
+            switch(bound_inc) { // TODO: have 4 different argument flags for each point
               case 1: b.minX = atof(optarg);
               case 2: b.minY = atof(optarg);
               case 3: b.maxX = atof(optarg);
               case 4: b.maxY = atof(optarg);
             }
           case 'h': fprintf(stderr, "./sa usuage is \n \
-                                    -i <value> : for denoting # outer iterations PER SA INSTANCE \n \
-                                    -j <value> : for denoting 'j'*#nodes inner iterations \n \
-                                    -t <value> : for denoting initial temperature \n \
-                                    -f <str>   : for denoting number output pl \n \
-                                    -e <float> : convergence epsilon \n \
-                                    -v         : varanelli cohoon flag \n \
-                                    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -f output.pl for the standard single instance timberwolf algorithm");
+                                    -i <optional, value> : for denoting # outer iterations PER SA INSTANCE \n \
+                                    -j <optional, value> : for denoting 'j'*#nodes inner iterations \n \
+                                    -t <optional, value> : for denoting initial temperature \n \
+                                    -f <optional, str>   : for output filename \n \
+                                    -e <optional, float> : convergence epsilon \n \
+                                    -v <optional>        : ben-amur flag \n \
+                                    -x <optional, int>   : simulated annealing instance index \n \
+                                    -p <required, string>: input placement board \n \
+                                    -d <optional, {0-3}> : debug verbosity \n \
+                                    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output");
           default: cout<<endl; abort();
       }
   }
-  if(string(parg) == "")   {
+  if(parg == "")   {
     cout << "./main: option requires an argument -- p\n";
     exit(1);
+  }
+  if(parg == "")   {
+    out_file = std::to_string( idx );
   }
   string p = string(parg);
   cout << "circuit: " << p << endl;
@@ -91,7 +104,7 @@ int main(int argc, char *argv[]) {
   CalcBoundaries();
   if(debug) { cout << "annealing" << endl; }
   float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell);
-  writePlFile("./"+std::to_string( idx )+".pl");
+  writePlFile("./"+out_file+".pl");
   cout << " " << idx << " " << cost << endl;
   return cost;
 }
@@ -109,55 +122,53 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
-  map < string, Node > ::iterator itNode;
+  //map < string, Node > ::iterator itNode;
+  vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if(!itNode -> second.terminal) {
+    if(!itNode -> terminal) {
       num_components += 1;
     }
   }
 
   // min/max wl
-  std::pair <double,double> wl;
+  std::pair < double, double > wl;
   double min_wl = std::numeric_limits<double>::max();
   double max_wl = 0.0;
 
   // min/max overlap area
-  std::pair <double,double> area;
+  std::pair < double, double > area;
   double min_area = 0.0;
   double max_area = 0.0;
 
-  map < string, Node > ::iterator nodeit1 = nodeId.begin();
-  map < string, Node > ::iterator nodeit2 = nodeId.begin();
-  vector < string > hist;
+  vector < Node > ::iterator nodeit1;
+  vector < Node > ::iterator nodeit2;
 
   for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
-    if(nodeit1->second.terminal) {
+    if(nodeit1->terminal) {
       continue;
     } else {
-        hist.push_back(nodeit1->second.name);
-        double cell_wl = nodeit1->second.width + nodeit1->second.height;
+        double cell_wl = nodeit1->width + nodeit1->height;
         if (cell_wl < min_wl) {
           min_wl = cell_wl;
         }
 
-        for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
-          if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
-            if(nodeit1->second.fixed && nodeit2->second.fixed) {
-                if(intersects(nodeit1->second.poly, nodeit2->second.poly)) {
-                  double oa = 0.0;
-                  std::deque<polygon> intersect_poly;
-                  boost::geometry::intersection(nodeit1->second.poly, nodeit2->second.poly, intersect_poly);
+        for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
+          if(nodeit2->idx == nodeit1->idx){continue;}
+          if(nodeit1->fixed && nodeit2->fixed) {
+              if(intersects(nodeit1->poly, nodeit2->poly)) {
+                double oa = 0.0;
+                std::deque<polygon> intersect_poly;
+                boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
 
-                  BOOST_FOREACH(polygon const& p, intersect_poly) {
-                      oa += bg::area(p);
-                  }
-                  min_area += pow(oa,2);
-                  max_area += pow(oa,2);
+                BOOST_FOREACH(polygon const& p, intersect_poly) {
+                    oa += bg::area(p);
                 }
-              } else {
-                max_area += pow(min(nodeit1->second.width, nodeit2->second.width) * min(nodeit1->second.height, (nodeit2->second.width)), 2);
+                min_area += pow(oa,2);
+                max_area += pow(oa,2);
               }
-          }
+            } else {
+              max_area += pow(min(nodeit1->width, nodeit2->width) * min(nodeit1->height, (nodeit2->width)), 2);
+            }
         }
       }
   }
@@ -195,13 +206,13 @@ rectangular envelop encompasing terminals & fixed modules.
 */
 void CalcBoundaries() {
   double xval, yval, width, height;
-  map < string, Node > ::iterator itNode;
+  vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if (itNode -> second.terminal || itNode->second.fixed) {
-      xval = itNode -> second.xCoordinate;
-      yval = itNode -> second.yCoordinate;
-      width = itNode -> second.width;
-      height =itNode -> second.height;
+    if (itNode -> terminal || itNode->fixed) {
+      xval = itNode -> xCoordinate;
+      yval = itNode -> yCoordinate;
+      width = itNode -> width;
+      height =itNode -> height;
       if (xval < b.minX) {
         b.minX = xval - 2;
       }
@@ -222,38 +233,6 @@ void CalcBoundaries() {
     cout << "max: " << b.maxX << " " << b.maxY << endl;
   }
 }
-
-/*
-macroPlacement [DEPRECIATED]
-Preplace macros/large components
-*//*
-int macroPlacement() {
-  // macro placement [depreceiated]
-  int xValue = b.minX, yValue = 0;
-  int xLimit = b.minX;
-  map < int, row > ::iterator itRow;
-  itRow = rowId.begin();
-  int rowHeight = itRow -> second.height;
-  for (map < string, Node > ::iterator itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if (!itNode -> second.terminal && itNode -> second.height > rowHeight) {
-      if (xValue + itNode -> second.width > xLimit) {
-        xLimit = xValue + itNode -> second.width + 1;
-      }
-      if ((yValue + itNode -> second.height) < b.maxY) {
-        itNode -> second.yCoordinate = yValue;
-        itNode -> second.xCoordinate = xValue;
-      } else {
-
-        yValue = 0;
-        xValue = xLimit;
-        itNode -> second.yCoordinate = yValue;
-        itNode -> second.xCoordinate = xValue;
-      }
-      yValue = yValue + itNode -> second.height;
-    }
-  }
-  return xLimit;
-}*/
 
 /*
 randomPlacement
@@ -281,11 +260,10 @@ initialPlacement
 Randomly place and orient all movable components in the board area
 */
 void initialPlacement() {
-  map < string, Node > ::iterator itNode;
+  vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    Node n = itNode -> second;
-    if (!n.fixed) {
-      randomPlacement(b.minX, b.maxX - n.width, b.minY, b.maxY - n.height, n);
+    if (!itNode -> fixed) {
+      randomPlacement(b.minX, b.maxX - itNode -> width, b.minY, b.maxY - itNode -> height, *itNode);
     }
   }
 }
@@ -299,27 +277,29 @@ void project_soln() {
   // ensure zero overlap
   double oa = cellOverlap();
   double eps = 10.0e-5;
-  map < string, Node > ::iterator nodeit = nodeId.begin();
-  map < string, Node > ::iterator nodeit2 = nodeId.begin();
 
-  boost::geometry::model::box< model::d2::point_xy<double> > env1;
-  boost::geometry::model::box< model::d2::point_xy<double> > env2;
+  vector < Node > ::iterator nodeit1;
+  vector < Node > ::iterator nodeit2;
+
+  box env1;
+  box env2;
 
   while (oa > eps) {
-    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      if (!nodeit->second.terminal) {
-        env1 = nodeit->second.envelope;
-        for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
-          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
+    for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
+      if (!nodeit1->terminal) {
+        env1 = nodeit1->envelope;
+        for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
+          if(nodeit2->idx == nodeit1->idx){continue;}
+          if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
             continue;
           } else {
             // Project out of envelope
-            env2 = nodeit2->second.envelope;
+            env2 = nodeit2->envelope;
 
             double dx = 0.0;
             double dy = 0.0;
-            double rx = nodeit->second.xCoordinate;
-            double ry = nodeit->second.yCoordinate;
+            double rx = nodeit1->xCoordinate;
+            double ry = nodeit1->yCoordinate;
             double env1minx = env1.min_corner().x();
             double env1miny = env1.min_corner().y();
             double env1maxx = env1.max_corner().x();
@@ -348,10 +328,10 @@ void project_soln() {
             }
             if (dx < dy) {
               // project in x direction
-              validateMove(&nodeit->second,rx + dx,ry);
+              validateMove(&(*nodeit1),rx + dx,ry);
             } else {
               // project in y direction
-              validateMove(&nodeit->second,rx,ry + dy);
+              validateMove(&(*nodeit1),rx,ry + dy);
             }
           }
         }
@@ -375,9 +355,9 @@ double wireLength(map<int, vector<Pin> > &netToCell) {
       if(itCellList->name == "") {
         continue;
       }
-      int orient = nodeId[itCellList->name].orientation;
-      xVal = nodeId[itCellList->name].xBy2;
-      yVal = nodeId[itCellList->name].yBy2;
+      int orient = nodeId[itCellList->idx].orientation;
+      xVal = nodeId[itCellList->idx].xBy2;
+      yVal = nodeId[itCellList->idx].yBy2;
       if(orient == 0) {
         xVal = xVal + itCellList->x_offset;
         yVal = yVal + itCellList->y_offset;
@@ -412,30 +392,32 @@ Compute sum squared overlap for all components
 */
 double cellOverlap() {
   double overlap = 0.0;
-  map < string, Node > ::iterator nodeit = nodeId.begin();
-  map < string, Node > ::iterator nodeit2 = nodeId.begin();
 
-  vector < string > hist;
-  for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-    hist.push_back(nodeit->second.name);
-    if (!nodeit->second.terminal) {
-      for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
-        if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
-          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
-            continue;
-          } else {
-            double oa = 0.0;
-            std::deque<polygon> intersect_poly;
-            boost::geometry::intersection(nodeit->second.poly, nodeit2->second.poly, intersect_poly);
+  vector < Node > ::iterator nodeit1;
+  vector < Node > ::iterator nodeit2;
 
-            BOOST_FOREACH(polygon const& p, intersect_poly) {
-                oa +=  bg::area(p);
-            }
-            if(oa < 1.0) {
-                oa = 1.0;
-            }
-            overlap +=  pow(oa,2);
+  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
+    if (!nodeit1->terminal) {
+      std::vector< std::pair<box, unsigned> > result_s;
+      rtree.query(bgi::intersects(nodeit1->envelope), std::back_inserter(result_s));
+      //BOOST_FOREACH(value const& v, result_s) {
+      //  nodeit2 = nodeId[v.first]
+      for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
+        if(nodeit2->idx == nodeit1->idx){continue;}
+        if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
+          continue;
+        } else {
+          double oa = 0.0;
+          std::deque<polygon> intersect_poly;
+          boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
+
+          BOOST_FOREACH(polygon const& p, intersect_poly) {
+              oa +=  bg::area(p);
           }
+          if(oa < 1.0) {
+              oa = 1.0;
+          }
+          overlap +=  pow(oa,2);
         }
       }
     }
@@ -447,22 +429,22 @@ double cellOverlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double wireLength_partial(map < string, Node > &nodes, map<int, vector<Pin> > &netToCell) {
+double wireLength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell) {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
-    if (nodes.find("f") == nodes.end()) {
-      continue;
-    }
+    //if (nodes.find("f") == nodes.end()) {
+    //  continue;
+    //}
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
       }
-      int orient = nodeId[itCellList->name].orientation;
-      xVal = nodeId[itCellList->name].xBy2;
-      yVal = nodeId[itCellList->name].yBy2;
+      int orient = nodeId[itCellList->idx].orientation;
+      xVal = nodeId[itCellList->idx].xBy2;
+      yVal = nodeId[itCellList->idx].yBy2;
       if(orient == 0) {
         xVal = xVal + itCellList->x_offset;
         yVal = yVal + itCellList->y_offset;
@@ -495,32 +477,29 @@ double wireLength_partial(map < string, Node > &nodes, map<int, vector<Pin> > &n
 cellOverlap_partial
 Compute sum squared overlap for select components
 */
-double cellOverlap_partial(map < string, Node > &nodes) {
+double cellOverlap_partial(vector < Node > &nodes) {
   double overlap = 0.0;
-  map < string, Node > ::iterator nodeit = nodes.begin();
-  map < string, Node > ::iterator nodeit2 = nodeId.begin();
+  vector < Node > ::iterator nodeit1;
+  vector < Node > ::iterator nodeit2;
 
-  vector < string > hist;
-  for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-    hist.push_back(nodeit->second.name);
-    if (!nodeit->second.terminal) {
-      for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
-        if (!nodeit2->second.terminal && !(find(hist.begin(), hist.end(), nodeit2->second.name) != hist.end()) ) {
-          if(!intersects(nodeit->second.poly, nodeit2->second.poly) || (nodeit->second.fixed && nodeit2->second.fixed)) {
-            continue;
-          } else {
-            double oa = 0.0;
-            std::deque<polygon> intersect_poly;
-            boost::geometry::intersection(nodeit->second.poly, nodeit2->second.poly, intersect_poly);
+  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
+    if (!nodeit1->terminal) {
+      for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
+        if(nodeit2->idx == nodeit1->idx){continue;}
+        if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
+          continue;
+        } else {
+          double oa = 0.0;
+          std::deque<polygon> intersect_poly;
+          boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
 
-            BOOST_FOREACH(polygon const& p, intersect_poly) {
-                oa +=  bg::area(p);
-            }
-            if(oa < 1.0) {
-                oa = 1.0;
-            }
-            overlap +=  pow(oa,2);
+          BOOST_FOREACH(polygon const& p, intersect_poly) {
+              oa +=  bg::area(p);
           }
+          if(oa < 1.0) {
+              oa = 1.0;
+          }
+          overlap +=  pow(oa,2);
         }
       }
     }
@@ -531,7 +510,7 @@ double cellOverlap_partial(map < string, Node > &nodes) {
 /*
 rudy
 Computes a routability score
-*/
+*/ // TODO: DOUBLE -> FLOAT
 double rudy(map<int, vector<Pin> > &netToCell) {
   return 0;
   static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
@@ -551,9 +530,9 @@ double rudy(map<int, vector<Pin> > &netToCell) {
       if(itCellList->name == "") {
         continue;
       }
-      int orient = nodeId[itCellList->name].orientation;
-      xVal = nodeId[itCellList->name].xBy2;
-      yVal = nodeId[itCellList->name].yBy2;
+      int orient = nodeId[itCellList->idx].orientation;
+      xVal = nodeId[itCellList->idx].xBy2;
+      yVal = nodeId[itCellList->idx].yBy2;
 
       // compute pin position from orientation & offsets
       if(orient == 0) {
@@ -645,7 +624,7 @@ double cost(
 }
 
 double cost_partial(int temp_debug,
-                    map < string, Node > nodes,
+                    vector < Node > nodes,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
@@ -660,8 +639,8 @@ double cost_partial(int temp_debug,
 random_node
 Select random node from set of nodes
 */
-map < string, Node > ::iterator random_node() {
-  map < string, Node > ::iterator itNode = nodeId.begin();
+vector < Node >::iterator random_node() {
+  vector < Node > ::iterator itNode = nodeId.begin();
   int size = nodeId.size();
   boost::uniform_int<> uni_dist(0,size-1);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
@@ -701,29 +680,29 @@ double initiateMove(vector< int > *accept_history,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
-                    map<int, vector<Pin> > &netToCell
-                    ) {
+                    map<int, vector<Pin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   if(debug > 1) {
     cout << "prevCost: " << prevCost << endl;
   }
-  map < string, Node > ::iterator rand_node1;
-  map < string, Node > ::iterator rand_node2;
+  vector < Node > ::iterator rand_node1;
+  vector < Node > ::iterator rand_node2;
   int r = 0;
   rand_node1 = random_node();
-  while(rand_node1->second.terminal || rand_node1->second.name == "" || rand_node1->second.fixed) {
+  while(rand_node1->terminal || rand_node1->name == "" || rand_node1->fixed) {
     rand_node1 = random_node();
   }
-  double rand_node1_orig_x = rand_node1->second.xCoordinate;
-  double rand_node1_orig_y = rand_node1->second.yCoordinate;
+  rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+  double rand_node1_orig_x = rand_node1->xCoordinate;
+  double rand_node1_orig_y = rand_node1->yCoordinate;
   double rand_node2_orig_x = 0.0;
   double rand_node2_orig_y = 0.0;
 
   if(debug > 1) {
     cout << "=======" << endl;
-    cout <<  "name: " << rand_node1->second.name << endl;
+    cout <<  "name: " << rand_node1->name << endl;
   }
 
   boost::uniform_real<> uni_dist(0,1);
@@ -736,20 +715,23 @@ double initiateMove(vector< int > *accept_history,
       cout << "swap" << endl;
     }
     rand_node2 = random_node();
-    while(rand_node2->second.terminal || rand_node2->first == rand_node1->first || rand_node2->second.name == "" || rand_node2->second.fixed) {
+    while(rand_node2->terminal || rand_node2->idx == rand_node1->idx || rand_node2->name == "" || rand_node2->fixed) {
       rand_node2 = random_node();
     }
-    rand_node2_orig_x = rand_node2->second.xCoordinate;
-    rand_node2_orig_y = rand_node2->second.yCoordinate;
+    rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    rand_node2_orig_x = rand_node2->xCoordinate;
+    rand_node2_orig_y = rand_node2->yCoordinate;
 
-    validateMove(&rand_node1->second, rand_node2_orig_x, rand_node2_orig_y);
-    validateMove(&rand_node2->second, rand_node1_orig_x, rand_node1_orig_y);
+    validateMove(&(*rand_node1), rand_node2_orig_x, rand_node2_orig_y);
+    validateMove(&(*rand_node2), rand_node1_orig_x, rand_node1_orig_y);
+    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
   } else if (i < 0.75) { // shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
     }
-    double sigma = rand_node1->second.sigma;
+    double sigma = rand_node1->sigma;
 
     boost::normal_distribution<> nd(0.0, sigma);
     boost::variate_generator<boost::mt19937&,
@@ -761,7 +743,8 @@ double initiateMove(vector< int > *accept_history,
     double rx = rand_node1_orig_x + dx;
     double ry = rand_node1_orig_y + dy;
 
-    validateMove(&rand_node1->second, rx, ry);
+    validateMove(&(*rand_node1), rx, ry);
+    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   } else if (i < 0.2) { // rotate
     state = 2;
     if(debug > 1) {
@@ -770,7 +753,11 @@ double initiateMove(vector< int > *accept_history,
     boost::uniform_int<> uni_dist(0,3);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
     int r = uni();
-    rand_node1->second.setRotation(r);
+    rand_node1->setRotation(r);
+    double rx = rand_node1->xCoordinate;
+    double ry = rand_node1->yCoordinate;
+    validateMove(&(*rand_node1), rx, ry);
+    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
   bool accept = checkMove(prevCost,
                           accept_history,
@@ -779,20 +766,23 @@ double initiateMove(vector< int > *accept_history,
                           area_normalization,
                           routability_normalization,
                           netToCell);
-  //accept_ratio_history.push_back(accept_ratio);
   if (!accept) {
     if(debug > 1) {
       cout << "reject" << endl;
     }
     // revert state
+    rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
     if (state == 0) {
-      rand_node1->second.setPos(rand_node1_orig_x,rand_node1_orig_y);
-      rand_node2->second.setPos(rand_node2_orig_x,rand_node2_orig_y);
+      rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
+      rand_node2->setPos(rand_node2_orig_x,rand_node2_orig_y);
+      rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
     } else if (state == 1) {
-      rand_node1->second.setPos(rand_node1_orig_x,rand_node1_orig_y);
+      rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     } else if (state == 2) {
-      rand_node1->second.setRotation(-r);
+      rand_node1->setRotation(-r);
     }
+    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     return prevCost;
   }
   else {
@@ -808,42 +798,38 @@ update_Temperature
 Update the SA parameters according to annealing schedule
 */
 void update_temperature(double* Temperature) {
-  map < string, Node > ::iterator nodeit = nodeId.begin();
+  vector < Node > ::iterator nodeit = nodeId.begin();
   if (*Temperature > 0.05) {
     *Temperature = (0.99986) * *Temperature;
     if (l1 > 10e-2) {
       l1 -= 10e-5;
     }
-    //sigma = max(0.9999*sigma,0.5);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->second.sigma =  max(0.9999*nodeit->second.sigma,0.5);
+      nodeit->sigma =  max(0.9999*nodeit->sigma,0.5);
     }
   } else if (*Temperature <= 0.05 && *Temperature > 0.005) {
     *Temperature = (0.999) * *Temperature;
     if (l1 > 25e-4) {
       l1 -= 25e-4;
     }
-    //sigma = max(0.999*sigma,0.25);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.25);
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.25);
     }
   } else if (*Temperature < 0.005) {
     *Temperature = (0.9985) * *Temperature;
     if (l1 > 20e-4) {
       l1 -= 20e-4;
     }
-    //sigma = max(0.999*sigma,0.18);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.18);
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.18);
     }
   } else if (*Temperature < 0.001) {
     *Temperature = (0.998) * *Temperature;
     if (l1 > 10e-5) {
       l1 -= 10e-5;
     }
-    //sigma = max(0.999*sigma,0.08);
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->second.sigma =  max(0.999*nodeit->second.sigma,0.08);
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.08);
     }
   }
 }
@@ -995,7 +981,7 @@ float timberWolfAlgorithm(int outer_loop_iter,
   double Temperature = t_0;
   int num_components = 0;
 
-  map < string, Node > ::iterator itNode;
+  vector < Node > ::iterator itNode;
   map < string, vector < double > > report;
   vector < double > cost_hist;
   vector < double > wl_hist;
@@ -1011,12 +997,10 @@ float timberWolfAlgorithm(int outer_loop_iter,
   vector< int > accept_history;
   float accept_ratio = 0;
   vector< double > accept_ratio_history;
-  //limit = macroPlacement();
   initialPlacement();
   SetInitParameters(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
 
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
-  //bgi::rtree<point_pair, bgi::quadratic<16>> intersectionRTree;
 
   if(var) {
     Temperature = varanelli_cohoon(accept_history,
@@ -1026,9 +1010,11 @@ float timberWolfAlgorithm(int outer_loop_iter,
                                    routability_normalization,
                                    netToCell);
   }
-
+  int idx = 0;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if(!itNode -> second.terminal && !itNode -> second.fixed) {
+    rtree.insert(std::make_pair(itNode -> envelope, idx));
+    idx+=1;
+    if(!itNode -> terminal && !itNode -> fixed) {
       num_components += 1;
     }
   }

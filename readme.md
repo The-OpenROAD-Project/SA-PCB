@@ -38,7 +38,7 @@ Supports the following:
 
 ## Example
 
-  ./sa parameters
+    ./sa parameters
            -i <optional, value> : for denoting # outer iterations PER SA INSTANCE
            -j <optional, value> : for denoting 'j'*#nodes inner iterations
            -t <optional, value> : for denoting initial temperature

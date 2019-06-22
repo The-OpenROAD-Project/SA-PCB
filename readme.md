@@ -16,11 +16,7 @@ Supports the following:
  Setup:
  - Clone repository from github
  - Run make install to create necessary directories
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> b1f985cdf5d45a4003f40ed4f0cd9b51fc49c0b1
  Requirements:
  - Boost version >=1.62
  - python3

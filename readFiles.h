@@ -32,7 +32,9 @@ void printMap();
 
 class Node;
 class Pin;
-extern map < string, Node > nodeId;
+extern map < string, int > name2id;
+extern vector < Node > nodeId;
+//extern map < string, Node > nodeId;
 //extern map<int, vector<string> > netToCell; // TODO netToNode consider going net -> node reference
 //extern map<int, vector<Pin> > netToCell;
 
@@ -41,13 +43,14 @@ class Pin {
   string name;
   double x_offset;
   double y_offset;
-
+  int idx;
   double depth;
 
-  void set_params(string nn, double xoffset, double yoffset) {
+  void set_params(string nn, double xoffset, double yoffset, int idx) {
     this -> name = nn;
     this -> x_offset = xoffset;
     this -> y_offset = yoffset;
+    this -> idx = idx;
   }
 };
 
@@ -56,6 +59,7 @@ class Node {
   string name;
   model::polygon<model::d2::point_xy<double> > poly;
   boost::geometry::model::box< model::d2::point_xy<double> > envelope;
+  int idx;
   double width;
   double height;
   int weight;
@@ -72,13 +76,14 @@ class Node {
   int orientation;
   vector < int > Netlist;
 
-  void setParameterNodes(string name, double width, double height, int terminal) {
+  void setParameterNodes(string name, double width, double height, int terminal, int idx) {
     // Sets parameters given an entry in Nodes file
     this -> name = name;
     this -> width = width;
     this -> height = height;
     this -> terminal = terminal;
-    this->orientation_str = "N";
+    this -> orientation_str = "N";
+    this -> idx = idx;
     if (!terminal) {
       double points[][2] = {{0.0, 0.0}, {width, 0.0}, {width, height}, {0.0, height}};
       model::polygon< model::d2::point_xy<double> > poly;
@@ -100,13 +105,10 @@ class Node {
     this -> xCoordinate = 0.0;
     this -> yCoordinate = 0.0;
     this -> setPos(xCoordinate, yCoordinate);
-
     this -> orientation_str = orientation_str;
     this -> init_orientation = str2orient(orientation_str);
     this -> orientation = 0;
-    //this -> orientation = this -> init_orientation;
     this -> setRotation(this->init_orientation);
-
     this -> fixed = fixed;
     this -> sigma = 10.0; // this -> width * this -> height; //10.0;
   }

@@ -2,12 +2,15 @@
 This program makes plots
 Usage:
   make_plots.py -h | --help
-  make_plots.py --brd <BRD> --pl <PL> --out <OUT_NAME>
+  make_plots.py --brd <BRD> --pl <PL> --out <OUT_NAME> --reports <reports>
 
 -h --help                      Show this message.
 -i --brd BRD                   The circuit file.
 -o --out OUT
 -p --pl PL
+-r --reports reports
+-apl --anim_pl animate_reports
+-arb --anim_rb animate_routability
 """
 
 import matplotlib
@@ -130,7 +133,7 @@ def plot_pl(plfile, nodesfile, netsfile, figname, board_dim=None):
             board_dim = [xs,ys]
             pass
         else:
-            board_dim = [[-500,500],[-500,500]]
+            board_dim = [[-50,200],[-50,200]]
     else:
         board_dim = board_dim#[[boarddimmin,boarddimmax],[boarddimmin, boarddimmax]]
     plot_circuit(plfile.split('.')[0], components,comp2rot,nets,board_dim,figname)
@@ -170,7 +173,7 @@ def make_heatmap_anim():
     anim = animation.FuncAnimation(fig, animate, init_func=init, frames=None, repeat = True)
     plt.title('routability')
 
-def make_placement_anim(plfile, nodesfile, netsfile):
+def make_placement_anim():
     f = []
     board_pins = {}
     for (dirpath, dirnames, filenames) in walk('./cache/'):
@@ -204,7 +207,23 @@ def make_placement_anim(plfile, nodesfile, netsfile):
                 tqdm.write("exception: " + ff)
                 continue
 
-def main(brd_name, out_file, pl_file=None, pl_anim=False, heatmap_anim=False):
+def make_graphs(reports_dir):
+    ar_fname = reports_dir + ''
+    cost_fname = reports_dir + ''
+    wl_fname = reports_dir + ''
+    oa_fname = reports_dir + ''
+
+    wl = open(wl_fname).read().splitlines()
+    oa = open(oa_fname).read().splitlines()
+    cost = open(cost_fname).read().splitlines()
+    ar = open(ar_fname).read().splitlines()
+
+    wl = [float(w) for w in wl]
+    oa = [float(o) for o in oa]
+    cost = [float(c) for c in oa]
+    ar = [float(a) for a in ar]
+
+def main(brd_name, out_file, pl_file=None, pl_anim=False, heatmap_anim=False, reports_dir=False):
     circuitname = brd_name
     plfile = circuitname + '.pl'
     nodesfile = circuitname + '.nodes'
@@ -215,6 +234,8 @@ def main(brd_name, out_file, pl_file=None, pl_anim=False, heatmap_anim=False):
     boarddimmin = None
     boarddim = None
 
+    #if reports_dir:
+    #    make_graphs(reports_dir)
     if pl_file is not None:
         plot_pl(plfile, nodesfile, netsfile, figname)
     if pl_anim:
@@ -228,5 +249,6 @@ if __name__ == "__main__":
     main(
         brd_name=str(arguments['--brd']),
         out_file=str(arguments['--out']),
-        pl_file=str(arguments['--pl'])
+        pl_file=str(arguments['--pl']),
+        reports_dir=str(arguments['--reports'])
     )

@@ -19,6 +19,8 @@
 using namespace std;
 using boost::is_any_of;
 
+//vector < Node > nodeId;
+
 void readNodesFile(string fname) {
   fstream file;
   string buf;
@@ -48,6 +50,28 @@ void readNodesFile(string fname) {
       nodeId.push_back(n);
       name2id.insert(pair < string, int > (strVec[0], idx));
       idx += 1;
+    }
+  }
+  file.close();
+}
+
+void readShapesFile(string fname) {
+  fstream file;
+  string buf;
+  int i = 0;
+  vector < string > strVec;
+
+  file.open(fname, ios:: in );
+  while (getline(file, buf)) {
+    i++;
+    if (i > 7) {
+      boost::trim(buf);
+      boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
+      if (strVec[0] == "" || strVec[0] == " "){
+        continue;
+      }
+      strVec.erase(strVec.begin());
+      nodeId[name2id[strVec[0]]].setParameterShapes(boost::algorithm::join(strVec,""));
     }
   }
   file.close();
@@ -95,6 +119,7 @@ void readPlFile(string fname) {
         value = 0;
       }
       //nodeId[strVec[0]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
+      //cout << strVec[0] << " " << strVec[4] << endl;
       nodeId[name2id[strVec[0]]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
     }
   }

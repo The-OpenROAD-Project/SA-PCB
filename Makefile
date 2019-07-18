@@ -1,5 +1,5 @@
 CC := g++
-CFLAGS := -g -std=c++17 -O3 -pthread -Wall -Wextra
+CFLAGS := -g -std=c++17 -O3 -pthread# -Wall -Wextra
 LIBS := -lboost_regex
 
 EAGLEFILE := test1.brd

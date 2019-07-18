@@ -1,4 +1,5 @@
 #include "main.h"
+#define PI 3.14159265
 
 using namespace std::chrono;
 
@@ -18,9 +19,9 @@ boost::mt19937 rng;
 //map < string, Node > nodeId;
 vector < Node > nodeId;
 map < string, int > name2id;
-bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
+//bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
 
-float l1 = 0.8;
+float l1 = 1.0;
 long long int iii = 0;
 
 int main(int argc, char *argv[]) {
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]) {
           case 'd': debug=atoi(optarg); break;
           case 'i': outer_loop_iter = atoi(optarg); break;
           case 'j': inner_loop_iter = atoi(optarg); break;
-          case 't': t_0 = atoi(optarg); break;
+          case 't': t_0 = atof(optarg); break;
           case 'e': eps = atof(optarg); break;
           case 'v': var = true; break;
           case 'f': out_file=string(optarg); break;
@@ -81,12 +82,14 @@ int main(int argc, char *argv[]) {
   string p = string(parg);
   cout << "circuit: " << p << endl;
 
-  string nodesfname = p + ".nodes";
-  string netsfname  = p + ".nets";
-  string plfname    = p + ".pl";
-  string wtsfname   = p + ".wts";
+  string nodesfname  = p + ".nodes";
+  string shapesfname = p + ".shapes";
+  string netsfname   = p + ".nets";
+  string plfname     = p + ".pl";
+  string wtsfname    = p + ".wts";
 
   cout << nodesfname << endl;
+  cout << shapesfname << endl;
   cout << netsfname << endl;
   cout << plfname << endl;
 
@@ -94,6 +97,7 @@ int main(int argc, char *argv[]) {
 
   if(debug) { cout << "reading nodes..." << endl; }
   readNodesFile(nodesfname);
+  //readShapesFile(shapesfname);
   //readWtsFile(wtsfname);
   if(debug) { cout << "reading pl..." << endl; }
   readPlFile(plfname);
@@ -151,7 +155,6 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
         if (cell_wl < min_wl) {
           min_wl = cell_wl;
         }
-
         for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
           if(nodeit2->idx == nodeit1->idx){continue;}
           if(nodeit1->fixed && nodeit2->fixed) {
@@ -177,10 +180,10 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
   max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
 
   wl.first = 0.0;
-  wl.second = wireLength(netToCell);
+  wl.second = max(wireLength(netToCell),1.0);
 
   area.first = 0.0;
-  area.second = cellOverlap();
+  area.second = max(cellOverlap(),1.0);
 
 /*
   wl.first = min_wl;
@@ -196,7 +199,7 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
   *area_normalization = normalization_terms[1];
 
   routability_normalization->first = 0.0;
-  routability_normalization->second = rudy(netToCell);
+  routability_normalization->second = max(rudy(netToCell),1.0);
 }
 
 /*
@@ -228,6 +231,12 @@ void CalcBoundaries() {
     }
   }
 
+  if (b.minX == 0 && b.maxX == 0 && b.minY == 0 && b.maxY == 0) {
+    cout << "no boundary found" << endl;
+    b.maxX = 50;
+    b.maxY = 50;
+  }
+
   if(debug) {
     cout << "min: " << b.minX << " " << b.minY << endl;
     cout << "max: " << b.maxX << " " << b.maxY << endl;
@@ -247,7 +256,7 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uniy(rng, uni_disty);
   int ry = uniy();
 
-  boost::uniform_int<> uni_disto(0,4);
+  boost::uniform_int<> uni_disto(0,7);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
   int ro = unio();
 
@@ -310,7 +319,6 @@ void project_soln() {
             double env2maxx = env2.max_corner().x();
             double env2maxy = env2.max_corner().y();
 
-
             // will get stuck in boundary edge case
             if (abs(env1maxx - env2minx) < abs(env1minx - env2maxx)) {
               // shift left
@@ -358,18 +366,23 @@ double wireLength(map<int, vector<Pin> > &netToCell) {
       int orient = nodeId[itCellList->idx].orientation;
       xVal = nodeId[itCellList->idx].xBy2;
       yVal = nodeId[itCellList->idx].yBy2;
-      if(orient == 0) {
+
+      if(orient == 0) { // 0
         xVal = xVal + itCellList->x_offset;
         yVal = yVal + itCellList->y_offset;
-      } else if(orient == 1) {
+      } else if(orient == 2) { // 90
         xVal = xVal + itCellList->y_offset;
         yVal = yVal - itCellList->x_offset;
-      } else if(orient == 2) {
+      } else if(orient == 4) { // 180
         xVal = xVal - itCellList->x_offset;
         yVal = yVal - itCellList->y_offset;
-      } else if(orient == 3) {
+      } else if(orient == 6) { // 270
         xVal = xVal - itCellList->y_offset;
         yVal = yVal + itCellList->x_offset;
+      } else {
+        double rad = (orient*45.0*PI/180.0);
+        xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
+        yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
       }
 
       if (xVal < minXW)
@@ -393,23 +406,28 @@ Compute sum squared overlap for all components
 double cellOverlap() {
   double overlap = 0.0;
 
-  vector < Node > ::iterator nodeit1;
-  vector < Node > ::iterator nodeit2;
+  //vector < Node > ::iterator nodeit1;
+  //vector < Node > ::iterator nodeit2;
 
-  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
-    if (!nodeit1->terminal) {
-      std::vector< std::pair<box, unsigned> > result_s;
-      rtree.query(bgi::intersects(nodeit1->envelope), std::back_inserter(result_s));
-      //BOOST_FOREACH(value const& v, result_s) {
-      //  nodeit2 = nodeId[v.first]
-      for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
-        if(nodeit2->idx == nodeit1->idx){continue;}
-        if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
+  //for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
+  for(int i = 0; i < nodeId.size(); i++) {
+    //if (nodeit1->terminal) {continue;}
+    if(nodeId[i].terminal) { continue; }
+      //std::vector< std::pair<box, unsigned> > result_s;
+      //rtree.query(bgi::intersects(nodeit1->envelope), std::back_inserter(result_s));
+      //for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
+      for(int j = i++; j < nodeId.size(); j++) {
+        //if (nodeit2->terminal) {continue;}
+        if (i == j) {continue;}
+        if(nodeId[j].terminal) { continue; }
+        //if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
+        if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
           continue;
         } else {
           double oa = 0.0;
           std::deque<polygon> intersect_poly;
-          boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
+          //boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
+          boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
 
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
@@ -421,7 +439,6 @@ double cellOverlap() {
         }
       }
     }
-  }
   return overlap;
 }
 
@@ -510,7 +527,7 @@ double cellOverlap_partial(vector < Node > &nodes) {
 /*
 rudy
 Computes a routability score
-*/ // TODO: DOUBLE -> FLOAT
+*/
 double rudy(map<int, vector<Pin> > &netToCell) {
   return 0;
   static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY)+1), static_cast<int>(abs(b.maxX)+abs(b.minX)+1), 0);
@@ -611,11 +628,11 @@ double cost(
     cout << "overlap: " << cellOverlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
     cout << "wirelength_cost: " << l1*(wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
-    cout << "overlap_cost: " << l2  * 0.99 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
-    cout << "routability_cost: " << l2  * 0.01  * rudy(netToCell) << endl;
+    cout << "overlap_cost: " << l2  * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "routability_cost: " << l2  * 0.1  * rudy(netToCell) << endl;
     cout << "cost: " << l1*(wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-                        l2  * 0.99 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
-                        l2 * 0.01*rudy(netToCell) << endl;
+                        l2  * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
+                        l2 * 0.1*rudy(netToCell) << endl;
   }
   return l1 * (wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
@@ -657,13 +674,15 @@ void validateMove(Node* node, double rx, double ry) {
   int orient = node->orientation;
   double width = 0.0;
   double height = 0.0;
-
-  if (orient == 0 || orient == 2) {
+  if (orient == 0 || orient == 4) {
     width = node->width;
     height = node->height;
-  } else {
+  } else if (orient == 2 || orient == 6) {
     width = node->height;
     height = node->width;
+  }else {
+    width = max(node->width,node->height);
+    height = max(node->width,node->height);
   }
   rx = max(rx, b.minX);
   ry = max(ry, b.minY);
@@ -694,11 +713,13 @@ double initiateMove(vector< int > *accept_history,
   while(rand_node1->terminal || rand_node1->name == "" || rand_node1->fixed) {
     rand_node1 = random_node();
   }
-  rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+  //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
   double rand_node1_orig_x = rand_node1->xCoordinate;
   double rand_node1_orig_y = rand_node1->yCoordinate;
   double rand_node2_orig_x = 0.0;
   double rand_node2_orig_y = 0.0;
+  double rx = 0.0;
+  double ry = 0.0;
 
   if(debug > 1) {
     cout << "=======" << endl;
@@ -709,7 +730,7 @@ double initiateMove(vector< int > *accept_history,
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double i = uni();
 
-  if (i<0.15) { // swap
+  if (i<0.20) { // swap
     state = 0;
     if(debug > 1) {
       cout << "swap" << endl;
@@ -718,15 +739,15 @@ double initiateMove(vector< int > *accept_history,
     while(rand_node2->terminal || rand_node2->idx == rand_node1->idx || rand_node2->name == "" || rand_node2->fixed) {
       rand_node2 = random_node();
     }
-    rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
     rand_node2_orig_x = rand_node2->xCoordinate;
     rand_node2_orig_y = rand_node2->yCoordinate;
 
     validateMove(&(*rand_node1), rand_node2_orig_x, rand_node2_orig_y);
     validateMove(&(*rand_node2), rand_node1_orig_x, rand_node1_orig_y);
-    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
-    rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
-  } else if (i < 0.75) { // shift
+    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+  } else if (i < 0.85) { // shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
@@ -744,20 +765,19 @@ double initiateMove(vector< int > *accept_history,
     double ry = rand_node1_orig_y + dy;
 
     validateMove(&(*rand_node1), rx, ry);
-    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
-  } else if (i < 0.2) { // rotate
+    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+  } else { // rotate
     state = 2;
     if(debug > 1) {
       cout << "rotate" << endl;
     }
     boost::uniform_int<> uni_dist(0,3);
+    //boost::uniform_int<> uni_dist(0,7);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
-    int r = uni();
+    r = uni();
     rand_node1->setRotation(r);
-    double rx = rand_node1->xCoordinate;
-    double ry = rand_node1->yCoordinate;
-    validateMove(&(*rand_node1), rx, ry);
-    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    validateMove(&(*rand_node1), rand_node1_orig_x, rand_node1_orig_y);
+    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
   bool accept = checkMove(prevCost,
                           accept_history,
@@ -771,18 +791,19 @@ double initiateMove(vector< int > *accept_history,
       cout << "reject" << endl;
     }
     // revert state
-    rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
     if (state == 0) {
-      rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
       rand_node2->setPos(rand_node2_orig_x,rand_node2_orig_y);
-      rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
     } else if (state == 1) {
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     } else if (state == 2) {
-      rand_node1->setRotation(-r);
+      rand_node1->setRotation(8 - r);
+      rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     }
-    rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     return prevCost;
   }
   else {
@@ -799,37 +820,49 @@ Update the SA parameters according to annealing schedule
 */
 void update_temperature(double* Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
-  if (*Temperature > 0.05) {
-    *Temperature = (0.99986) * *Temperature;
-    if (l1 > 10e-2) {
-      l1 -= 10e-5;
+  if (*Temperature > 0.1) {
+    *Temperature = (0.985) * *Temperature;
+    if (l1 > 92e-2) {
+      l1 -= 2e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9999*nodeit->sigma,0.5);
     }
-  } else if (*Temperature <= 0.05 && *Temperature > 0.005) {
-    *Temperature = (0.999) * *Temperature;
-    if (l1 > 25e-4) {
-      l1 -= 25e-4;
+  } else if (*Temperature > 0.01) {
+    *Temperature = (0.9995) * *Temperature;
+    if (l1 > 88.5e-2) {
+      l1 -= 4e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.999*nodeit->sigma,0.25);
     }
-  } else if (*Temperature < 0.005) {
-    *Temperature = (0.9985) * *Temperature;
-    if (l1 > 20e-4) {
-      l1 -= 20e-4;
+  } else if (*Temperature > 0.005) {
+    *Temperature = (0.9955) * *Temperature;
+    if (l1 > 85.5e-2) {
+      l1 -= 8e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.999*nodeit->sigma,0.18);
     }
-  } else if (*Temperature < 0.001) {
-    *Temperature = (0.998) * *Temperature;
-    if (l1 > 10e-5) {
-      l1 -= 10e-5;
+  } else if (*Temperature > 0.001) {
+    *Temperature = (0.9965) * *Temperature;
+    if (l1 > 82e-2) {
+      l1 -= 16e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.08);
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
+    }
+  } else {
+    if (*Temperature > 0.000001) {
+      *Temperature = (0.855) * *Temperature;
+    } else {
+      *Temperature = 0.0000000001;
+    }
+    if (l1 > 1e-4) {
+      l1 -= 10e-4;
+    }
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
     }
   }
 }
@@ -864,7 +897,7 @@ bool checkMove(double prevCost,
     cout << "new cost: " << newCost << endl;
   }
   delCost = newCost - prevCost;
-  if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
+  if (delCost <= 0  || prob <= (exp(-delCost/Temperature))) {
     prevCost = newCost;
     accept_history->push_back(1);
     return true;
@@ -999,9 +1032,7 @@ float timberWolfAlgorithm(int outer_loop_iter,
   vector< double > accept_ratio_history;
   initialPlacement();
   SetInitParameters(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
-
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
-
   if(var) {
     Temperature = varanelli_cohoon(accept_history,
                                    Temperature,
@@ -1012,7 +1043,7 @@ float timberWolfAlgorithm(int outer_loop_iter,
   }
   int idx = 0;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    rtree.insert(std::make_pair(itNode -> envelope, idx));
+    //rtree.insert(std::make_pair(itNode -> envelope, idx));
     idx+=1;
     if(!itNode -> terminal && !itNode -> fixed) {
       num_components += 1;
@@ -1037,7 +1068,6 @@ float timberWolfAlgorithm(int outer_loop_iter,
       cout << "acceptance ratio: " << accept_ratio << endl;
       cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
     }
-
     while (i > 0) {
       cst = initiateMove(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
       update_accept_history(accept_history, &accept_ratio_history, &accept_ratio);
@@ -1049,11 +1079,10 @@ float timberWolfAlgorithm(int outer_loop_iter,
       i -= 1;
     }
 
-    // convergence criterion - avg over last 100-1000
+    // convergence criterion
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }
-
     update_temperature(&Temperature);
     iii += 1;
     ii += 1;

@@ -1,0 +1,12 @@
+UCLA nets 1.0
+
+# Created    : 2019-05-02 23:32:11.824135
+# Created by : Devon Merrill
+
+NumNets : 1
+NumPins : 3
+
+NetDegree : 3
+            C14   B :     -0.977        0.0
+             F1   B :      -1.95        0.0
+             T1   B :      0.0        0.0

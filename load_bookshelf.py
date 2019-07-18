@@ -8,6 +8,7 @@ import utils
 import shapely
 from shapely.geometry import Point, Polygon
 from shapely.affinity import translate, rotate
+import shapely.wkt
 
 import argparse
 
@@ -75,7 +76,7 @@ def read_pl2(fname,components):
 					if '/FIXED' in l[5]:
 						static_components.append(pname)
 				comp2rot[pname] = r
-				rot2deg = {'N':0,'S':180,'E':90,'W':270}
+				rot2deg = {'N':0,'NE':45,'E':90,'SE':135,'S':180,'SW':225,'W':270,'NW':315}
 				components[pname] = rotate(components[pname],rot2deg[r])
 				minx, miny, maxx, maxy = components[pname].bounds
 				components[pname] = translate(components[pname],newx-minx,newy-miny)
@@ -204,6 +205,27 @@ def read_blocks(fname):
 			poly = Polygon(vertices)
 			components[cname] = poly
 
+	return components
+
+def read_shapes(fname, components):
+	"""
+	Read & parse .shapes (shapes) file
+	:param fname: .shapes filename
+	"""
+	with open(fname, 'r') as f:
+		lines = f.read().splitlines()
+
+	target_ibdex = [i for i, s in enumerate(lines) if 'NumNonRectangularNodes' in s][0]
+	lines = lines[target_ibdex+2:]
+	bp = 0
+	for line in lines:
+		l = line.split()
+		pname = l[0]
+		poly = shapely.wkt.loads(' '.join(l[1:]))
+		newx, newy, _, _ = components[pname].bounds
+		minx, miny, _, _ = poly.bounds
+		components[pname] = translate(poly,newx-minx,newy-miny)
+		#components[pname] = poly
 	return components
 
 def read_nodes(fname):

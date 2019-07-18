@@ -24,6 +24,7 @@ class Node;
 class Pin;
 
 void readNodesFile(string fname);
+void readShapesFile(string fname);
 void readWtsFile(string fname);
 void readPlFile(string fname);
 map<int, vector<Pin> > readNetsFile(string fname);
@@ -94,6 +95,14 @@ class Node {
     }
   }
 
+  void setParameterShapes(string wkt) {
+    // Sets parameters given an entry in Shapes file
+    model::polygon< model::d2::point_xy<double> > poly;
+    boost::geometry::read_wkt(wkt, poly);
+    boost::geometry::correct(poly);
+    this -> poly = poly;
+  }
+
   void setParameterWts(int weight) {
     // Sets parameters given an entry in weights file.
     // weights can correspond to size, importance, etc.
@@ -110,7 +119,7 @@ class Node {
     this -> orientation = 0;
     this -> setRotation(this->init_orientation);
     this -> fixed = fixed;
-    this -> sigma = 10.0; // this -> width * this -> height; //10.0;
+    this -> sigma = 10.0;
   }
 
   void setNetList(int NetId) {
@@ -133,55 +142,53 @@ class Node {
   }
 
   int str2orient(string o) const{
-    // convert a string to an orientation int
     if(o == "N") {
       return 0;
-    } else if(o == "E") {
+    } else if(o == "NE") {
       return 1;
-    } else if(o == "S") {
+    } else if(o == "E") {
       return 2;
-    } else if(o == "W") {
+    } else if(o == "SE") {
       return 3;
+    } else if (o == "S") {
+      return 4;
+    } else if (o == "SW") {
+      return 5;
+    } else if (o == "W") {
+      return 6;
+    } else if (o == "NW") {
+      return 7;
     }
     return -1;
   }
 
   string orient2str(int o) const{
-    // converts an orientation int to a string
     if(o == 0) {
       return "N";
     } else if(o == 1) {
-      return "E";
+      return "NE";
     } else if(o == 2) {
-      return "S";
+      return "E";
     } else if(o == 3) {
+      return "SE";
+    } else if(o == 4) {
+      return "S";
+    } else if(o == 5) {
+      return "SW";
+    } else if(o == 6) {
       return "W";
+    } else if(o == 7) {
+      return "NW";
     }
     return "";
   }
 
-  int entation(int kX) {
-    if (kX <= 3) {
-      return kX;
-    } else {
-      return kX - 4;
-    }
-  }
-
   int wrap_orientation(int kX) {
-    if (kX <= 3) {
-      return kX;
-    } else {
-      return kX - 4;
-    }
+    return kX % 8;
   }
 
-  // TODO fix rotation origin?
   void setRotation(int r) {
-    if(this->terminal){return;}
-    // rotates Node
-    int o = this->orientation;
-    int rot_deg = 90*r;//orient2degree(r);
+    int rot_deg = 45*r;
     double tmpx = this->xCoordinate;
     double tmpy = this->yCoordinate;
 
@@ -191,17 +198,15 @@ class Node {
     boost::geometry::transform(this->poly, tmp, rotate);
     this->poly = tmp;
     updateCoordinates();
-    this->orientation = wrap_orientation(o + r);
+    this->orientation = wrap_orientation(this->orientation + r);
     this->setPos(tmpx, tmpy);
   }
 
+  /*
+  upateCoordinates
+  Updates parameters of Node class from a geometry object
+  */
   void updateCoordinates() {
-    // Updates parameters of Node class from a geometry object
-    //auto it = boost::begin(boost::geometry::exterior_ring(this->poly));
-    //this -> xCoordinate = bg::get<0>(*it);
-    //this -> yCoordinate = bg::get<1>(*it);
-
-    // centroid
     if(this->terminal) {
         this -> xBy2 = this->xCoordinate;
         this -> yBy2 = this->yCoordinate;
@@ -216,8 +221,11 @@ class Node {
     }
   }
 
+  /*
+  printExterior
+  print polygon vertices
+  */
   void printExterior() const{
-    // print polygon vertices
     for(auto it = boost::begin(boost::geometry::exterior_ring(this->poly)); it != boost::end(boost::geometry::exterior_ring(this->poly)); ++it) {
         double x = bg::get<0>(*it);
         double y = bg::get<1>(*it);
@@ -225,8 +233,11 @@ class Node {
     }
   }
 
+  /*
+  printParameter
+  print node params
+  */
   void printParameter() {
-    // print parameters of Node class
     cout << "name      " << this -> name << endl;
     cout << "Width         " << this -> width << endl;
     cout << "Height        " << this -> height << endl;

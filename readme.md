@@ -6,10 +6,12 @@ Supports the following:
  - BEN-AMEUR et al. cost-normalization & automatic initial temperature
  - Variable placement shift window, smaller displacement with temperature
  - Geometric temperature updates (cooling schedule) based on timberwolf schedule
- - Parallel multistart
  - Bookshelf parser
  - Bookshelf version translator
  - Plotting & animations
+
+ ## Currently has issues / in development
+ - Parallel multistart [New issues with cpp-taskflow. Still support for multi-start via python script.]
  - rtree spatial indexing for fast overlap computation
 
  ## Setup and requirements

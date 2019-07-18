@@ -43,7 +43,7 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
     boundary = patches.Rectangle((min(board_dim[0]), min(board_dim[1])), \
                                   max(board_dim[0]) - min(board_dim[0]), max(board_dim[1]) - min(board_dim[1]), \
                                   linewidth=1,edgecolor='b',facecolor='none')
-    ax.add_patch(boundary)
+    #ax.add_patch(boundary)
     for name,shape in components.items():
         if isinstance(shape, geometry.Point):
             x = shape.x
@@ -81,12 +81,12 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
         ymin = min([p[1] for p in netlist])
         center =  [(xmax + xmin)/2,(ymax + ymin)/2]
         # centroid - star
-        for i in range(len(netlist)):
-            ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
-        xs= [ x[0] for x in netlist ]
-        ys= [ x[1] for x in netlist ]
-        ax.scatter(xs,ys,marker='.',c=c)
-        ax.scatter(center[0],center[1],marker='.',c=c)
+        #for i in range(len(netlist)):
+        #    ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
+        #xs= [ x[0] for x in netlist ]
+        #ys= [ x[1] for x in netlist ]
+        #ax.scatter(xs,ys,marker='.',c=c)
+        #ax.scatter(center[0],center[1],marker='.',c=c)
     plt.xlim(board_lower_left_corner[0] - 5,board_upper_right_corner[0] + 5)
     plt.ylim(board_lower_left_corner[1] - 5,board_upper_right_corner[1] + 5)
     #plt.gca().set_aspect('equal', adjustable='box')
@@ -103,6 +103,7 @@ def pin_pos(pin_loc, modules,comp2rot):
     module_name, local_pin_loc = pin_loc
     cx = modules[module_name].centroid.x
     cy = modules[module_name].centroid.y
+    """
     if module_name in comp2rot:
         r = comp2rot[module_name]
     else:
@@ -119,11 +120,16 @@ def pin_pos(pin_loc, modules,comp2rot):
     elif r == 'W':
         pinx = cx - local_pin_loc[1]
         piny = cy + local_pin_loc[0]
+    """
+    pinx = cx
+    piny = cy
     return pinx, piny
 
-def plot_pl(plfile, nodesfile, netsfile, figname, board_dim=None):
+def plot_pl(plfile, nodesfile, netsfile, figname, shapesfile=None, board_dim=None):
     board_pins = {}
     components = load_bookshelf.read_nodes(nodesfile)
+    if shapesfile:
+        components = load_bookshelf.read_shapes(shapesfile,components)
     components,comp2rot,board_pins,_ = load_bookshelf.read_pl2(plfile,components)
     nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
     if board_dim is None:
@@ -133,7 +139,9 @@ def plot_pl(plfile, nodesfile, netsfile, figname, board_dim=None):
             board_dim = [xs,ys]
             pass
         else:
-            board_dim = [[-50,200],[-50,200]]
+            #board_dim = [[-50,200],[-50,200]]
+            board_dim = [[-25,120],[-25,120]]
+            #board_dim = [[0,50],[0,50]]
     else:
         board_dim = board_dim#[[boarddimmin,boarddimmax],[boarddimmin, boarddimmax]]
     plot_circuit(plfile.split('.')[0], components,comp2rot,nets,board_dim,figname)
@@ -187,7 +195,7 @@ def make_placement_anim():
             components = load_bookshelf.read_nodes(nodesfile)
             components,comp2rot,board_pins,_ = load_bookshelf.read_pl2('./cache/'+ff,components)
             nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
-            board_dim = [[-5,60],[-5,50]]
+            board_dim = [[-5,60],[-5,60]]
             plot_circuit(ff.split('.')[0], components,comp2rot,nets,board_dim,'./cache/img/'+ff.split('.')[0]+'.png')
 
     f = []
@@ -225,9 +233,13 @@ def make_graphs(reports_dir):
 
 def main(brd_name, out_file, pl_file=None, pl_anim=False, heatmap_anim=False, reports_dir=False):
     circuitname = brd_name
-    plfile = circuitname + '.pl'
+    if pl_file:
+        plfile = pl_file
+    else:
+        plfile = circuitname + '.pl'
     nodesfile = circuitname + '.nodes'
     netsfile = circuitname + '.nets'
+    shapesfile = circuitname + '.shapes'
     figname = out_file
 
     bversion = 1
@@ -237,11 +249,11 @@ def main(brd_name, out_file, pl_file=None, pl_anim=False, heatmap_anim=False, re
     #if reports_dir:
     #    make_graphs(reports_dir)
     if pl_file is not None:
-        plot_pl(plfile, nodesfile, netsfile, figname)
-    if pl_anim:
-        make_placement_anim()
-    if heatmap_anim:
-        make_heatmap_anim()
+        plot_pl(plfile, nodesfile, netsfile, figname, shapesfile)
+    #if pl_anim:
+    #    make_placement_anim()
+    #if heatmap_anim:
+    #    make_heatmap_anim()
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='make_plots v0.1')

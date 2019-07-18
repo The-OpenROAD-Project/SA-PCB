@@ -1,0 +1,2 @@
+#!/bin/bash
+/Applications/KiCad/kicad.app/Contents/Frameworks/Python.framework/Versions/2.7/bin/python $1

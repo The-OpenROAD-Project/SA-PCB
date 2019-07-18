@@ -20,8 +20,12 @@ try:
 except NotImplementedError:
     num_cpus = 2
 
+"""
+for now, make directories associated with each idx manually.
+"""
+
 def f(idx):
-    res = subprocess.check_output(["./sa", "-x", str(idx)])
+    res = subprocess.check_output(["./sa", "-p","designs/bm1","-i", str(2500),"-j",str(25),"-t",str(0.025), "-x", str(idx)])
     return res.strip()[-2:]
 
 def worker(args, output):

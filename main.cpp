@@ -398,29 +398,18 @@ Compute sum squared overlap for all components
 double cell_overlap() {
   double overlap = 0.0;
 
-  //vector < Node > ::iterator nodeit1;
-  //vector < Node > ::iterator nodeit2;
-
-  //for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
   for(int i = 0; i < nodeId.size(); i++) {
-    //if (nodeit1->terminal) {continue;}
     if(nodeId[i].terminal) { continue; }
-      //std::vector< std::pair<box, unsigned> > result_s;
-      //rtree.query(bgi::intersects(nodeit1->envelope), std::back_inserter(result_s));
-      //for (nodeit2 = nodeId.begin(); nodeit2 != nodeId.end(); ++nodeit2) {
       for(int j = i++; j < nodeId.size(); j++) {
-        //if (nodeit2->terminal) {continue;}
         if (i == j) {continue;}
         if(nodeId[j].terminal) { continue; }
-        //if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
+
         if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
           continue;
         } else {
           double oa = 0.0;
           std::deque<polygon> intersect_poly;
-          //boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
           boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
-
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
           }
@@ -853,6 +842,7 @@ void update_temperature(double* Temperature) {
       nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
     }
   }
+  l1 = 0.0;
 }
 
 void update_accept_history(vector< int > &accept_history, vector< double > *accept_ratio_history, float *accept_ratio) {

@@ -1,3 +1,43 @@
+///////////////////////////////////////////////////////////////////////////////
+// Authors: Ilgweon Kang and Lutong Wang
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng),
+//          based on Dr. Jingwei Lu with ePlace and ePlace-MS
+//
+//          Many subsequent improvements were made by Mingyu Woo
+//          leading up to the initial release.
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "main.h"
 #define PI 3.14159265
 
@@ -16,10 +56,9 @@ int debug = 1;
 boundaries b;
 boost::mt19937 rng;
 
-//map < string, Node > nodeId;
 vector < Node > nodeId;
 map < string, int > name2id;
-//bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
+bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
 
 float l1 = 1.0;
 long long int iii = 0;
@@ -32,14 +71,15 @@ int main(int argc, char *argv[]) {
   double eps = -1.0;
   double t_0 = 1.0;
   string out_file;
+  int rotate_flag = 0;
 
   long long int idx = -1;
 
   string parg = "";
   int bound_inc = 0;
   bool var = false;
-  // TODO: replace with config
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b::h")) != EOF) {
+
+  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:r::h")) != EOF) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
@@ -50,6 +90,7 @@ int main(int argc, char *argv[]) {
           case 'e': eps = atof(optarg); break;
           case 'v': var = true; break;
           case 'f': out_file=string(optarg); break;
+          case 'r': rotate_flag=atoi(optarg); break;
           case 'b':
             bound_inc += 1;
             switch(bound_inc) { // TODO: have 4 different argument flags for each point
@@ -68,6 +109,7 @@ int main(int argc, char *argv[]) {
                                     -x <optional, int>   : simulated annealing instance index \n \
                                     -p <required, string>: input placement board \n \
                                     -d <optional, {0-3}> : debug verbosity \n \
+                                    -r <optional, {0-3}> : rotation \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output");
           default: cout<<endl; abort();
       }
@@ -107,7 +149,7 @@ int main(int argc, char *argv[]) {
   if(debug) { cout << "calculating boundaries..." << endl; }
   set_boundaries();
   if(debug) { cout << "annealing" << endl; }
-  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell);
+  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, rotate_flag);
   writePlFile("./"+out_file+".pl");
   cout << " " << idx << " " << cost << endl;
   return cost;
@@ -142,7 +184,7 @@ void initialize_params(std::pair <double,double> *wl_normalization,
   std::pair < double, double > area;
   double min_area = 0.0;
   double max_area = 0.0;
-
+/*
   vector < Node > ::iterator nodeit1;
   vector < Node > ::iterator nodeit2;
 
@@ -183,6 +225,21 @@ void initialize_params(std::pair <double,double> *wl_normalization,
 
   area.first = 0.0; // min_area;
   area.second = max(cell_overlap(),1.0); // max_area;
+*/
+
+  double sum_wl = 0.0;
+  double sum_oa = 0.0;
+  for (int i = 0; i<1000; i++) {
+    random_initial_placement();
+    sum_wl += wirelength(netToCell);
+    sum_oa += cell_overlap();
+  }
+
+  wl.first = 0.0;
+  wl.second = sum_wl / 1000.0;
+
+  area.first = 0.0;
+  area.second = sum_oa / 1000.0;
 
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
@@ -260,7 +317,7 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
 initial_placement
 Randomly place and orient all movable components in the board area
 */
-void initial_placement() {
+void random_initial_placement() {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
@@ -399,17 +456,17 @@ double cell_overlap() {
   double overlap = 0.0;
 
   for(int i = 0; i < nodeId.size(); i++) {
-    if(nodeId[i].terminal) { continue; }
-      for(int j = i++; j < nodeId.size(); j++) {
+    //if(nodeId[i].terminal) { continue; }
+      for(int j = i; j < nodeId.size(); j++) {
         if (i == j) {continue;}
-        if(nodeId[j].terminal) { continue; }
-
+        //if(nodeId[j].terminal) { continue; }
         if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
           continue;
         } else {
           double oa = 0.0;
           std::deque<polygon> intersect_poly;
           boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
+
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
           }
@@ -679,7 +736,8 @@ double initiate_move(vector< int > *accept_history,
                      std::pair <double,double> &wl_normalization,
                      std::pair <double,double> &area_normalization,
                      std::pair <double,double> &routability_normalization,
-                     map<int, vector<Pin> > &netToCell) {
+                     map<int, vector<Pin> > &netToCell,
+                     int rotate_flag) {
   // Initate a transition
   int state = -1;
   double prevCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
@@ -749,6 +807,7 @@ double initiate_move(vector< int > *accept_history,
     if(debug > 1) {
       cout << "rotate" << endl;
     }
+
     boost::uniform_int<> uni_dist(0,7);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
     r = uni();
@@ -806,7 +865,7 @@ void update_temperature(double* Temperature) {
       nodeit->sigma =  max(0.9999*nodeit->sigma,0.5);
     }
   } else if (*Temperature > 0.01) {
-    *Temperature = (0.9995) * *Temperature;
+    *Temperature = (0.9992) * *Temperature;
     if (l1 > 88.5e-2) {
       l1 -= 4e-4;
     }
@@ -842,7 +901,6 @@ void update_temperature(double* Temperature) {
       nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
     }
   }
-  l1 = 0.0;
 }
 
 void update_accept_history(vector< int > &accept_history, vector< double > *accept_ratio_history, float *accept_ratio) {
@@ -890,19 +948,20 @@ double initialize_temperature(vector< int > &accept_history,
                               std::pair <double,double> &wl_normalization,
                               std::pair <double,double> &area_normalization,
                               std::pair <double,double> &routability_normalization,
-                              map<int, vector<Pin> > &netToCell) {
+                              map<int, vector<Pin> > &netToCell,
+                              int rotate_flag) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
   double xt = 1.0;
   double x0 = 0.84;
   double p = 2.0;
-  initial_placement();
+  random_initial_placement();
   for(int i=1; i<=10; i++){
     for(int j=1; j<=10; j++){
-      initial_placement();
+      random_initial_placement();
       emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
-      initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
+      initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
     }
     xt = emax/emin;
@@ -988,7 +1047,8 @@ float timberWolfAlgorithm(int outer_loop_iter,
                           double eps,
                           double t_0,
                           bool var,
-                          map<int, vector<Pin> > &netToCell) {
+                          map<int, vector<Pin> > &netToCell,
+                          int rotate_flag) {
   double Temperature = t_0;
   int num_components = 0;
 
@@ -1008,7 +1068,7 @@ float timberWolfAlgorithm(int outer_loop_iter,
   vector< int > accept_history;
   float accept_ratio = 0;
   vector< double > accept_ratio_history;
-  initial_placement();
+  random_initial_placement();
   initialize_params(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   if(var) {
@@ -1017,11 +1077,12 @@ float timberWolfAlgorithm(int outer_loop_iter,
                                          wl_normalization,
                                          area_normalization,
                                          routability_normalization,
-                                         netToCell);
+                                         netToCell,
+                                         rotate_flag);
   }
   int idx = 0;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    //rtree.insert(std::make_pair(itNode -> envelope, idx));
+    rtree.insert(std::make_pair(itNode -> envelope, idx));
     idx+=1;
     if(!itNode -> terminal && !itNode -> fixed) {
       num_components += 1;
@@ -1041,13 +1102,13 @@ float timberWolfAlgorithm(int outer_loop_iter,
       cout << "iteration: " << ii << endl;
       cout << "time: " <<  time_span.count() << " (s)" << endl;
       cout << "move/time: " <<  i*ii/time_span.count() << endl;
-      cout << "time remaining: " <<  time_span.count()/ii * (1000-ii) << " (s)" << endl;
+      cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
       cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
     }
     while (i > 0) {
-      cst = initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
+      cst = initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       update_accept_history(accept_history, &accept_ratio_history, &accept_ratio);
       cost_hist.push_back(cst);
 

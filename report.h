@@ -1,4 +1,3 @@
-"""
 ///////////////////////////////////////////////////////////////////////////////
 // Authors: Ilgweon Kang and Lutong Wang
 //          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng),
@@ -38,9 +37,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-"""
 
-import pcbnew
-from pcbnew import IO_MGR, LoadBoard, PCB_LAYER_ID_COUNT
-board = pcbnew.LoadBoard(filename, pcbnew.IO_MGR.EAGLE)
-board.Save(fname)
+class report {
+
+};

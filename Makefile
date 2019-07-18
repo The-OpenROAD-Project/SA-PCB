@@ -20,13 +20,12 @@ readFiles.o : readFiles.h readFiles.cpp
 graphs:
 	echo creating graphs
 
+circuitname := './designs/bm1'
+plfile := './bm1_45.pl'
+outfile := './tst'
 plot:
 	echo creating plots
-	#circuitname = 'bm3'
-	#plfile = 'bm3.pl'
-	#outfile = 'tst'
-	echo $(circuitname)
-	python3 make_plots.py --brd bm3 --pl bm3.pl --out tst --reports reports
+	python3 make_plots.py --brd $(circuitname)  --pl $(plfile) --out $(outfile) --reports reports
 
 animation_plot:
 	circuitname = bm3
@@ -64,7 +63,6 @@ convert:
 	mv $(BOOKSHELFPRFX).nets ./cache/designs
 	mv $(BOOKSHELFPRFX).pl ./cache/designs
 	mv $(BOOKSHELFPRFX).wts ./cache/designs
-
 
 install:
 	if [ ! -d "./cache" ]; then \

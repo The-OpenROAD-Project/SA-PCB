@@ -20,24 +20,18 @@ namespace trans = boost::geometry::strategy::transform;
 namespace bg = boost::geometry;
 typedef boost::geometry::model::d2::point_xy<double> point_type;
 
-class Node;
-class Pin;
-
-void readNodesFile(string fname);
-void readShapesFile(string fname);
-void readWtsFile(string fname);
-void readPlFile(string fname);
-map<int, vector<Pin> > readNetsFile(string fname);
-void writePlFile(string fname);
-void printMap();
 
 class Node;
 class Pin;
 extern map < string, int > name2id;
 extern vector < Node > nodeId;
-//extern map < string, Node > nodeId;
-//extern map<int, vector<string> > netToCell; // TODO netToNode consider going net -> node reference
-//extern map<int, vector<Pin> > netToCell;
+
+int readNodesFile(string fname);
+int readShapesFile(string fname);
+int readWtsFile(string fname);
+int readPlFile(string fname);
+map<int, vector<Pin> > readNetsFile(string fname);
+int writePlFile(string fname);
 
 class Pin {
   public:

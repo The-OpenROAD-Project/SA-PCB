@@ -5,3 +5,4 @@ bin/annealer
 designs/bm*
 reports/*
 boost/
+taskflow/

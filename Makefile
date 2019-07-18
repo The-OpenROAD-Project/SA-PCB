@@ -1,43 +1,29 @@
-CC := g++
-CFLAGS := -g -std=c++17 -O3 -pthread# -Wall -Wextra
-LIBS := -lboost_regex
-
-EAGLEFILE := test1.brd
-BOOKSHELFPRFX := testing1
-
-sa : main.o readFiles.o
-	$(CC) $(CFLAGS) $(LIBS) -o sa main.o readFiles.o  #readScl.o
-
-main.o : main.h readFiles.h main.cpp
-	$(CC) $(CFLAGS) -c main.cpp
-
-readFiles.o : readFiles.h readFiles.cpp
-	$(CC) $(CFLAGS) -c readFiles.cpp
-
-#readScl.o : readFiles.h readScl.h readScl.cpp
-#	$(CC) $(CFLAGS) -c readScl.cpp
+all:
+	+$(MAKE) -C src
+	mv src/annealer ./bin
 
 graphs:
 	echo creating graphs
 
 circuitname := './designs/bm1'
-plfile := './bm1_45.pl'
+plfile := './bin/cache/10.pl'
 outfile := './tst'
+
 plot:
 	echo creating plots
-	python3 make_plots.py --brd $(circuitname)  --pl $(plfile) --out $(outfile) --reports reports
+	python3 src/py_utils/make_plots.py --brd $(circuitname)  --pl $(plfile) --out $(outfile) --reports reports
 
-animation_plot:
+animate_plot:
 	circuitname = bm3
 	figname = plot.gif
 	echo creating animation
-	python3 make_plots.py
+	python3 src/py_utils/make_plots.py
 
-animation_graphs:
+animate_graphs:
 	circuitname=bm3
 	figname=plot.gif
 	echo creating animation
-	python3 make_plots.py
+	python3 src/py_utils/make_plots.py
 
 convert:
 	if [ ! -d "./eagle2bookshelf" ]; then \
@@ -65,6 +51,7 @@ convert:
 	mv $(BOOKSHELFPRFX).wts ./cache/designs
 
 install:
+	cp -r cpp-taskflow/taskflow .
 	if [ ! -d "./cache" ]; then \
 			echo "creating cache directory"; \
 			mkdir "cache"; \
@@ -87,13 +74,9 @@ install:
 	fi
 
 clean :
-	-rm *.o
+	-rm src/*.o
 	-rm cache/*.pl
 	-rm cache/designs/*.pl
 	-rm cache/img/*.png
 	-rm cache_rudy/*.txt
 	-rm reports/*.txt
-	-rm wl.txt
-	-rm oa.txt
-	-rm cost.txt
-	-rm anim.gif

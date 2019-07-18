@@ -641,7 +641,7 @@ double rudy(map<int, vector<Pin> > &netToCell) {
 
   // write tab separated matrix to file
   if(iii % 10 == 0) {
-      ofstream dat("cache_rudy/"+std::to_string(iii) + ".txt");
+      ofstream dat("cache/route/"+std::to_string(iii) + ".txt");
       for (unsigned i = 0; i < D.size1() ; i++) {
           for (unsigned j = 0; j < D.size2(); j++) {
               dat << D(i, j) << "\t";

@@ -1,29 +1,36 @@
 # RePlAce
-*SA-PCB: Simulated Annealing-based Placement For PCB Layout*
+  *SA-PCB: Simulated Annealing-based Placement For PCB Layout*
 
 ## Getting Started
 
-## Install on a bare-metal machine
+## Installation
 
-### Pre-requisite
-* GCC compiler and libstdc++ static library >= 4.8.5
-* boost library >= 1.62
-* Python >= 3.6
-* shapely
-* matplotlib
-* docopt
-* numpy
-* Recommended OS: Centos6, Centos7 or Ubuntu 16.04
+### Pre-requisites
+  * GCC compiler >= 4.8.5
+  * boost library >= 1.62
+  * cpp-taskflow >= 2.0
+  * Python >= 3.6
+  * shapely >= 1.6.4
+  * matplotlib >= 3.0.2
+  * docopt >= 0.6.2
+  * numpy >= 1.15.4
+  * argparse >= 1.1
+  * tqdm >= 4.30.0 [python-multistart]
+  * numba >= 0.42.1 [python-multistart]
+  * multiprocessing [python-multistart]
+  * yaml
+  * json
+  * Recommended OS: Centos6, Centos7 or Ubuntu 16.04
 
 ### Clone repo and submodules
     $ git clone --recursive https://github.com/choltz95/c-pcb-annealer
     $ cd ~/c-pcbannealer
+    $ pip install -r requirements.txt
     $ make install
     $ make
 
 ### Fix eagle2bookshelf errors
-    You may have to fix some eagle2bookshelf errors. Download DRU.py from https://github.com/NVSL/Swoop/blob/master/Swoop/DRU.py
-    and place into the eagle2bookshelf directory. Test the installation by running their testcases.
+    You may have to fix some eagle2bookshelf errors. Download DRU.py from https://github.com/NVSL/Swoop/blob/master/Swoop/DRU.py into the eagle2bookshelf directory. Test the installation by running their testcases.
 
 ### Check your installation [in development]
     To make sure your installation is correct and the current tool version is stable enough,
@@ -46,7 +53,7 @@
        EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output
 
 ### License
-* BSD-3-clause License [[Link]](LICENSE)
+  * BSD-3-clause License [[Link]](LICENSE)
 
 ## Description
  C++ annealer for simple PCB placement of polygonal components.
@@ -61,16 +68,15 @@
   - Bookshelf version translator
   - Plotting & animations
 
-## Currently has issues / in development
-  - Parallel multistart [New issues with cpp-taskflow. Still support for multi-start via python script.]
+## Limitations / Current issues / In development
+  - Parallel multistart [Issues with cpp-taskflow. Still support for multi-start via python script.]
   - R-Tree spatial indexing for fast overlap computation
+  - Free rotation
+  - Algorithm very sensitive to parameters
+  - Broken support for weighted modules/nets
 
 ### Authors
   - Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu (Ph.D. advisor: Chung-Kuan Cheng, Steven Swanson).
-
-### Limitations
-  - Algorithm very sensitive to parameters
-  - Broken support for weighted modules/nets
 
 ### Citations
   - Sechen, C. and Sangiovanni-Vincentelli, A. L., "The Timber-Wolf placement and routing package", IEEE J. Solid-State Circuits 30:510–522 1985.

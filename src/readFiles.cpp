@@ -192,7 +192,7 @@ map<int, vector<Pin> > readNetsFile(string fname) {
       for (j = 0; j < a; j++) {
         getline(file, buf);
         boost::trim_all(buf);
-        boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on); // a1213	 I : 0.5 0.5
+        boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
         strTemp.push_back(strVec[0]);
         nodeId[name2id[strVec[0]]].setNetList(NetId);
         Pin p;

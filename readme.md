@@ -65,7 +65,7 @@
   - rtree spatial indexing for fast overlap computation
 
 ### Authors
-- Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng).
+- Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu (Ph.D. advisor: Chung-Kuan Cheng, Steven Swanson).
 
 ### Limitations
  - Algorithm very sensitive to parameters

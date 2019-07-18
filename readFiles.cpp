@@ -19,9 +19,7 @@
 using namespace std;
 using boost::is_any_of;
 
-//vector < Node > nodeId;
-
-void readNodesFile(string fname) {
+int readNodesFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -46,16 +44,16 @@ void readNodesFile(string fname) {
         value = 0;
       }
       n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value, idx);
-      //nodeId.insert(pair < string, Node > (strVec[0], n));
       nodeId.push_back(n);
       name2id.insert(pair < string, int > (strVec[0], idx));
       idx += 1;
     }
   }
   file.close();
+  return 0;
 }
 
-void readShapesFile(string fname) {
+int readShapesFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -75,9 +73,10 @@ void readShapesFile(string fname) {
     }
   }
   file.close();
+  return 0;
 }
 
-void readWtsFile(string fname) {
+int readWtsFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -90,14 +89,14 @@ void readWtsFile(string fname) {
     boost::trim(buf);
     if (i > 5) {
       boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
-      //nodeId[strVec[1]].setParameterWts(atof(strVec[2].c_str()));
       nodeId[name2id[strVec[1]]].setParameterWts(atof(strVec[2].c_str()));
     }
   }
   file.close();
+  return 0;
 }
 
-void readPlFile(string fname) {
+int readPlFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
@@ -118,12 +117,11 @@ void readPlFile(string fname) {
       } else {
         value = 0;
       }
-      //nodeId[strVec[0]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
-      //cout << strVec[0] << " " << strVec[4] << endl;
       nodeId[name2id[strVec[0]]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
     }
   }
   file.close();
+  return 0;
 }
 
 map<int, vector<Pin> > readNetsFile(string fname) {
@@ -133,8 +131,6 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   vector < string > strVec;
   map<int, vector<Pin> > netToCell;
 
-  //boost::regex pattern("\\b(NetDegree : )");
-  //boost::smatch match;
   string pat = "NetDegree : ";
   string Out;
 
@@ -143,15 +139,13 @@ map<int, vector<Pin> > readNetsFile(string fname) {
     i++;
     if (i > 7) {
       boost::trim_all(buf);
-      //if(boost::regex_search(buf, match, pattern)) {
-      //  Out = match.suffix();
+
       std::size_t found = buf.find(pat);
       if(found!=std::string::npos) {
         Out = buf.substr(buf.rfind(" ") + 1);
       } else {
         continue;
       }
-      //a = atof(Out.c_str());
       a = stoi(Out);
       vector < string > strTemp;
       vector < Pin > pinTemp;
@@ -176,7 +170,7 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   return netToCell;
 }
 
-void writePlFile(string fname) {
+int writePlFile(string fname) {
   vector < string > strVec;
   fstream file;
   string buf;
@@ -210,22 +204,6 @@ void writePlFile(string fname) {
         }
       }
     myfile.close();
-  } else{ cout << "Unable to open file"; }
+    return 0;
+  } else{ cout << "Unable to open file"; return 1;}
 }
-/*
-void printMap() {
-  map < int, vector < string > > ::iterator itr;
-  vector < string > ::iterator itr1;
-
-  cout << "netToCellMap" << endl;
-  for (itr = netToCell.begin(); itr != netToCell.end(); ++itr) {
-    cout << itr -> first << "	";
-
-    for (itr1 = itr -> second.begin(); itr1 != itr -> second.end(); ++itr1) {
-      cout << * itr1 << "	";
-    }
-
-    cout << endl;
-  }
-  cout << "\n" << endl;
-}*/

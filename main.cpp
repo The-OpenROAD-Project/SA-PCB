@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
   netToCell = readNetsFile(netsfname);
   //readSclFile();
   if(debug) { cout << "calculating boundaries..." << endl; }
-  CalcBoundaries();
+  set_boundaries();
   if(debug) { cout << "annealing" << endl; }
   float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell);
   writePlFile("./"+out_file+".pl");
@@ -114,11 +114,11 @@ int main(int argc, char *argv[]) {
 }
 
 /*
-SetInitParameters
+initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of the inital placement.
 */
-void SetInitParameters(std::pair <double,double> *wl_normalization,
+void initialize_params(std::pair <double,double> *wl_normalization,
                        std::pair <double,double> *area_normalization,
                        std::pair <double,double> *routability_normalization,
                        map<int, vector<Pin> > &netToCell) {
@@ -126,7 +126,6 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
-  //map < string, Node > ::iterator itNode;
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if(!itNode -> terminal) {
@@ -179,19 +178,12 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
   min_wl = min_wl*num_components;
   max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
 
-  wl.first = 0.0;
-  wl.second = max(wireLength(netToCell),1.0);
+  wl.first = 0.0; // min_area
+  wl.second = max(wirelength(netToCell),1.0); // max_area
 
-  area.first = 0.0;
-  area.second = max(cellOverlap(),1.0);
+  area.first = 0.0; // min_area;
+  area.second = max(cell_overlap(),1.0); // max_area;
 
-/*
-  wl.first = min_wl;
-  wl.second = max_wl;
-
-  area.first = min_area;
-  area.second = max_area;
-*/
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
 
@@ -203,11 +195,11 @@ void SetInitParameters(std::pair <double,double> *wl_normalization,
 }
 
 /*
-CalcBoundaries
+set_boundaries
 Calculate board boundaries by finding the maximum-area
 rectangular envelop encompasing terminals & fixed modules.
 */
-void CalcBoundaries() {
+void set_boundaries() {
   double xval, yval, width, height;
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -265,10 +257,10 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
 }
 
 /*
-initialPlacement
+initial_placement
 Randomly place and orient all movable components in the board area
 */
-void initialPlacement() {
+void initial_placement() {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
@@ -284,7 +276,7 @@ shifting overlapped components until cumulative overlap reduces below an eps.
 */
 void project_soln() {
   // ensure zero overlap
-  double oa = cellOverlap();
+  double oa = cell_overlap();
   double eps = 10.0e-5;
 
   vector < Node > ::iterator nodeit1;
@@ -336,10 +328,10 @@ void project_soln() {
             }
             if (dx < dy) {
               // project in x direction
-              validateMove(&(*nodeit1),rx + dx,ry);
+              validate_move(&(*nodeit1),rx + dx,ry);
             } else {
               // project in y direction
-              validateMove(&(*nodeit1),rx,ry + dy);
+              validate_move(&(*nodeit1),rx,ry + dy);
             }
           }
         }
@@ -349,10 +341,10 @@ void project_soln() {
 }
 
 /*
-wireLength
+wirelength
 Computes HPWL for all nets
 */
-double wireLength(map<int, vector<Pin> > &netToCell) {
+double wirelength(map<int, vector<Pin> > &netToCell) {
   // compute HPWL
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
@@ -400,10 +392,10 @@ double wireLength(map<int, vector<Pin> > &netToCell) {
 }
 
 /*
-cellOverlap
+cell_overlap
 Compute sum squared overlap for all components
 */
-double cellOverlap() {
+double cell_overlap() {
   double overlap = 0.0;
 
   //vector < Node > ::iterator nodeit1;
@@ -446,7 +438,7 @@ double cellOverlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double wireLength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell) {
+double wirelength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell) {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
@@ -491,10 +483,10 @@ double wireLength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToC
 }
 
 /*
-cellOverlap_partial
+cell_overlap_partial
 Compute sum squared overlap for select components
 */
-double cellOverlap_partial(vector < Node > &nodes) {
+double cell_overlap_partial(vector < Node > &nodes) {
   double overlap = 0.0;
   vector < Node > ::iterator nodeit1;
   vector < Node > ::iterator nodeit2;
@@ -612,7 +604,6 @@ double rudy(map<int, vector<Pin> > &netToCell) {
       }
   }
 
-  //r = r/(wl_normalization.second * D.size1() * D.size2()); // normalize r
   return r;
 }
 
@@ -624,18 +615,18 @@ double cost(
             int temp_debug) {
   double l2 = 1 - l1;
   if(debug > 1 || temp_debug == -1) {
-    cout << "wirelength: " << wireLength(netToCell) << endl;
-    cout << "overlap: " << cellOverlap() << endl;
+    cout << "wirelength: " << wirelength(netToCell) << endl;
+    cout << "overlap: " << cell_overlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
-    cout << "wirelength_cost: " << l1*(wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
-    cout << "overlap_cost: " << l2  * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
+    cout << "wirelength_cost: " << l1*(wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) << endl;
+    cout << "overlap_cost: " << l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
     cout << "routability_cost: " << l2  * 0.1  * rudy(netToCell) << endl;
-    cout << "cost: " << l1*(wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-                        l2  * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
+    cout << "cost: " << l1*(wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+                        l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
                         l2 * 0.1*rudy(netToCell) << endl;
   }
-  return l1 * (wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.9 * (cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+  return l1 * (wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2 * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
          l2 * 0.1 * rudy(netToCell);
          //l2 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
@@ -647,8 +638,8 @@ double cost_partial(int temp_debug,
                     std::pair <double,double> &routability_normalization,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
-  return l1 * (wireLength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.9 * (cellOverlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+  return l1 * (wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2 * 0.9 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
 		     l2 * 0.1 * rudy(netToCell);
 }
 
@@ -667,10 +658,10 @@ vector < Node >::iterator random_node() {
 }
 
 /*
-validateMove
+validate_move
 validates a shift, project within board boundary
 */
-void validateMove(Node* node, double rx, double ry) {
+void validate_move(Node* node, double rx, double ry) {
   int orient = node->orientation;
   double width = 0.0;
   double height = 0.0;
@@ -694,12 +685,12 @@ void validateMove(Node* node, double rx, double ry) {
 }
 
 double c = 0.0;
-double initiateMove(vector< int > *accept_history,
-                    double & Temperature,
-                    std::pair <double,double> &wl_normalization,
-                    std::pair <double,double> &area_normalization,
-                    std::pair <double,double> &routability_normalization,
-                    map<int, vector<Pin> > &netToCell) {
+double initiate_move(vector< int > *accept_history,
+                     double & Temperature,
+                     std::pair <double,double> &wl_normalization,
+                     std::pair <double,double> &area_normalization,
+                     std::pair <double,double> &routability_normalization,
+                     map<int, vector<Pin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
@@ -718,8 +709,6 @@ double initiateMove(vector< int > *accept_history,
   double rand_node1_orig_y = rand_node1->yCoordinate;
   double rand_node2_orig_x = 0.0;
   double rand_node2_orig_y = 0.0;
-  double rx = 0.0;
-  double ry = 0.0;
 
   if(debug > 1) {
     cout << "=======" << endl;
@@ -743,8 +732,8 @@ double initiateMove(vector< int > *accept_history,
     rand_node2_orig_x = rand_node2->xCoordinate;
     rand_node2_orig_y = rand_node2->yCoordinate;
 
-    validateMove(&(*rand_node1), rand_node2_orig_x, rand_node2_orig_y);
-    validateMove(&(*rand_node2), rand_node1_orig_x, rand_node1_orig_y);
+    validate_move(&(*rand_node1), rand_node2_orig_x, rand_node2_orig_y);
+    validate_move(&(*rand_node2), rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
   } else if (i < 0.85) { // shift
@@ -764,28 +753,27 @@ double initiateMove(vector< int > *accept_history,
     double rx = rand_node1_orig_x + dx;
     double ry = rand_node1_orig_y + dy;
 
-    validateMove(&(*rand_node1), rx, ry);
+    validate_move(&(*rand_node1), rx, ry);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   } else { // rotate
     state = 2;
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-    boost::uniform_int<> uni_dist(0,3);
-    //boost::uniform_int<> uni_dist(0,7);
+    boost::uniform_int<> uni_dist(0,7);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
     r = uni();
     rand_node1->setRotation(r);
-    validateMove(&(*rand_node1), rand_node1_orig_x, rand_node1_orig_y);
+    validate_move(&(*rand_node1), rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
-  bool accept = checkMove(prevCost,
-                          accept_history,
-                          Temperature,
-                          wl_normalization,
-                          area_normalization,
-                          routability_normalization,
-                          netToCell);
+  bool accept = check_move(prevCost,
+                           accept_history,
+                           Temperature,
+                           wl_normalization,
+                           area_normalization,
+                           routability_normalization,
+                           netToCell);
   if (!accept) {
     if(debug > 1) {
       cout << "reject" << endl;
@@ -877,16 +865,16 @@ void update_accept_history(vector< int > &accept_history, vector< double > *acce
 }
 
 /*
-checkMove
+check_move
 either accept or reject the move based on current & previous temperature & cost
 */
-bool checkMove(double prevCost,
-               vector< int > *accept_history,
-               double & Temperature,
-               std::pair <double,double> &wl_normalization,
-               std::pair <double,double> &area_normalization,
-               std::pair <double,double> &routability_normalization,
-               map<int, vector<Pin> > &netToCell) {
+bool check_move(double prevCost,
+                vector< int > *accept_history,
+                double & Temperature,
+                std::pair <double,double> &wl_normalization,
+                std::pair <double,double> &area_normalization,
+                std::pair <double,double> &routability_normalization,
+                map<int, vector<Pin> > &netToCell) {
   double newCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   c = newCost;
   double delCost = 0;
@@ -907,24 +895,24 @@ bool checkMove(double prevCost,
   }
 }
 
-double varanelli_cohoon(vector< int > &accept_history,
-                        double & Temperature,
-                        std::pair <double,double> &wl_normalization,
-                        std::pair <double,double> &area_normalization,
-                        std::pair <double,double> &routability_normalization,
-                        map<int, vector<Pin> > &netToCell) {
+double initialize_temperature(vector< int > &accept_history,
+                              double & Temperature,
+                              std::pair <double,double> &wl_normalization,
+                              std::pair <double,double> &area_normalization,
+                              std::pair <double,double> &routability_normalization,
+                              map<int, vector<Pin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
   double xt = 1.0;
   double x0 = 0.84;
   double p = 2.0;
-  initialPlacement();
+  initial_placement();
   for(int i=1; i<=10; i++){
     for(int j=1; j<=10; j++){
-      initialPlacement();
+      initial_placement();
       emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
-      initiateMove(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
+      initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
       emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
     }
     xt = emax/emin;
@@ -954,8 +942,8 @@ void gen_report(map<string, vector<double> > &report,
     strftime (buf,80,"%Y-%m-%d-%H-%M-%S",now);
     string buffer = string(buf);
 
-    double wl = wireLength(netToCell);
-    double oa = cellOverlap();
+    double wl = wirelength(netToCell);
+    double oa = cell_overlap();
     double routability = rudy(netToCell);
     double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
     double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
@@ -1030,16 +1018,16 @@ float timberWolfAlgorithm(int outer_loop_iter,
   vector< int > accept_history;
   float accept_ratio = 0;
   vector< double > accept_ratio_history;
-  initialPlacement();
-  SetInitParameters(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
+  initial_placement();
+  initialize_params(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   if(var) {
-    Temperature = varanelli_cohoon(accept_history,
-                                   Temperature,
-                                   wl_normalization,
-                                   area_normalization,
-                                   routability_normalization,
-                                   netToCell);
+    Temperature = initialize_temperature(accept_history,
+                                         Temperature,
+                                         wl_normalization,
+                                         area_normalization,
+                                         routability_normalization,
+                                         netToCell);
   }
   int idx = 0;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -1069,12 +1057,12 @@ float timberWolfAlgorithm(int outer_loop_iter,
       cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
     }
     while (i > 0) {
-      cst = initiateMove(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
+      cst = initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell);
       update_accept_history(accept_history, &accept_ratio_history, &accept_ratio);
       cost_hist.push_back(cst);
 
-      wl_hist.push_back((wireLength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      oa_hist.push_back((cellOverlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
+      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
 
       i -= 1;
     }

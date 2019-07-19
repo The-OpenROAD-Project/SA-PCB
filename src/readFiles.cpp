@@ -33,24 +33,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <string>
-#include <map>
-
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim_all.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/tuple/tuple.hpp>
-
 #include "readFiles.hpp"
-//#include "readScl.hpp"
 
 using namespace std;
 using boost::is_any_of;
@@ -232,11 +215,7 @@ int writePlFile(string fname) {
       for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
         if(itNode->terminal) {
           myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orientation_str;
-          if (itNode->fixed) {
-            myfile << " /FIXED_NI\n";
-          } else {
-            myfile << "\n";
-          }
+          myfile << " /FIXED_NI\n";
         }
       }
     myfile.close();

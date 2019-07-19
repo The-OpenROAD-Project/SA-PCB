@@ -9,23 +9,24 @@ circuitname := './designs/bm1'
 plfile := './bin/cache/10.pl'
 outfile := './tst'
 
-plot:
+plot: # should be like -> %.png: %.brd %.pl...
 	echo creating plots
 	python3 src/py_utils/make_plots.py --brd $(circuitname)  --pl $(plfile) --out $(outfile) --reports reports
 
-animate_plot:
+animate_plot: # should be like -> %.gif: %.brd %.pl...
 	circuitname = bm3
 	figname = plot.gif
 	echo creating animation
 	python3 src/py_utils/make_plots.py
 
-animate_graphs:
+animate_graphs: # should be like -> %.graph.gif: %.brd %.pl...
 	circuitname=bm3
 	figname=plot.gif
 	echo creating animation
 	python3 src/py_utils/make_plots.py
 
-convert:
+convert: # should be several rules like make %.nodes, %.pl, %.nodes and so on
+	# also need different rules that have different file dependancies, one for .kicad_pcb, .eagle.brd (eagle), .esir.xml and so on
 	if [ ! -d "./module/eagle2bookshelf" ]; then \
 		echo downloading eagle2bookshelf tool; \
 		git clone https://github.com/djmerrill/eagle2bookshelf.git; \

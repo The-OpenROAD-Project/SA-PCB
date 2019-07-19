@@ -53,8 +53,8 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "readFiles.h"
-//#include "readScl.h"
+#include "readFiles.hpp"
+//#include "readScl.hpp"
 
 using namespace std;
 using boost::is_any_of;

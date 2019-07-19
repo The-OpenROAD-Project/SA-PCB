@@ -54,7 +54,7 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 
-#include "Pin.h"
+#include "Pin.hpp"
 
 using namespace std;
 using namespace boost::geometry;

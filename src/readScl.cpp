@@ -46,8 +46,8 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include "readFiles.h"
-//#include "readScl.h"
+#include "readFiles.hpp"
+//#include "readScl.hpp"
 
 using namespace std;
 

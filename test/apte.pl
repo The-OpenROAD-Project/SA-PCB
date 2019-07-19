@@ -1,0 +1,88 @@
+UCLA pl 1.0
+
+
+
+
+cc_12	21.65	73.54	: N
+cc_11	1.05	36.57	: N
+cc_22	73.14	57.55	: N
+cc_23	51.06	59.36	: N
+cc_21	49.26	38.28	: N
+clk	86.93	35.23	: N
+cc_24	33.11	19.64	: N
+cc_14	68.13	0.0	: N
+cc_13	-1.09	0.0	 : N
+
+new64	105.0	69.0	 : N	/FIXED_NI
+new62	105.0	61.0	 : N	/FIXED_NI
+new58	105.0	49.0	 : N	/FIXED_NI
+new59	105.0	53.0	 : N	/FIXED_NI
+new71	17.0	105.0	 : N	/FIXED_NI
+new8	0.0	57.0	 : N	/FIXED_NI
+VDD	89.0	0.0	 : N	/FIXED_NI
+GND	105.0	93.0	 : N	/FIXED_NI
+new2	0.0	33.0	 : N	/FIXED_NI
+new3	0.0	37.0	 : N	/FIXED_NI
+new0	0.0	25.0	 : N	/FIXED_NI
+new1	0.0	29.0	 : N	/FIXED_NI
+new6	0.0	49.0	 : N	/FIXED_NI
+new7	0.0	53.0	 : N	/FIXED_NI
+new4	0.0	41.0	 : N	/FIXED_NI
+new5	0.0	45.0	 : N	/FIXED_NI
+new31	45.0	0.0	 : N	/FIXED_NI
+new50	85.0	0.0	 : N	/FIXED_NI
+new51	105.0	25.0	 : N	/FIXED_NI
+new52	105.0	29.0	 : N	/FIXED_NI
+new10	0.0	61.0	 : N	/FIXED_NI
+new11	0.0	65.0	 : N	/FIXED_NI
+new12	0.0	69.0	 : N	/FIXED_NI
+new39	57.0	0.0	 : N	/FIXED_NI
+new14	0.0	73.0	 : N	/FIXED_NI
+new15	0.0	77.0	 : N	/FIXED_NI
+new16	0.0	81.0	 : N	/FIXED_NI
+new17	0.0	85.0	 : N	/FIXED_NI
+new86	77.0	105.0	 : N	/FIXED_NI
+new78	45.0	105.0	 : N	/FIXED_NI
+new79	49.0	105.0	 : N	/FIXED_NI
+new76	37.0	105.0	 : N	/FIXED_NI
+new55	105.0	37.0	 : N	/FIXED_NI
+new74	29.0	105.0	 : N	/FIXED_NI
+new75	33.0	105.0	 : N	/FIXED_NI
+new72	21.0	105.0	 : N	/FIXED_NI
+new73	25.0	105.0	 : N	/FIXED_NI
+new70	105.0	89.0	 : N	/FIXED_NI
+new32	49.0	0.0	 : N	/FIXED_NI
+new18	0.0	89.0	 : N	/FIXED_NI
+new77	41.0	105.0	 : N	/FIXED_NI
+new82	61.0	105.0	 : N	/FIXED_NI
+new19	17.0	0.0	 : N	/FIXED_NI
+TestHS1	85.0	105.0	 : N	/FIXED_NI
+new30	41.0	0.0	 : N	/FIXED_NI
+new65	105.0	73.0	 : N	/FIXED_NI
+new22	29.0	0.0	 : N	/FIXED_NI
+new56	105.0	41.0	 : N	/FIXED_NI
+new54	105.0	33.0	 : N	/FIXED_NI
+new66	105.0	77.0	 : N	/FIXED_NI
+new33	53.0	0.0	 : N	/FIXED_NI
+Phi	81.0	105.0	 : N	/FIXED_NI
+new21	25.0	0.0	 : N	/FIXED_NI
+new20	21.0	0.0	 : N	/FIXED_NI
+VSS	0.0	93.0	 : N	/FIXED_NI
+new29	37.0	0.0	 : N	/FIXED_NI
+new28	33.0	0.0	 : N	/FIXED_NI
+new60	105.0	57.0	 : N	/FIXED_NI
+new67	105.0	81.0	 : N	/FIXED_NI
+new85	73.0	105.0	 : N	/FIXED_NI
+new84	69.0	105.0	 : N	/FIXED_NI
+new69	105.0	85.0	 : N	/FIXED_NI
+new57	105.0	45.0	 : N	/FIXED_NI
+new81	57.0	105.0	 : N	/FIXED_NI
+new80	53.0	105.0	 : N	/FIXED_NI
+new43	73.0	0.0	 : N	/FIXED_NI
+new42	69.0	0.0	 : N	/FIXED_NI
+new41	65.0	0.0	 : N	/FIXED_NI
+new40	61.0	0.0	 : N	/FIXED_NI
+new83	65.0	105.0	 : N	/FIXED_NI
+new46	81.0	0.0	 : N	/FIXED_NI
+new63	105.0	65.0	 : N	/FIXED_NI
+new44	77.0	0.0	 : N	/FIXED_NI

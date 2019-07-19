@@ -26,13 +26,13 @@ animate_graphs:
 	python3 src/py_utils/make_plots.py
 
 convert:
-	if [ ! -d "./eagle2bookshelf" ]; then \
+	if [ ! -d "./module/eagle2bookshelf" ]; then \
 		echo downloading eagle2bookshelf tool; \
 		git clone https://github.com/djmerrill/eagle2bookshelf.git; \
 	fi
-	if [ ! -f "./eagle2bookshelf/DRU.py" ]; then \
+	if [ ! -f "./module/eagle2bookshelf/DRU.py" ]; then \
 			echo downloading DRU library; \
-			wget https://raw.githubusercontent.com/NVSL/Swoop/master/Swoop/DRU.py -P ./eagle2bookshelf/; \
+			wget https://raw.githubusercontent.com/NVSL/Swoop/master/Swoop/DRU.py -P ./module/eagle2bookshelf/; \
 	fi
 	if [ ! -d "./cache" ]; then \
 			echo "creating cache directory"; \
@@ -44,7 +44,7 @@ convert:
 	fi
 	echo "converting from eagle to bookshelf"
 
-	python eagle2bookshelf/eagle2bookshelf2012.py --brd $(EAGLEFILE) --output_prfx $(BOOKSHELFPRFX) --userid annealer
+	python module/eagle2bookshelf/eagle2bookshelf2012.py --brd $(EAGLEFILE) --output_prfx $(BOOKSHELFPRFX) --userid annealer
 	mv $(BOOKSHELFPRFX).nodes ./cache/designs
 	mv $(BOOKSHELFPRFX).nets ./cache/designs
 	mv $(BOOKSHELFPRFX).pl ./cache/designs
@@ -72,6 +72,10 @@ install:
 			echo "creating reports directory"; \
 			mkdir "reports"; \
 	fi
+
+test:
+	cd ./test
+	./run.sh
 
 clean :
 	-rm src/*.o

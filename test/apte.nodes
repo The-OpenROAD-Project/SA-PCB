@@ -1,0 +1,91 @@
+UCLA blocks 1.0
+
+
+
+
+NumNodes	 :	 9
+NumTerminals	 :	 73
+
+cc_11	31.46	18.26
+cc_12	31.46	18.26
+cc_13	31.46	18.26
+cc_14	31.46	18.26
+cc_21	31.86	18.32
+cc_22	31.86	18.32
+cc_23	31.86	18.32
+cc_24	31.86	18.32
+clk	8.26	2.86
+
+new64	1	1	terminal_NI
+new62	1	1	terminal_NI
+new58	1	1	terminal_NI
+new59	1	1	terminal_NI
+new71	1	1	terminal_NI
+new8	1	1	terminal_NI
+VDD	1	1	terminal_NI
+GND	1	1	terminal_NI
+new2	1	1	terminal_NI
+new3	1	1	terminal_NI
+new0	1	1	terminal_NI
+new1	1	1	terminal_NI
+new6	1	1	terminal_NI
+new7	1	1	terminal_NI
+new4	1	1	terminal_NI
+new5	1	1	terminal_NI
+new31	1	1	terminal_NI
+new50	1	1	terminal_NI
+new51	1	1	terminal_NI
+new52	1	1	terminal_NI
+new10	1	1	terminal_NI
+new11	1	1	terminal_NI
+new12	1	1	terminal_NI
+new39	1	1	terminal_NI
+new14	1	1	terminal_NI
+new15	1	1	terminal_NI
+new16	1	1	terminal_NI
+new17	1	1	terminal_NI
+new86	1	1	terminal_NI
+new78	1	1	terminal_NI
+new79	1	1	terminal_NI
+new76	1	1	terminal_NI
+new55	1	1	terminal_NI
+new74	1	1	terminal_NI
+new75	1	1	terminal_NI
+new72	1	1	terminal_NI
+new73	1	1	terminal_NI
+new70	1	1	terminal_NI
+new32	1	1	terminal_NI
+new18	1	1	terminal_NI
+new77	1	1	terminal_NI
+new82	1	1	terminal_NI
+new19	1	1	terminal_NI
+TestHS1	1	1	terminal_NI
+new30	1	1	terminal_NI
+new65	1	1	terminal_NI
+new22	1	1	terminal_NI
+new56	1	1	terminal_NI
+new54	1	1	terminal_NI
+new66	1	1	terminal_NI
+new33	1	1	terminal_NI
+Phi	1	1	terminal_NI
+new21	1	1	terminal_NI
+new20	1	1	terminal_NI
+VSS	1	1	terminal_NI
+new29	1	1	terminal_NI
+new28	1	1	terminal_NI
+new60	1	1	terminal_NI
+new67	1	1	terminal_NI
+new85	1	1	terminal_NI
+new84	1	1	terminal_NI
+new69	1	1	terminal_NI
+new57	1	1	terminal_NI
+new81	1	1	terminal_NI
+new80	1	1	terminal_NI
+new43	1	1	terminal_NI
+new42	1	1	terminal_NI
+new41	1	1	terminal_NI
+new40	1	1	terminal_NI
+new83	1	1	terminal_NI
+new46	1	1	terminal_NI
+new63	1	1	terminal_NI
+new44	1	1	terminal_NI

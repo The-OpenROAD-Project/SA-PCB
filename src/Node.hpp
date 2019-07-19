@@ -1,10 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Authors: Ilgweon Kang and Lutong Wang
-//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng),
-//          based on Dr. Jingwei Lu with ePlace and ePlace-MS
-//
-//          Many subsequent improvements were made by Mingyu Woo
-//          leading up to the initial release.
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
 //
 // BSD 3-Clause License
 //
@@ -39,6 +35,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <string>
+
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim_all.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/tuple/tuple.hpp>
+
+using namespace std;
+using namespace boost::geometry;
+namespace trans = boost::geometry::strategy::transform;
+namespace bg = boost::geometry;
+typedef boost::geometry::model::d2::point_xy<double> point_type;
 
 class Node {
   public:
@@ -90,7 +101,6 @@ class Node {
 
   void setParameterWts(int weight) {
     // Sets parameters given an entry in weights file.
-    // weights can correspond to size, importance, etc.
     this -> weight = weight;
   }
 
@@ -124,6 +134,47 @@ class Node {
         this->xCoordinate = x;
         this->yCoordinate = y;
       }
+  }
+
+  int wrap_orientation(int kX) {
+    return kX % 8;
+  }
+
+  /*
+  setRotation
+  Rotate polygon about global origin and transform back to local origin
+  */
+  void setRotation(int r) {
+    int rot_deg = 45*r;
+    double tmpx = this->xCoordinate;
+    double tmpy = this->yCoordinate;
+
+    model::polygon<model::d2::point_xy<double> > tmp;
+    trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
+    boost::geometry::transform(this->poly, tmp, rotate);
+    this->poly = tmp;
+    updateCoordinates();
+    this->orientation = wrap_orientation(this->orientation + r);
+    this->setPos(tmpx, tmpy);
+  }
+
+  /*
+  upateCoordinates
+  Updates parameters of Node class from a geometry object
+  */
+  void updateCoordinates() {
+    if(this->terminal) {
+        this -> xBy2 = this->xCoordinate;
+        this -> yBy2 = this->yCoordinate;
+    } else {
+        boost::geometry::model::d2::point_xy<double> centroid;
+        boost::geometry::centroid(this->poly, centroid);
+        this -> xBy2 = centroid.get<0>();
+        this -> yBy2 = centroid.get<1>();
+        boost::geometry::envelope(poly, envelope);
+        this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
+        this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
+    }
   }
 
   int str2orient(string o) const{
@@ -166,44 +217,6 @@ class Node {
       return "NW";
     }
     return "";
-  }
-
-  int wrap_orientation(int kX) {
-    return kX % 8;
-  }
-
-  void setRotation(int r) {
-    int rot_deg = 45*r;
-    double tmpx = this->xCoordinate;
-    double tmpy = this->yCoordinate;
-
-    // rotate polygon about its origin
-    model::polygon<model::d2::point_xy<double> > tmp;
-    trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
-    boost::geometry::transform(this->poly, tmp, rotate);
-    this->poly = tmp;
-    updateCoordinates();
-    this->orientation = wrap_orientation(this->orientation + r);
-    this->setPos(tmpx, tmpy);
-  }
-
-  /*
-  upateCoordinates
-  Updates parameters of Node class from a geometry object
-  */
-  void updateCoordinates() {
-    if(this->terminal) {
-        this -> xBy2 = this->xCoordinate;
-        this -> yBy2 = this->yCoordinate;
-    } else {
-        boost::geometry::model::d2::point_xy<double> centroid;
-        boost::geometry::centroid(this->poly, centroid);
-        this -> xBy2 = centroid.get<0>();
-        this -> yBy2 = centroid.get<1>();
-        boost::geometry::envelope(poly, envelope);
-        this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
-        this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
-    }
   }
 
   /*

@@ -1,4 +1,4 @@
-# RePlAce
+# SA-PCB
   *SA-PCB: Simulated Annealing-based Placement For PCB Layout*
 
 ## Getting Started
@@ -30,7 +30,12 @@
     $ make
 
 ### Fix eagle2bookshelf errors
-    You may have to fix some eagle2bookshelf errors. Download DRU.py from https://github.com/NVSL/Swoop/blob/master/Swoop/DRU.py into the eagle2bookshelf directory. Test the installation by running their testcases.
+    You may have to fix some eagle2bookshelf errors. Download DRU.py and place into the eagle2bookshelf directory.
+    Test the installation by running their testcases.
+
+     $ wget https://raw.githubusercontent.com/NVSL/Swoop/master/Swoop/DRU.py
+     $ mv DRU.py eagle2bookshelf
+
 
 ### Check your installation [in development]
     To make sure your installation is correct and the current tool version is stable enough,
@@ -74,6 +79,7 @@
   - Free rotation
   - Algorithm very sensitive to parameters
   - Broken support for weighted modules/nets
+  - Set up Dockerfile
 
 ### Authors
   - Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu (Ph.D. advisor: Chung-Kuan Cheng, Steven Swanson).

@@ -38,6 +38,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+
+using namespace std;
+
 class Pin {
   public:
   string name;

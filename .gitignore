@@ -6,3 +6,4 @@ designs/bm*
 reports/*
 boost/
 taskflow/
+annealer

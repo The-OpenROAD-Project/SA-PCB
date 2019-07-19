@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 /*
 initialize_params
 Empirically finds normalization parameters for scaling cost terms.
-Currently, we scale by 1/(f) where f is the cost of the inital placement.
+Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
 void initialize_params(std::pair <double,double> *wl_normalization,
                        std::pair <double,double> *area_normalization,
@@ -288,10 +288,10 @@ void set_boundaries() {
 }
 
 /*
-randomPlacement
+random_placement
 Randomly place and orient a single component within a bounded region
 */
-void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
+void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, rotate_flag) {
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -304,6 +304,10 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
   int ro = unio();
 
+  if (rotate_flag == 0) {
+    ro = ro * 2;
+  }
+
   string ostr = n.orient2str(ro);
   n.setParameterPl(rx,ry,ostr, n.fixed);
 }
@@ -312,11 +316,11 @@ void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n) {
 initial_placement
 Randomly place and orient all movable components in the board area
 */
-void random_initial_placement() {
+void random_initial_placement(rotate_flag) {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
-      randomPlacement(b.minX, b.maxX - itNode -> width, b.minY, b.maxY - itNode -> height, *itNode);
+      random_placement(b.minX, b.maxX - itNode -> width, b.minY, b.maxY - itNode -> height, *itNode, rotate_flag);
     }
   }
 }
@@ -807,10 +811,12 @@ double initiate_move(vector< int > *accept_history,
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-
     boost::uniform_int<> uni_dist(0,7);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
     r = uni();
+    if (rotate_flag == 0) {
+      r = r*2;
+    }
     rand_node1->setRotation(r);
     validate_move(&(*rand_node1), rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));

@@ -49,7 +49,7 @@ using namespace std;
 using namespace boost::geometry;
 namespace trans = boost::geometry::strategy::transform;
 namespace bg = boost::geometry;
-typedef boost::geometry::model::d2::point_xy<double> point_type;
+typedef boost::geometry::model::d2::point_xy<double> Point;
 
 class Node {
   public:
@@ -171,7 +171,9 @@ class Node {
         boost::geometry::centroid(this->poly, centroid);
         this -> xBy2 = centroid.get<0>();
         this -> yBy2 = centroid.get<1>();
-        boost::geometry::envelope(poly, envelope);
+        boost::geometry::envelope(poly, this->envelope);
+        this->width =
+        this->height =
         this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
         this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
     }

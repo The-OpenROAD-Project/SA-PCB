@@ -61,7 +61,6 @@ map < string, int > name2id;
 bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
 
 float l1 = 1.0;
-long long int iii = 0;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
@@ -590,18 +589,22 @@ double rudy(map<int, vector<Pin> > &netToCell) {
       yVal = nodeId[itCellList->idx].yBy2;
 
       // compute pin position from orientation & offsets
-      if(orient == 0) {
+      if(orient == 0) { // 0
         xVal = xVal + itCellList->x_offset;
         yVal = yVal + itCellList->y_offset;
-      } else if(orient == 1) {
+      } else if(orient == 2) { // 90
         xVal = xVal + itCellList->y_offset;
         yVal = yVal - itCellList->x_offset;
-      } else if(orient == 2) {
+      } else if(orient == 4) { // 180
         xVal = xVal - itCellList->x_offset;
         yVal = yVal - itCellList->y_offset;
-      } else if(orient == 3) {
+      } else if(orient == 6) { // 270
         xVal = xVal - itCellList->y_offset;
         yVal = yVal + itCellList->x_offset;
+      } else {
+        double rad = (orient*45.0*PI/180.0);
+        xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
+        yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
       }
 
       if (xVal < minXW)
@@ -640,6 +643,7 @@ double rudy(map<int, vector<Pin> > &netToCell) {
   }
 
   // write tab separated matrix to file
+  /*
   if(iii % 10 == 0) {
       ofstream dat("cache/route/"+std::to_string(iii) + ".txt");
       for (unsigned i = 0; i < D.size1() ; i++) {
@@ -648,7 +652,7 @@ double rudy(map<int, vector<Pin> > &netToCell) {
           }
           dat << endl;
       }
-  }
+  }*/
 
   return r;
 }
@@ -1123,7 +1127,6 @@ float timberWolfAlgorithm(int outer_loop_iter,
       break;
     }
     update_temperature(&Temperature);
-    iii += 1;
     ii += 1;
     if (ii % 10 == 0) {
       writePlFile("./cache/"+std::to_string( ii )+".pl");

@@ -54,6 +54,8 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 
+#include "Pin.h"
+
 using namespace std;
 using namespace boost::geometry;
 namespace trans = boost::geometry::strategy::transform;
@@ -72,7 +74,7 @@ int readWtsFile(string fname);
 int readPlFile(string fname);
 map<int, vector<Pin> > readNetsFile(string fname);
 int writePlFile(string fname);
-
+/*
 class Pin {
   public:
   string name;
@@ -88,7 +90,7 @@ class Pin {
     this -> idx = idx;
   }
 };
-
+*/
 class Node {
   public:
   string name;

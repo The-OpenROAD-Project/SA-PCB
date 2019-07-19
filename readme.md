@@ -89,4 +89,4 @@
   - C.-K. Cheng, A. B. Kahng, I. Kang and L. Wang, "RePlAce: Advancing Solution Quality and Routability Validation in Global Placement", to appear in IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 2018. (Digital Object Identifier: 10.1109/TCAD.2018.2859220)
   - Ben-Ameur, Walid. "Computing the initial temperature of simulated annealing." Computational Optimization and Applications 29, no. 3 (2004): 369-385.
   - James M. Varanelli and James P. Cohoon. Two-stage simulated annealing methodology. In Proceedings of the 5th Great Lakes Symposium on VLSI, volume ?, pages 50–53, Buffalo, NY, 16.-18. March 1995. IEEE, Los Alamitos, CA. †EI M153001/95
-  -  K. D. Boese A. B. Kahng and S. Muddu A new adaptive multistart technique for combinatorial global optimizations, Operations Research Letters, 16(2): 101-113, September, 1993. 
+  - K. D. Boese A. B. Kahng and S. Muddu A new adaptive multistart technique for combinatorial global optimizations, Operations Research Letters, 16(2): 101-113, September, 1993.

@@ -38,7 +38,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "main.h"
+#include "main.hpp"
 #define PI 3.14159265
 
 using namespace std::chrono;

@@ -42,6 +42,7 @@
     run a Hello World application:
 
     $ make test
+    $ open test.png
 
 ### How to execute
     ./sa parameters
@@ -84,7 +85,7 @@
 
 ### Authors
   - Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu (Ph.D. advisor: Chung-Kuan Cheng, Steven Swanson).
-  - Pull requests to improve the tool are very appreciated. 
+  - Pull requests to improve the tool are very appreciated.
 
 ### Citations
   - Sechen, C. and Sangiovanni-Vincentelli, A. L., "The Timber-Wolf placement and routing package", IEEE J. Solid-State Circuits 30:510–522 1985.

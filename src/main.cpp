@@ -44,7 +44,7 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 namespace bg = boost::geometry;
 namespace bnu = boost::numeric::ublas;
 namespace bgi = boost::geometry::index;
-//typedef bg::model::point<float, 2, bg::cs::cartesian> point;
+typedef bg::model::point<float, 2, bg::cs::cartesian> Point;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
@@ -144,8 +144,8 @@ int main(int argc, char *argv[]) {
   if(debug) { cout << "calculating boundaries..." << endl; }
   set_boundaries();
   if(debug) { cout << "annealing" << endl; }
-  float cost = timberWolfAlgorithm(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, rotate_flag);
-  writePlFile("./"+out_file+".pl");
+  float cost = annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, rotate_flag);
+  writePlFile("./final_placement.pl");
   cout << " " << idx << " " << cost << endl;
   return cost;
 }
@@ -158,7 +158,8 @@ Currently, we scale by 1/(f) where f is the cost of an expected placement.
 void initialize_params(std::pair <double,double> *wl_normalization,
                        std::pair <double,double> *area_normalization,
                        std::pair <double,double> *routability_normalization,
-                       map<int, vector<Pin> > &netToCell) {
+                       map<int, vector<Pin> > &netToCell,
+                       int rotate_flag) {
 
   vector < std::pair <double,double> > normalization_terms;
 
@@ -172,13 +173,13 @@ void initialize_params(std::pair <double,double> *wl_normalization,
 
   // min/max wl
   std::pair < double, double > wl;
-  double min_wl = std::numeric_limits<double>::max();
-  double max_wl = 0.0;
+//  double min_wl = std::numeric_limits<double>::max();
+//  double max_wl = 0.0;
 
   // min/max overlap area
   std::pair < double, double > area;
-  double min_area = 0.0;
-  double max_area = 0.0;
+//  double min_area = 0.0;
+//  double max_area = 0.0;
 /*
   vector < Node > ::iterator nodeit1;
   vector < Node > ::iterator nodeit2;
@@ -225,7 +226,7 @@ void initialize_params(std::pair <double,double> *wl_normalization,
   double sum_wl = 0.0;
   double sum_oa = 0.0;
   for (int i = 0; i<1000; i++) {
-    random_initial_placement();
+    random_initial_placement(rotate_flag);
     sum_wl += wirelength(netToCell);
     sum_oa += cell_overlap();
   }
@@ -291,7 +292,7 @@ void set_boundaries() {
 random_placement
 Randomly place and orient a single component within a bounded region
 */
-void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, rotate_flag) {
+void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, int rotate_flag) {
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -316,7 +317,7 @@ void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, rotate_fla
 initial_placement
 Randomly place and orient all movable components in the board area
 */
-void random_initial_placement(rotate_flag) {
+void random_initial_placement(int rotate_flag) {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
@@ -454,9 +455,9 @@ Compute sum squared overlap for all components
 double cell_overlap() {
   double overlap = 0.0;
 
-  for(int i = 0; i < nodeId.size(); i++) {
+  for(size_t i = 0; i < nodeId.size(); i++) {
     //if(nodeId[i].terminal) { continue; }
-      for(int j = i; j < nodeId.size(); j++) {
+      for(size_t j = i; j < nodeId.size(); j++) {
         if (i == j) {continue;}
         //if(nodeId[j].terminal) { continue; }
         if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
@@ -962,10 +963,10 @@ double initialize_temperature(vector< int > &accept_history,
   double xt = 1.0;
   double x0 = 0.84;
   double p = 2.0;
-  random_initial_placement();
+  random_initial_placement(rotate_flag);
   for(int i=1; i<=10; i++){
     for(int j=1; j<=10; j++){
-      random_initial_placement();
+      random_initial_placement(rotate_flag);
       emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
       initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
@@ -1045,10 +1046,10 @@ void gen_report(map<string, vector<double> > &report,
 }
 
 /*
-timberWolfAlgorithm
+annealer
 main loop for sa algorithm
 */
-float timberWolfAlgorithm(int outer_loop_iter,
+float annealer(int outer_loop_iter,
                           int inner_loop_iter,
                           double eps,
                           double t_0,
@@ -1074,8 +1075,8 @@ float timberWolfAlgorithm(int outer_loop_iter,
   vector< int > accept_history;
   float accept_ratio = 0;
   vector< double > accept_ratio_history;
-  random_initial_placement();
-  initialize_params(&wl_normalization, &area_normalization, &routability_normalization, netToCell);
+  random_initial_placement(rotate_flag);
+  initialize_params(&wl_normalization, &area_normalization, &routability_normalization, netToCell, rotate_flag);
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   if(var) {
     Temperature = initialize_temperature(accept_history,

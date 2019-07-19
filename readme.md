@@ -30,7 +30,7 @@
     $ make
 
 ### Fix eagle2bookshelf errors
-    You may have to fix some eagle2bookshelf errors. Download DRU.py and place into the eagle2bookshelf
+    You may have to fix some Swoop errors. Download DRU.py and place into the eagle2bookshelf
     directory.
 
      $ wget https://raw.githubusercontent.com/NVSL/Swoop/master/Swoop/DRU.py

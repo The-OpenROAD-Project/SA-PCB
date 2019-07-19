@@ -245,5 +245,5 @@ int writePlFile(string fname) {
       }
     myfile.close();
     return 0;
-  } else{ cout << "Unable to open file"; return 1;}
+  } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
 }

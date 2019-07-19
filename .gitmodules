@@ -1,6 +1,6 @@
 [submodule "cpp-taskflow"]
-	path = cpp-taskflow
+	path = module/cpp-taskflow
 	url = https://github.com/cpp-taskflow/cpp-taskflow.git
 [submodule "eagle2bookshelf"]
-	path = eagle2bookshelf
+	path = module/eagle2bookshelf
 	url = https://github.com/djmerrill/eagle2bookshelf.git

@@ -72,7 +72,6 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-
 #include "readFiles.hpp"
 #include "time.h"
 //#include "readScl.h"
@@ -129,7 +128,7 @@ bool check_move(double prevCost,
                 std::pair <double,double> &routability_normalization,
                 map<int, vector<Pin> > &netToCell);
 void project_soln();
-void randomPlacement(int xmin, int xmax, int ymin, int ymax, Node n);
+void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, int rotate_flag);
 void gen_report(map<string, vector<double> > &report,
                 vector< double > &accept_ratio_history,
                 std::pair <double,double> &wl_normalization,

@@ -1,11 +1,7 @@
 """
 ///////////////////////////////////////////////////////////////////////////////
-// Authors: Ilgweon Kang and Lutong Wang
-//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng),
-//          based on Dr. Jingwei Lu with ePlace and ePlace-MS
-//
-//          Many subsequent improvements were made by Mingyu Woo
-//          leading up to the initial release.
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
 //
 // BSD 3-Clause License
 //

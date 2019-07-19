@@ -14,11 +14,41 @@ Usage:
 -o --out OUT_NAME              Name for updated EAGLE file that will be created.
 """
 
+LICENCE = """
+BSD 3-Clause License
+
+Copyright (c) 2015-2018, The Regents of the University of California
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from __future__ import print_function
 
 import datetime
-
-import numpy as np
 
 import Swoop
 from docopt import docopt
@@ -67,8 +97,12 @@ def read_pl2(fname):
 					if '/FIXED' in l[5]:
 						locked = True
 
-				rot2deg = {'N':0,'S':180,'E':270,'W':90}
-				components[pname] = Component(x=newx, y=newy, rotdeg=rot2deg[r], locked=locked)
+				rot2deg = {'N':0,'S':180,'E':270,'W':90,'NW':45,'SW':(90+45),'SE':(180+45),'NE':(270+45)}
+
+				if r.startswith('R'): # EAGLE style rotation
+					components[pname] = Component(x=newx, y=newy, rotdeg=r.strip().strip('R'), locked=locked)
+				else: # NSEW style rotation
+					components[pname] = Component(x=newx, y=newy, rotdeg=rot2deg[r], locked=locked)
 
 	return components
 
@@ -99,7 +133,7 @@ def update_placements(
 	for n in (Swoop.From(brd).
 		get_elements()
 	):
-		name = n.get_name()
+		name = n.get_name()			
 		library = n.get_library()
 		package = n.get_package()
 		e = ElementEntry(name, library=library, package=package)
@@ -141,7 +175,7 @@ def update_placements(
 				continue
 
 			((x_min, x_max), (y_min, y_max)) = de_bounding_box(de)
-
+			
 			e.expand_bb(
 				x_min,
 				x_max,
@@ -183,23 +217,24 @@ def update_placements(
 			n.set_y( pl_info[brd_name].y - e.x_min )
 			# ll_y = e.y_loc + (e.x_min)
 			# print e.name, 'loc:', (e.x_loc, e.y_loc),'ll:', (ll_x, ll_y), 'x:', (e.x_min, e.x_max), 'y:', (e.y_min, e.y_max)
-                elif e.rotation == 'R180':
+		elif e.rotation == 'R180':
 			n.set_x( pl_info[brd_name].x + e.x_max )
 			# ll_x = e.x_loc - (e.x_max)
 			n.set_y( pl_info[brd_name].y + e.y_max )
 			# ll_y = e.y_loc - (e.y_max)
 			# print e.name, 'loc:', (e.x_loc, e.y_loc),'ll:', (ll_x, ll_y), 'x:', (e.x_min, e.x_max), 'y:', (e.y_min, e.y_max)
-                elif e.rotation == 'R270':
+		elif e.rotation == 'R270':
 			n.set_x( pl_info[brd_name].x - e.y_min )
 			# ll_x = e.x_loc + (e.y_min)
 			n.set_y( pl_info[brd_name].y + e.x_max )
 			# ll_y = e.y_loc - (e.x_max)
+
 	brd.write(out_file, check_sanity=False, dtd_validate=False) # should really pass sanity check and dtd
 
 
 
 if __name__ == '__main__':
-	arguments = docopt(__doc__, version='bookshelf2eagle v0.1')
+	arguments = docopt(__doc__, version='bookshelf2eagle v0.2')
 	update_placements(
 		brd_file=str(arguments['--brd']),
 		pl_file=str(arguments['--pl']),

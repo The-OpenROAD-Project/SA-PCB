@@ -119,12 +119,12 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
         ymin = min([p[1] for p in netlist])
         center =  [(xmax + xmin)/2,(ymax + ymin)/2]
         # centroid - star
-        #for i in range(len(netlist)):
-        #    ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
-        #xs= [ x[0] for x in netlist ]
-        #ys= [ x[1] for x in netlist ]
-        #ax.scatter(xs,ys,marker='.',c=c)
-        #ax.scatter(center[0],center[1],marker='.',c=c)
+        for i in range(len(netlist)):
+            ax.plot([netlist[i][0],center[0]],[netlist[i][1],center[1]], color=tuple(map(tuple, c))[0] + (255,), linewidth=1, alpha=0.5, linestyle='dashed')
+        xs= [ x[0] for x in netlist ]
+        ys= [ x[1] for x in netlist ]
+        ax.scatter(xs,ys,marker='.',c=c)
+        ax.scatter(center[0],center[1],marker='.',c=c)
     plt.xlim(board_lower_left_corner[0] - 5,board_upper_right_corner[0] + 5)
     plt.ylim(board_lower_left_corner[1] - 5,board_upper_right_corner[1] + 5)
     #plt.gca().set_aspect('equal', adjustable='box')
@@ -177,7 +177,8 @@ def plot_pl(plfile, nodesfile, netsfile, figname, shapesfile=None, board_dim=Non
             board_dim = [xs,ys]
             pass
         else:
-            board_dim = [[-25,120],[-25,120]]
+            #board_dim = [[-25,120],[-25,120]]
+            board_dim = [[0,50],[0,50]]
     else:
         board_dim = board_dim#[[boarddimmin,boarddimmax],[boarddimmin, boarddimmax]]
     plot_circuit(plfile.split('.')[0], components,comp2rot,nets,board_dim,figname)

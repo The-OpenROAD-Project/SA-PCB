@@ -44,7 +44,6 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 namespace bg = boost::geometry;
 namespace bnu = boost::numeric::ublas;
 namespace bgi = boost::geometry::index;
-typedef bg::model::point<float, 2, bg::cs::cartesian> Point;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
@@ -54,9 +53,9 @@ boost::mt19937 rng;
 
 vector < Node > nodeId;
 map < string, int > name2id;
-bgi::rtree<std::pair<box, unsigned>, bgi::quadratic<16>> rtree;
+bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
-float l1 = 1.0;
+float l1 = 0.0;//0.85;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
@@ -71,6 +70,7 @@ int main(int argc, char *argv[]) {
   long long int idx = -1;
 
   string parg = "";
+  string initial_pl = "";
   int bound_inc = 0;
   bool var = false;
 
@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
       switch(opt) {
           case 'x': idx = atoi(optarg); break;
           case 'p': parg=string(optarg); break;
+          case 'l ': initial_pl=string(optarg); break;
           case 'd': debug=atoi(optarg); break;
           case 'i': outer_loop_iter = atoi(optarg); break;
           case 'j': inner_loop_iter = atoi(optarg); break;
@@ -102,7 +103,8 @@ int main(int argc, char *argv[]) {
                                     -e <optional, float> : convergence epsilon \n \
                                     -v <optional>        : ben-amur flag \n \
                                     -x <optional, int>   : simulated annealing instance index \n \
-                                    -p <required, string>: input placement board \n \
+                                    -p <required, string>: prefix of board to place \n \
+                                    -l <optional, string>: prefix of initial placement \n \
                                     -d <optional, {0-3}> : debug verbosity \n \
                                     -r <optional, {0-3}> : rotation \n \
                                     EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output");
@@ -116,14 +118,18 @@ int main(int argc, char *argv[]) {
   if(parg == "")   {
     out_file = std::to_string( idx );
   }
-  string p = string(parg);
-  cout << "circuit: " << p << endl;
+  cout << "circuit: " << parg << endl;
 
-  string nodesfname  = p + ".nodes";
-  string shapesfname = p + ".shapes";
-  string netsfname   = p + ".nets";
-  string plfname     = p + ".pl";
-  string wtsfname    = p + ".wts";
+  string nodesfname  = parg + ".nodes";
+  string shapesfname = parg + ".shapes";
+  string netsfname   = parg + ".nets";
+  string plfname     = "";
+  if (initial_pl != "") {
+    plfname          = parg + ".pl";
+  } else {
+    plfname          = initial_pl;
+  }
+  string wtsfname    = parg + ".wts";
 
   cout << nodesfname << endl;
   cout << shapesfname << endl;
@@ -144,7 +150,7 @@ int main(int argc, char *argv[]) {
   if(debug) { cout << "calculating boundaries..." << endl; }
   set_boundaries();
   if(debug) { cout << "annealing" << endl; }
-  float cost = annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, rotate_flag);
+  float cost = annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, initial_pl, rotate_flag);
   writePlFile("./final_placement.pl");
   cout << " " << idx << " " << cost << endl;
   return cost;
@@ -155,9 +161,9 @@ initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
-void initialize_params(std::pair <double,double> *wl_normalization,
-                       std::pair <double,double> *area_normalization,
-                       std::pair <double,double> *routability_normalization,
+void initialize_params(std::pair <double,double> &wl_normalization,
+                       std::pair <double,double> &area_normalization,
+                       std::pair <double,double> &routability_normalization,
                        map<int, vector<Pin> > &netToCell,
                        int rotate_flag) {
 
@@ -170,16 +176,15 @@ void initialize_params(std::pair <double,double> *wl_normalization,
       num_components += 1;
     }
   }
-
   // min/max wl
   std::pair < double, double > wl;
-//  double min_wl = std::numeric_limits<double>::max();
-//  double max_wl = 0.0;
+  double min_wl = std::numeric_limits<double>::max();
+  double max_wl = 0.0;
 
   // min/max overlap area
   std::pair < double, double > area;
-//  double min_area = 0.0;
-//  double max_area = 0.0;
+  double min_area = 0.0;
+  double max_area = 0.0;
 /*
   vector < Node > ::iterator nodeit1;
   vector < Node > ::iterator nodeit2;
@@ -217,40 +222,39 @@ void initialize_params(std::pair <double,double> *wl_normalization,
   max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
 
   wl.first = 0.0; // min_area
-  wl.second = max(wirelength(netToCell),1.0); // max_area
+  wl.second = max(wirelength(netToCell), 1.0); // max_area
 
   area.first = 0.0; // min_area;
-  area.second = max(cell_overlap(),1.0); // max_area;
+  area.second = max(cell_overlap(), 1.0); // max_area;
 */
-
   double sum_wl = 0.0;
   double sum_oa = 0.0;
-  for (int i = 0; i<1000; i++) {
+  for (int i = 0; i<100; i++) {
     random_initial_placement(rotate_flag);
     sum_wl += wirelength(netToCell);
     sum_oa += cell_overlap();
   }
 
   wl.first = 0.0;
-  wl.second = sum_wl / 1000.0;
+  wl.second = sum_wl / 100.0;
 
   area.first = 0.0;
-  area.second = sum_oa / 1000.0;
+  area.second = sum_oa / 100.0;
 
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
 
-  *wl_normalization = normalization_terms[0];
-  *area_normalization = normalization_terms[1];
+  wl_normalization = normalization_terms[0];
+  area_normalization = normalization_terms[1];
 
-  routability_normalization->first = 0.0;
-  routability_normalization->second = max(rudy(netToCell),1.0);
+  routability_normalization.first = 0.0;
+  routability_normalization.second = max(rudy(netToCell),1.0);
 }
 
 /*
 set_boundaries
 Calculate board boundaries by finding the maximum-area
-rectangular envelop encompasing terminals & fixed modules.
+rectangular envelope encompasing terminals & fixed modules.
 */
 void set_boundaries() {
   double xval, yval, width, height;
@@ -279,7 +283,7 @@ void set_boundaries() {
   if (b.minX == 0 && b.maxX == 0 && b.minY == 0 && b.maxY == 0) {
     cout << "no boundary found" << endl;
     b.maxX = 50;
-    b.maxY = 50;
+    b.maxY = 10;
   }
 
   if(debug) {
@@ -292,7 +296,7 @@ void set_boundaries() {
 random_placement
 Randomly place and orient a single component within a bounded region
 */
-void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, int rotate_flag) {
+void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n, int rotate_flag) {
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -301,12 +305,16 @@ void random_placement(int xmin, int xmax, int ymin, int ymax, Node n, int rotate
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uniy(rng, uni_disty);
   int ry = uniy();
 
-  boost::uniform_int<> uni_disto(0,7);
-  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
-  int ro = unio();
-
+  int ro = 0.0;
   if (rotate_flag == 0) {
+    boost::uniform_int<> uni_disto(0,3);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
+    ro = unio();
     ro = ro * 2;
+  } else {
+    boost::uniform_int<> uni_disto(0,7);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unio(rng, uni_disto);
+    ro = unio();
   }
 
   string ostr = n.orient2str(ro);
@@ -321,7 +329,7 @@ void random_initial_placement(int rotate_flag) {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
-      random_placement(b.minX, b.maxX - itNode -> width, b.minY, b.maxY - itNode -> height, *itNode, rotate_flag);
+      random_placement(b.minX, b.maxX - max(itNode -> width, itNode -> height), b.minY, b.maxY - max(itNode -> width, itNode -> height), *itNode, rotate_flag);
     }
   }
 }
@@ -457,26 +465,26 @@ double cell_overlap() {
 
   for(size_t i = 0; i < nodeId.size(); i++) {
     //if(nodeId[i].terminal) { continue; }
-      for(size_t j = i; j < nodeId.size(); j++) {
-        if (i == j) {continue;}
-        //if(nodeId[j].terminal) { continue; }
-        if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
-          continue;
-        } else {
-          double oa = 0.0;
-          std::deque<polygon> intersect_poly;
-          boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
+    for(size_t j = i; j < nodeId.size(); j++) {
+      if (i == j) {continue;}
+      //if(nodeId[j].terminal) { continue; }
+      if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
+        continue;
+      } else {
+        double oa = 0.0;
+        std::deque<polygon> intersect_poly;
+        boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
 
-          BOOST_FOREACH(polygon const& p, intersect_poly) {
-              oa +=  bg::area(p);
-          }
-          if(oa < 1.0) {
-              oa = 1.0;
-          }
-          overlap +=  pow(oa,2);
+        BOOST_FOREACH(polygon const& p, intersect_poly) {
+            oa +=  bg::area(p);
         }
+        if(oa < 1.0) {
+            oa = 1.0;
+        }
+        overlap +=  pow(oa,2);
       }
     }
+  }
   return overlap;
 }
 
@@ -485,45 +493,61 @@ wireLength_partial
 Compute HPWL for select nets
 */
 double wirelength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell) {
-  map<int, vector < Pin > > ::iterator itNet;
+  //map < int, vector < Pin > > ::iterator itNet;
+  vector < Pin > net;
+  vector < int > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
+  vector < Node >::iterator itNode;
+  unordered_set < int > net_history;
+
   double xVal, yVal, wireLength = 0;
-  for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
-    //if (nodes.find("f") == nodes.end()) {
-    //  continue;
-    //}
-    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
-    for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
-      if(itCellList->name == "") {
+  //for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
+  for (itNode = nodes.begin(); itNode != nodes.end(); ++itNode) {
+    for (itNet = itNode->Netlist.begin(); itNet != itNode->Netlist.end(); ++itNet) {
+      if (net_history.find(*itNet) == net_history.end()) {
+        net_history.insert(*itNet);
+      } else {
         continue;
       }
-      int orient = nodeId[itCellList->idx].orientation;
-      xVal = nodeId[itCellList->idx].xBy2;
-      yVal = nodeId[itCellList->idx].yBy2;
-      if(orient == 0) {
-        xVal = xVal + itCellList->x_offset;
-        yVal = yVal + itCellList->y_offset;
-      } else if(orient == 1) {
-        xVal = xVal + itCellList->y_offset;
-        yVal = yVal - itCellList->x_offset;
-      } else if(orient == 2) {
-        xVal = xVal - itCellList->x_offset;
-        yVal = yVal - itCellList->y_offset;
-      } else if(orient == 3) {
-        xVal = xVal - itCellList->y_offset;
-        yVal = yVal + itCellList->x_offset;
-      }
+      net = netToCell.find(*itNet)->second;
+      double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+      for (itCellList = net.begin(); itCellList != net.end(); ++itCellList) {
+        if(itCellList->name == "") {
+          continue;
+        }
+        int orient = nodeId[itCellList->idx].orientation;
+        xVal = nodeId[itCellList->idx].xBy2;
+        yVal = nodeId[itCellList->idx].yBy2;
 
-      if (xVal < minXW)
-        minXW = xVal;
-      if (xVal > maxXW)
-        maxXW = xVal;
-      if (yVal < minYW)
-        minYW = yVal;
-      if (yVal > maxYW)
-        maxYW = yVal;
+        if(orient == 0) { // 0
+          xVal = xVal + itCellList->x_offset;
+          yVal = yVal + itCellList->y_offset;
+        } else if(orient == 2) { // 90
+          xVal = xVal + itCellList->y_offset;
+          yVal = yVal - itCellList->x_offset;
+        } else if(orient == 4) { // 180
+          xVal = xVal - itCellList->x_offset;
+          yVal = yVal - itCellList->y_offset;
+        } else if(orient == 6) { // 270
+          xVal = xVal - itCellList->y_offset;
+          yVal = yVal + itCellList->x_offset;
+        } else {
+          double rad = (orient*45.0*PI/180.0);
+          xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
+          yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
+        }
+
+        if (xVal < minXW)
+          minXW = xVal;
+        if (xVal > maxXW)
+          maxXW = xVal;
+        if (yVal < minYW)
+          minYW = yVal;
+        if (yVal > maxYW)
+          maxYW = yVal;
+      }
+      wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
     }
-    wireLength += (abs((maxXW - minXW)) + abs((maxYW - minYW)));
   }
   return wireLength;
 }
@@ -534,28 +558,26 @@ Compute sum squared overlap for select components
 */
 double cell_overlap_partial(vector < Node > &nodes) {
   double overlap = 0.0;
-  vector < Node > ::iterator nodeit1;
-  vector < Node > ::iterator nodeit2;
 
-  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
-    if (!nodeit1->terminal) {
-      for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
-        if(nodeit2->idx == nodeit1->idx){continue;}
-        if(!intersects(nodeit1->poly, nodeit2->poly) || (nodeit1->fixed && nodeit2->fixed)) {
-          continue;
-        } else {
-          double oa = 0.0;
-          std::deque<polygon> intersect_poly;
-          boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
+  for(size_t i = 0; i < nodes.size(); i++) {
+    //if(nodeId[i].terminal) { continue; }
+    for(size_t j = 0; j < nodeId.size(); j++) {
+      if (i == j) {continue;}
+      //if(nodeId[j].terminal) { continue; }
+      if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
+        continue;
+      } else {
+        double oa = 0.0;
+        std::deque<polygon> intersect_poly;
+        boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
 
-          BOOST_FOREACH(polygon const& p, intersect_poly) {
-              oa +=  bg::area(p);
-          }
-          if(oa < 1.0) {
-              oa = 1.0;
-          }
-          overlap +=  pow(oa,2);
+        BOOST_FOREACH(polygon const& p, intersect_poly) {
+            oa +=  bg::area(p);
         }
+        if(oa < 1.0) {
+            oa = 1.0;
+        }
+        overlap +=  pow(oa,2);
       }
     }
   }
@@ -576,7 +598,6 @@ double rudy(map<int, vector<Pin> > &netToCell) {
   map<int, vector < Pin > > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
 
-  // For each net
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
     double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
@@ -677,21 +698,20 @@ double cost(
                         l2 * 0.1*rudy(netToCell) << endl;
   }
   return l1 * (wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-         l2 * 0.1 * rudy(netToCell);
+         l2 * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
+         //l2 * 0.1 * rudy(netToCell);
          //l2 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
-double cost_partial(int temp_debug,
-                    vector < Node > nodes,
+double cost_partial(vector < Node > &nodes,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * (wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.9 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-		     l2 * 0.1 * rudy(netToCell);
+         l2 * 0.9 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
+		     //l2 * 0.1 * rudy(netToCell);
 }
 
 /*
@@ -736,7 +756,8 @@ void validate_move(Node* node, double rx, double ry) {
 }
 
 double c = 0.0;
-double initiate_move(vector< int > *accept_history,
+double initiate_move(double current_cost,
+                     vector< int > *accept_history,
                      double & Temperature,
                      std::pair <double,double> &wl_normalization,
                      std::pair <double,double> &area_normalization,
@@ -745,17 +766,22 @@ double initiate_move(vector< int > *accept_history,
                      int rotate_flag) {
   // Initate a transition
   int state = -1;
-  double prevCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
+  double prevCost = 0.0;
   if(debug > 1) {
     cout << "prevCost: " << prevCost << endl;
   }
   vector < Node > ::iterator rand_node1;
   vector < Node > ::iterator rand_node2;
+
+  vector < Node > perturbed_nodes;
+
   int r = 0;
   rand_node1 = random_node();
   while(rand_node1->terminal || rand_node1->name == "" || rand_node1->fixed) {
     rand_node1 = random_node();
   }
+  perturbed_nodes.push_back(*rand_node1);
+
   //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
   double rand_node1_orig_x = rand_node1->xCoordinate;
   double rand_node1_orig_y = rand_node1->yCoordinate;
@@ -780,6 +806,9 @@ double initiate_move(vector< int > *accept_history,
     while(rand_node2->terminal || rand_node2->idx == rand_node1->idx || rand_node2->name == "" || rand_node2->fixed) {
       rand_node2 = random_node();
     }
+    perturbed_nodes.push_back(*rand_node2);
+    prevCost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+
     //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
     rand_node2_orig_x = rand_node2->xCoordinate;
     rand_node2_orig_y = rand_node2->yCoordinate;
@@ -793,6 +822,8 @@ double initiate_move(vector< int > *accept_history,
     if(debug > 1) {
       cout << "shift" << endl;
     }
+    prevCost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+
     double sigma = rand_node1->sigma;
 
     boost::normal_distribution<> nd(0.0, sigma);
@@ -812,17 +843,29 @@ double initiate_move(vector< int > *accept_history,
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-    boost::uniform_int<> uni_dist(0,7);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
-    r = uni();
+    prevCost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+
     if (rotate_flag == 0) {
+      boost::uniform_int<> uni_dist(0,3);
+      boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
+      r = uni();
       r = r*2;
+    } else {
+      boost::uniform_int<> uni_dist(0,7);
+      boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
+      r = uni();
     }
+
     rand_node1->setRotation(r);
     validate_move(&(*rand_node1), rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
-  bool accept = check_move(prevCost,
+
+  double transition_cost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+  double updated_cost = current_cost - prevCost + transition_cost;
+
+  bool accept = check_move(current_cost,
+                           updated_cost,
                            accept_history,
                            Temperature,
                            wl_normalization,
@@ -847,13 +890,13 @@ double initiate_move(vector< int > *accept_history,
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     }
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
-    return prevCost;
+    return current_cost;
   }
   else {
     if(debug > 1) {
       cout << "accept" << endl;
     }
-    return c;
+    return updated_cost;
   }
 }
 
@@ -865,35 +908,35 @@ void update_temperature(double* Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
   if (*Temperature > 0.1) {
     *Temperature = (0.985) * *Temperature;
-    if (l1 > 92e-2) {
+    if (l1 > 88e-2) {
       l1 -= 2e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.9999*nodeit->sigma,0.5);
+      nodeit->sigma =  max(0.9999*nodeit->sigma,3/4 * nodeit->sigma);
     }
   } else if (*Temperature > 0.01) {
     *Temperature = (0.9992) * *Temperature;
-    if (l1 > 88.5e-2) {
+    if (l1 > 80e-2) {
       l1 -= 4e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.25);
+      nodeit->sigma =  max(0.999*nodeit->sigma,2/4 * nodeit->sigma);
     }
   } else if (*Temperature > 0.005) {
     *Temperature = (0.9955) * *Temperature;
-    if (l1 > 85.5e-2) {
+    if (l1 > 60e-2) {
       l1 -= 8e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.18);
+      nodeit->sigma =  max(0.999*nodeit->sigma,1/4 * nodeit->sigma);
     }
   } else if (*Temperature > 0.001) {
     *Temperature = (0.9965) * *Temperature;
-    if (l1 > 82e-2) {
+    if (l1 > 50e-2) {
       l1 -= 16e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
+      nodeit->sigma =  max(0.999*nodeit->sigma,0.2);
     }
   } else {
     if (*Temperature > 0.000001) {
@@ -901,7 +944,7 @@ void update_temperature(double* Temperature) {
     } else {
       *Temperature = 0.0000000001;
     }
-    if (l1 > 1e-4) {
+    if (l1 > 10e-4) {
       l1 -= 10e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
@@ -924,14 +967,13 @@ check_move
 either accept or reject the move based on current & previous temperature & cost
 */
 bool check_move(double prevCost,
+                double newCost,
                 vector< int > *accept_history,
                 double & Temperature,
                 std::pair <double,double> &wl_normalization,
                 std::pair <double,double> &area_normalization,
                 std::pair <double,double> &routability_normalization,
                 map<int, vector<Pin> > &netToCell) {
-  double newCost = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
-  c = newCost;
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -968,7 +1010,7 @@ double initialize_temperature(vector< int > &accept_history,
     for(int j=1; j<=10; j++){
       random_initial_placement(rotate_flag);
       emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
-      initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+      initiate_move(0.0, &accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
     }
     xt = emax/emin;
@@ -1050,12 +1092,13 @@ annealer
 main loop for sa algorithm
 */
 float annealer(int outer_loop_iter,
-                          int inner_loop_iter,
-                          double eps,
-                          double t_0,
-                          bool var,
-                          map<int, vector<Pin> > &netToCell,
-                          int rotate_flag) {
+               int inner_loop_iter,
+               double eps,
+               double t_0,
+               bool var,
+               map<int, vector<Pin> > &netToCell,
+               string initial_pl,
+               int rotate_flag) {
   double Temperature = t_0;
   int num_components = 0;
 
@@ -1075,8 +1118,18 @@ float annealer(int outer_loop_iter,
   vector< int > accept_history;
   float accept_ratio = 0;
   vector< double > accept_ratio_history;
-  random_initial_placement(rotate_flag);
-  initialize_params(&wl_normalization, &area_normalization, &routability_normalization, netToCell, rotate_flag);
+
+  // random_initial_placement(rotate_flag);
+
+  if(debug) { cout << "calculating initial params..." << endl; }
+  initialize_params(wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+
+  if (initial_pl != "") {
+    readPlFile(initial_pl);
+  } else {
+    random_initial_placement(rotate_flag);
+  }
+
   double cst = cost(wl_normalization, area_normalization, routability_normalization, netToCell);
   if(var) {
     Temperature = initialize_temperature(accept_history,
@@ -1099,6 +1152,7 @@ float annealer(int outer_loop_iter,
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   long long int ii = 0; // outer loop iterator
   int i = 0; // inner loop iterator
+  if(debug) { cout << "annealing..." << endl; }
   while (ii < outer_loop_iter) {
     i = inner_loop_iter*num_components;
     if(ii > 1 && ii % 10 == 0 && debug) {
@@ -1115,12 +1169,12 @@ float annealer(int outer_loop_iter,
       cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
     }
     while (i > 0) {
-      cst = initiate_move(&accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+      cst = initiate_move(cst, &accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       update_accept_history(accept_history, &accept_ratio_history, &accept_ratio);
       cost_hist.push_back(cst);
 
-      wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      //wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
+      //oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
 
       i -= 1;
     }

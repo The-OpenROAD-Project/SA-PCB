@@ -1,13 +1,13 @@
+circuitname := './designs/bm1'
+plfile := './bin/final_placement.pl'
+outfile := './placement.png'
+
 all:
 	+$(MAKE) -C src
 	mv src/annealer ./bin
 
 graphs:
 	echo creating graphs
-
-circuitname := './designs/bm1'
-plfile := './bin/cache/10.pl'
-outfile := './tst'
 
 plot:
 	echo creating plots

@@ -172,8 +172,10 @@ class Node {
         this -> xBy2 = centroid.get<0>();
         this -> yBy2 = centroid.get<1>();
         boost::geometry::envelope(poly, this->envelope);
-        this->width =
-        this->height =
+        Point minCorner = this->envelope.min_corner();
+        Point maxCorner = this->envelope.max_corner();
+        this->width = maxCorner.get<0>() - minCorner.get<0>();
+        this->height =maxCorner.get<1>() - minCorner.get<1>();
         this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
         this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
     }

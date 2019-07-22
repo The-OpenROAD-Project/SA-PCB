@@ -33,6 +33,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
+
 #include "readFiles.hpp"
 
 using namespace std;
@@ -150,7 +151,8 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   vector < string > strVec;
   map<int, vector<Pin> > netToCell;
 
-  string pat = "NetDegree : ";
+  //string pat = "NetDegree : ";
+  string pat = "_net";
   string Out;
 
   file.open(fname, ios:: in );
@@ -198,7 +200,7 @@ int writePlFile(string fname) {
     myfile << "\n\n\n\n";
     vector <Node> ::iterator itNode;
 
-    //components
+    // print components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(!itNode->terminal) {
         myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
@@ -210,14 +212,14 @@ int writePlFile(string fname) {
       }
     }
 
-      myfile << "\n";
-      //terminals
-      for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-        if(itNode->terminal) {
-          myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orientation_str;
-          myfile << " /FIXED_NI\n";
-        }
+    myfile << "\n";
+    // print terminals
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orientation_str;
+        myfile << " /FIXED_NI\n";
       }
+    }
     myfile.close();
     return 0;
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}

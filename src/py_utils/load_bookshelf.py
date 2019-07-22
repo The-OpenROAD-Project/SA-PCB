@@ -100,6 +100,7 @@ def read_pl2(fname,components):
 	board_pins = {}
 	static_components = []
 	for line in lines:
+		print(line)
 		if line.strip() == '':
 			bp = 1
 			continue
@@ -186,14 +187,16 @@ def read_nets2(fname,components,board_pins):
 	i = -1
 	with open(fname,'r') as f:
 		lines = f.read().splitlines()
-	target_ibdex = [i for i, s in enumerate(lines) if 'NetDegree' in s][0]
+	#target_ibdex = [i for i, s in enumerate(lines) if 'NetDegree' in s][0]
+	target_ibdex = [i for i, s in enumerate(lines) if '_net' in s][0]
 	lines = lines[target_ibdex:]
 
 	t = -1
 	for line in lines:
 		if line[0] == '#':
 			continue
-		if 'NetDegree' in line:
+		#if 'NetDegree' in line:
+		if '_net' in line:
 			i += 1
 			nets.append([])
 			continue
@@ -250,6 +253,7 @@ def read_shapes(fname, components):
 	Read & parse .shapes (shapes) file
 	:param fname: .shapes filename
 	"""
+	return components
 	with open(fname, 'r') as f:
 		lines = f.read().splitlines()
 

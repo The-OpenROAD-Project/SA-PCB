@@ -34,6 +34,32 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-class Board {
+#include "Node.hpp"
+#include "Pin.hpp"
 
+class Board {
+public:
+  int idx;
+  string nodesfname;
+  string shapesfname;
+  string netsfname;
+  string plfname;
+  string outfname;
+
+  double t_0;
+  double temp;
+  double convergence_epsilon;
+  int inner_loop_iter;
+  int outer_loop_iter;
+
+  bool initial_placement;
+  bool ben_amur;
+  int rotate_flag;
+
+  boundaries board_boundary;
+
+};
+
+struct boundaries {
+  double minX, maxX, minY, maxY = 0.0;
 };

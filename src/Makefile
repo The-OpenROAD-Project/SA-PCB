@@ -1,5 +1,5 @@
 CC := g++
-CFLAGS := -g -std=c++17 -O3 -pthread -Wall -Wextra
+CFLAGS := -g -std=c++17 -O3 -pthread -Wall -Wextra #-DNDEBUG
 LIBS := -lboost_regex
 
 annealer : main.o readFiles.o

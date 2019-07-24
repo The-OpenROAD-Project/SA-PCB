@@ -84,7 +84,7 @@ void initialize_params(std::pair <double,double> &wl_normalization,
                        std::pair <double,double> &routability_normalization,
                        map<int, vector<Pin> > &netToCell,
                        int rotate_flag);
-void validate_move(Node* node, double rx, double ry);
+void validate_move(Node &node, double rx, double ry);
 double cost(
             std::pair <double,double> &wl_normalization,
             std::pair <double,double> &area_normalization,
@@ -110,7 +110,7 @@ float annealer(int outer_loop_iter,
                           int rotate_flag);
 float multistart();
 double initialize_temperature(vector< int > &accept_history,
-                              double & Temperature,
+                              double &Temperature,
                               std::pair <double,double> &wl_normalization,
                               std::pair <double,double> &area_normalization,
                               std::pair <double,double> &routability_normalization,
@@ -128,7 +128,7 @@ double initiate_move(double current_cost,
 bool check_move(double prevCost,
                 double newCost,
                 vector< int > *accept_history,
-                double & Temperature,
+                double &Temperature,
                 std::pair <double,double> &wl_normalization,
                 std::pair <double,double> &area_normalization,
                 std::pair <double,double> &routability_normalization,

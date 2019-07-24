@@ -203,6 +203,10 @@ int writePlFile(string fname) {
     // print components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(!itNode->terminal) {
+        if(itNode->yCoordinate > 9 && (itNode->orient2str(itNode->orientation) == "E" || itNode->orient2str(itNode->orientation) == "W")) {
+          itNode->printParameter();
+          itNode->printExterior();
+        } // issue with orientation
         myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
         if (itNode->fixed) {
           myfile << " /FIXED_NI\n";
@@ -216,7 +220,7 @@ int writePlFile(string fname) {
     // print terminals
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(itNode->terminal) {
-        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orientation_str;
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation);
         myfile << " /FIXED_NI\n";
       }
     }

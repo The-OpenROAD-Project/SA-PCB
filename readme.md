@@ -89,6 +89,8 @@
 
 ### Citations
   - Sechen, C. and Sangiovanni-Vincentelli, A. L., "The Timber-Wolf placement and routing package", IEEE J. Solid-State Circuits 30:510–522 1985.
+  - Spindler, P. and Johannes, F., "Fast and Accurate Routing Demand Estimation for Efficient Routability-driven Placement
+", IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 2007.
   - C.-K. Cheng, A. B. Kahng, I. Kang and L. Wang, "RePlAce: Advancing Solution Quality and Routability Validation in Global Placement", to appear in IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 2018. (Digital Object Identifier: 10.1109/TCAD.2018.2859220)
   - Ben-Ameur, Walid. "Computing the initial temperature of simulated annealing." Computational Optimization and Applications 29, no. 3 (2004): 369-385.
   - James M. Varanelli and James P. Cohoon. Two-stage simulated annealing methodology. In Proceedings of the 5th Great Lakes Symposium on VLSI, pages 50–53, Buffalo, NY, 16.-18. March 1995. IEEE, Los Alamitos, CA. †EI M153001/95

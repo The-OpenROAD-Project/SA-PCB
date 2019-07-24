@@ -81,7 +81,7 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
     boundary = patches.Rectangle((min(board_dim[0]), min(board_dim[1])), \
                                   max(board_dim[0]) - min(board_dim[0]), max(board_dim[1]) - min(board_dim[1]), \
                                   linewidth=1,edgecolor='b',facecolor='none')
-    #ax.add_patch(boundary)
+    ax.add_patch(boundary)
     for name,shape in components.items():
         if isinstance(shape, geometry.Point):
             x = shape.x
@@ -124,7 +124,7 @@ def plot_circuit(circuit_name, components, comp2rot, nets, board_dim,figname=Non
         xs= [ x[0] for x in netlist ]
         ys= [ x[1] for x in netlist ]
         ax.scatter(xs,ys,marker='.',c=c)
-        ax.scatter(center[0],center[1],marker='.',c=c)
+        ##ax.scatter(center[0],center[1],marker='.',c=c)
     plt.xlim(board_lower_left_corner[0] - 5,board_upper_right_corner[0] + 5)
     plt.ylim(board_lower_left_corner[1] - 5,board_upper_right_corner[1] + 5)
     #plt.gca().set_aspect('equal', adjustable='box')
@@ -178,7 +178,7 @@ def plot_pl(plfile, nodesfile, netsfile, figname, shapesfile=None, board_dim=Non
             pass
         else:
             #board_dim = [[-25,120],[-25,120]]
-            board_dim = [[0,50],[0,50]]
+            board_dim = [[0,25],[0,25]]
     else:
         board_dim = board_dim#[[boarddimmin,boarddimmax],[boarddimmin, boarddimmax]]
     plot_circuit(plfile.split('.')[0], components,comp2rot,nets,board_dim,figname)

@@ -154,7 +154,6 @@ class Node {
     trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
     boost::geometry::transform(this->poly, tmp, rotate);
     this->poly = tmp;
-
     double otmp = wrap_orientation(this->orientation + r);
     this->orientation = otmp;
     this->setPos(tmpx, tmpy);

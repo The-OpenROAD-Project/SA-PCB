@@ -55,7 +55,7 @@ vector < Node > nodeId;
 map < string, int > name2id;
 bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
-float l1 = 0.85;
+float l1 = 0.88;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
@@ -505,18 +505,18 @@ double cell_overlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double wirelength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell) {
+double wirelength_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell) {
   //map < int, vector < Pin > > ::iterator itNet;
   vector < Pin > net;
   vector < int > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
-  vector < Node >::iterator itNode;
+  vector < Node *>::iterator itNode;
   unordered_set < int > net_history;
 
   double xVal, yVal, wireLength = 0;
   //for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
   for (itNode = nodes.begin(); itNode != nodes.end(); ++itNode) {
-    for (itNet = itNode->Netlist.begin(); itNet != itNode->Netlist.end(); ++itNet) {
+    for (itNet = (*itNode)->Netlist.begin(); itNet != (*itNode)->Netlist.end(); ++itNet) {
       if (net_history.find(*itNet) == net_history.end()) {
         net_history.insert(*itNet);
       } else {
@@ -569,20 +569,23 @@ double wirelength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToC
 cell_overlap_partial
 Compute sum squared overlap for select components
 */
-double cell_overlap_partial(vector < Node > &nodes) {
+double cell_overlap_partial(vector < Node *> &nodes) {
   double overlap = 0.0;
-
+  unordered_set < int > cell_history;
   for(size_t i = 0; i < nodes.size(); i++) {
-    //if(nodeId[i].terminal) { continue; }
+    //if(nodes[i].terminal) { continue; }
+    cell_history.insert(nodes[i]->idx);
     for(size_t j = 0; j < nodeId.size(); j++) {
-      if (i == j) {continue;}
       //if(nodeId[j].terminal) { continue; }
-      if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
+      if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
+        continue;
+      }
+      if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)) {
         continue;
       } else {
         double oa = 0.0;
         std::deque<polygon> intersect_poly;
-        boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
+        boost::geometry::intersection(nodes[i]->poly, nodeId[j].poly, intersect_poly);
 
         BOOST_FOREACH(polygon const& p, intersect_poly) {
             oa +=  bg::area(p);
@@ -707,12 +710,12 @@ double cost(
                         l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
                         l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first) << endl;
   }
-  return l1 * (wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
-         //l2 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+  return l1 * 0.9 * (wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+         l2 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+         l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
-double cost_partial(vector < Node > &nodes,
+double cost_partial(vector < Node *> &nodes,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
@@ -754,7 +757,7 @@ void validate_move(Node &node, double rx, double ry) {
 
 double c = 0.0;
 double initiate_move(double current_cost,
-                     vector< int > *accept_history,
+                     vector< int > &accept_history,
                      double & Temperature,
                      std::pair <double,double> &wl_normalization,
                      std::pair <double,double> &area_normalization,
@@ -765,19 +768,19 @@ double initiate_move(double current_cost,
   int state = -1;
   double prevCost = 0.0;
   if(debug > 1) {
-    cout << "prevCost: " << prevCost << endl;
+    cout << "current_cost: " << current_cost << endl;
   }
   vector < Node > ::iterator rand_node1;
   vector < Node > ::iterator rand_node2;
 
-  vector < Node > perturbed_nodes;
+  vector < Node* > perturbed_nodes;
 
   int r = 0;
   rand_node1 = random_node();
   while(rand_node1->terminal || rand_node1->name == "" || rand_node1->fixed) {
     rand_node1 = random_node();
   }
-  perturbed_nodes.push_back(*rand_node1);
+  perturbed_nodes.push_back(&(*rand_node1));
 
   //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
   double rand_node1_orig_x = rand_node1->xCoordinate;
@@ -794,7 +797,7 @@ double initiate_move(double current_cost,
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double i = uni();
 
-  if (i<0.20) { // swap
+  if (i<0) { // .2swap
     state = 0;
     if(debug > 1) {
       cout << "swap" << endl;
@@ -803,7 +806,7 @@ double initiate_move(double current_cost,
     while(rand_node2->terminal || rand_node2->idx == rand_node1->idx || rand_node2->name == "" || rand_node2->fixed) {
       rand_node2 = random_node();
     }
-    perturbed_nodes.push_back(*rand_node2);
+    perturbed_nodes.push_back(&(*rand_node2));
     prevCost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
 
     //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
@@ -814,7 +817,7 @@ double initiate_move(double current_cost,
     validate_move(*rand_node2, rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
-  } else if (i < 0.85) { // shift
+  } else if (i < 10) { //.85 shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
@@ -852,24 +855,18 @@ double initiate_move(double current_cost,
       boost::variate_generator<boost::mt19937&, boost::uniform_int<> > uni(rng, uni_dist);
       r = uni();
     }
-
     rand_node1->setRotation(r);
     validate_move(*rand_node1, rand_node1_orig_x, rand_node1_orig_y);
 
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
-
   double transition_cost = cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
 
   bool accept = check_move(current_cost,
                            updated_cost,
                            accept_history,
-                           Temperature,
-                           wl_normalization,
-                           area_normalization,
-                           routability_normalization,
-                           netToCell);
+                           Temperature);
   if (!accept) {
     if(debug > 1) {
       cout << "reject" << endl;
@@ -902,62 +899,62 @@ double initiate_move(double current_cost,
 update_Temperature
 Update the SA parameters according to annealing schedule
 */
-void update_temperature(double* Temperature) {
+void update_temperature(double& Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
-  if (*Temperature > 0.1) {
-    *Temperature = (0.985) * *Temperature;
+  if (Temperature > 0.1) {
+    Temperature = (0.985) * Temperature;
     if (l1 > 88e-2) {
       l1 -= 2e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.9999*nodeit->sigma,3/4 * nodeit->sigma);
+      nodeit->sigma =  max(0.985*nodeit->sigma,3/4 * nodeit->sigma);
     }
-  } else if (*Temperature > 0.01) {
-    *Temperature = (0.9992) * *Temperature;
+  } else if (Temperature > 0.01) {
+    Temperature = (0.9992) * Temperature;
     if (l1 > 80e-2) {
       l1 -= 4e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,2/4 * nodeit->sigma);
+      nodeit->sigma =  max(0.9992*nodeit->sigma,2/4 * nodeit->sigma);
     }
-  } else if (*Temperature > 0.005) {
-    *Temperature = (0.9955) * *Temperature;
+  } else if (Temperature > 0.005) {
+    Temperature = (0.9955) * Temperature;
     if (l1 > 60e-2) {
       l1 -= 8e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,1/4 * nodeit->sigma);
+      nodeit->sigma =  max(0.9955*nodeit->sigma,1/4 * nodeit->sigma);
     }
-  } else if (*Temperature > 0.001) {
-    *Temperature = (0.9965) * *Temperature;
+  } else if (Temperature > 0.001) {
+    Temperature = (0.9965) * Temperature;
     if (l1 > 50e-2) {
       l1 -= 16e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.2);
+      nodeit->sigma =  max(0.9965*nodeit->sigma,0.2);
     }
   } else {
-    if (*Temperature > 0.000001) {
-      *Temperature = (0.855) * *Temperature;
+    if (Temperature > 0.000001) {
+      Temperature = (0.855) * Temperature;
     } else {
-      *Temperature = 0.0000000001;
+      Temperature = 0.0000000001;
     }
     if (l1 > 10e-4) {
       l1 -= 10e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.999*nodeit->sigma,0.1);
+      nodeit->sigma =  max(0.855*nodeit->sigma,0.1);
     }
   }
 }
 
-void update_accept_history(vector< int > &accept_history, vector< double > *accept_ratio_history, float *accept_ratio) {
+void update_accept_history(vector< int > &accept_history, vector< double > &accept_ratio_history, float &accept_ratio) {
   if (accept_history.size() > 100) {
-    *accept_ratio = ((*accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
+    accept_ratio = ((accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
   } else {
-    *accept_ratio = accumulate(accept_history.begin(), accept_history.end(),0.0) / accept_history.size();
+    accept_ratio = accumulate(accept_history.begin(), accept_history.end(),0.0) / accept_history.size();
   }
-  accept_ratio_history->push_back(*accept_ratio);
+  accept_ratio_history.push_back(accept_ratio);
 }
 
 /*
@@ -966,12 +963,8 @@ either accept or reject the move based on current & previous temperature & cost
 */
 bool check_move(double prevCost,
                 double newCost,
-                vector< int > *accept_history,
-                double & Temperature,
-                std::pair <double,double> &wl_normalization,
-                std::pair <double,double> &area_normalization,
-                std::pair <double,double> &routability_normalization,
-                map<int, vector<Pin> > &netToCell) {
+                vector< int > &accept_history,
+                double & Temperature) {
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -980,18 +973,18 @@ bool check_move(double prevCost,
     cout << "new cost: " << newCost << endl;
   }
   delCost = newCost - prevCost;
-  if (delCost <= 0  || prob <= (exp(-delCost/Temperature))) {
+  if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
     prevCost = newCost;
-    accept_history->push_back(1);
+    accept_history.push_back(1);
     return true;
   } else {
-    accept_history->push_back(0);
+    accept_history.push_back(0);
     return false;
   }
 }
 
 double initialize_temperature(vector< int > &accept_history,
-                              double & Temperature,
+                              double &Temperature,
                               std::pair <double,double> &wl_normalization,
                               std::pair <double,double> &area_normalization,
                               std::pair <double,double> &routability_normalization,
@@ -1008,7 +1001,7 @@ double initialize_temperature(vector< int > &accept_history,
     for(int j=1; j<=10; j++){
       random_initial_placement(rotate_flag);
       emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
-      initiate_move(0.0, &accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+      initiate_move(0.0, accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
       emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
     }
     xt = emax/emin;
@@ -1114,7 +1107,7 @@ float annealer(int outer_loop_iter,
   std::pair <double,double> routability_normalization;
 
   vector< int > accept_history;
-  float accept_ratio = 0;
+  float accept_ratio = 0.0;
   vector< double > accept_ratio_history;
 
   if(debug) { cout << "calculating initial params..." << endl; }
@@ -1165,8 +1158,8 @@ float annealer(int outer_loop_iter,
       cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
     }
     while (i > 0) {
-      cst = initiate_move(cst, &accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
-      update_accept_history(accept_history, &accept_ratio_history, &accept_ratio);
+      cst = initiate_move(cst, accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+      update_accept_history(accept_history, accept_ratio_history, accept_ratio);
       cost_hist.push_back(cst);
 
       //wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
@@ -1179,7 +1172,7 @@ float annealer(int outer_loop_iter,
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }
-    update_temperature(&Temperature);
+    update_temperature(Temperature);
     ii += 1;
     if (ii % 10 == 0) {
       writePlFile("./cache/"+std::to_string( ii )+".pl");

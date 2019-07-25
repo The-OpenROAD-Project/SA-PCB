@@ -91,15 +91,15 @@ double cost(
             std::pair <double,double> &routability_normalization,
             map<int, vector<Pin> > &netToCell,
             int temp_debug = 0);
-double cost_partial(vector < Node > &nodes,
+double cost_partial(vector < Node *> &nodes,
                     std::pair <double,double> &wl_normalization,
                     std::pair <double,double> &area_normalization,
                     std::pair <double,double> &routability_normalization,
                     map<int, vector<Pin> > &netToCell);
 double cell_overlap();
 double wirelength(map<int, vector<Pin> > &netToCell);
-double cell_overlap_partial(map<int, vector<Pin> > &netToCell);
-double wirelength_partial(vector < Node > &nodes, map<int, vector<Pin> > &netToCell);
+double cell_overlap_partial(vector < Node* > &nodes);
+double wirelength_partial(vector < Node* > &nodes, map<int, vector<Pin> > &netToCell);
 double rudy(map<int, vector<Pin> > &netToCell);
 float annealer(int outer_loop_iter,
                           int inner_loop_iter,
@@ -116,9 +116,9 @@ double initialize_temperature(vector< int > &accept_history,
                               std::pair <double,double> &routability_normalization,
                               map<int, vector<Pin> > &netToCell,
                               int rotate_flag);
-void update_Temperature(double* Temperature);
+void update_Temperature(double& Temperature);
 double initiate_move(double current_cost,
-                     vector< int > *accept_history,
+                     vector< int > &accept_history,
                      double & Temperature,
                      std::pair <double,double> &wl_normalization,
                      std::pair <double,double> &area_normalization,
@@ -127,12 +127,8 @@ double initiate_move(double current_cost,
                      int rotate_flag);
 bool check_move(double prevCost,
                 double newCost,
-                vector< int > *accept_history,
-                double &Temperature,
-                std::pair <double,double> &wl_normalization,
-                std::pair <double,double> &area_normalization,
-                std::pair <double,double> &routability_normalization,
-                map<int, vector<Pin> > &netToCell);
+                vector< int > &accept_history,
+                double &Temperature);
 void project_soln();
 void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n, int rotate_flag);
 void gen_report(map<string, vector<double> > &report,
@@ -141,7 +137,7 @@ void gen_report(map<string, vector<double> > &report,
                 std::pair <double,double> &area_normalization,
                 std::pair <double,double> &routability_normalization,
                 map<int, vector<Pin> > &netToCell);
-void update_accept_history(vector< int > &accept_history, vector< double > *accept_ratio_history, float *accept_ratio);
+void update_accept_history(vector< int > &accept_history, vector< double > &accept_ratio_history, float &accept_ratio);
 void update_rtree(int idx);
 vector < Node > ::iterator random_node();
 

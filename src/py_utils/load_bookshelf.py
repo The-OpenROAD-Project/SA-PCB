@@ -187,8 +187,8 @@ def read_nets2(fname,components,board_pins):
 	i = -1
 	with open(fname,'r') as f:
 		lines = f.read().splitlines()
-	#target_ibdex = [i for i, s in enumerate(lines) if 'NetDegree' in s][0]
-	target_ibdex = [i for i, s in enumerate(lines) if '_net' in s][0]
+	target_ibdex = [i for i, s in enumerate(lines) if 'NetDegree' in s][0]
+	#target_ibdex = [i for i, s in enumerate(lines) if '_net' in s][0]
 	lines = lines[target_ibdex:]
 
 	t = -1
@@ -196,7 +196,7 @@ def read_nets2(fname,components,board_pins):
 		if line[0] == '#':
 			continue
 		#if 'NetDegree' in line:
-		if '_net' in line:
+		if 'NetDegree' in line:
 			i += 1
 			nets.append([])
 			continue

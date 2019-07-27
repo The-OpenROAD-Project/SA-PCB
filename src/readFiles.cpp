@@ -151,8 +151,8 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   vector < string > strVec;
   map<int, vector<Pin> > netToCell;
 
-  //string pat = "NetDegree : ";
-  string pat = "_net";
+  string pat = "NetDegree : ";
+  //string pat = "_net";
   string Out;
 
   file.open(fname, ios:: in );
@@ -203,10 +203,6 @@ int writePlFile(string fname) {
     // print components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(!itNode->terminal) {
-        if(itNode->yCoordinate > 9 && (itNode->orient2str(itNode->orientation) == "E" || itNode->orient2str(itNode->orientation) == "W")) {
-          itNode->printParameter();
-          itNode->printExterior();
-        } // issue with orientation
         myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
         if (itNode->fixed) {
           myfile << " /FIXED_NI\n";

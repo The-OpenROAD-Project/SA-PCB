@@ -55,7 +55,7 @@ vector < Node > nodeId;
 map < string, int > name2id;
 bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
-float l1 = 0.88;
+float l1 = 0.6;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
@@ -123,12 +123,13 @@ int main(int argc, char *argv[]) {
   string nodesfname  = parg + ".nodes";
   string shapesfname = parg + ".shapes";
   string netsfname   = parg + ".nets";
-  string plfname     = "";
+  string plfname     = "cache/3470.pl";
+/*
   if (initial_pl != "") {
     plfname          = initial_pl + ".pl";
   } else {
     plfname          = parg + ".pl";
-  }
+  }*/
   string wtsfname    = parg + ".wts";
 
   cout << nodesfname << endl;
@@ -294,8 +295,9 @@ void set_boundaries() {
 
   if (b.minX == 0 && b.maxX == 0 && b.minY == 0 && b.maxY == 0) {
     cout << "no boundary found" << endl;
-    b.maxX = 25;
-    b.maxY = 10;
+    // snake
+    b.maxX = 600;
+    b.maxY = 150;
   }
 
   if(debug) {
@@ -707,12 +709,12 @@ double cost(
     cout << "overlap_cost: " << l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) << endl;
     cout << "routability_cost: " << l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first) << endl;
     cout << "cost: " << l1*(wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-                        l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first)  +
-                        l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first) << endl;
+                        l2  * 0.9 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);//  +
+                        //l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first) << endl;
   }
   return l1 * 0.9 * (wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-         l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+         l2 * (cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);// +
+         //l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
 double cost_partial(vector < Node *> &nodes,
@@ -722,8 +724,8 @@ double cost_partial(vector < Node *> &nodes,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * 0.9 * (wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-         l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+         l2 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first);// +
+         //l1 * 0.1 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 
 }
 
@@ -901,49 +903,55 @@ Update the SA parameters according to annealing schedule
 */
 void update_temperature(double& Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
-  if (Temperature > 0.1) {
+  if (Temperature > 50e-3) {
     Temperature = (0.985) * Temperature;
-    if (l1 > 88e-2) {
+    if (l1 > 92e-2) {
       l1 -= 2e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.985*nodeit->sigma,3/4 * nodeit->sigma);
     }
-  } else if (Temperature > 0.01) {
+  } else if (Temperature > 10e-3) {
     Temperature = (0.9992) * Temperature;
-    if (l1 > 80e-2) {
+    if (l1 > 88.5e-2) {
       l1 -= 4e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9992*nodeit->sigma,2/4 * nodeit->sigma);
     }
-  } else if (Temperature > 0.005) {
+  } else if (Temperature > 50e-4) {
     Temperature = (0.9955) * Temperature;
-    if (l1 > 60e-2) {
+    if (l1 > 88e-2) {
       l1 -= 8e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9955*nodeit->sigma,1/4 * nodeit->sigma);
     }
-  } else if (Temperature > 0.001) {
+  } else if (Temperature > 10e-4) {
     Temperature = (0.9965) * Temperature;
-    if (l1 > 50e-2) {
+    if (l1 > 85e-2) {
       l1 -= 16e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.9965*nodeit->sigma,0.2);
+      nodeit->sigma =  max(0.9965*nodeit->sigma,2.0);
     }
   } else {
-    if (Temperature > 0.000001) {
-      Temperature = (0.855) * Temperature;
+    if (Temperature > 10e-8) {
+      Temperature = (0.885) * Temperature;
+      if (l1 > 80e-2) {
+        l1 -= 10e-4;
+      }
     } else {
+      if (l1 > 10e-2) {
+        l1 -= 10e-4;
+      }
       Temperature = 0.0000000001;
     }
     if (l1 > 10e-4) {
       l1 -= 10e-4;
     }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.855*nodeit->sigma,0.1);
+      nodeit->sigma =  max(0.855*nodeit->sigma,1.0);
     }
   }
 }

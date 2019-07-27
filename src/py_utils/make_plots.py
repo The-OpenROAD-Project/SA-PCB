@@ -178,7 +178,9 @@ def plot_pl(plfile, nodesfile, netsfile, figname, shapesfile=None, board_dim=Non
             pass
         else:
             #board_dim = [[-25,120],[-25,120]]
-            board_dim = [[0,25],[0,25]]
+            #board_dim = [[0,25],[0,10]] #snake
+            #board_dim = [[-10,120],[-8,55]] # bm1
+            board_dim = [[-5,600],[-5,150]] # mt
     else:
         board_dim = board_dim#[[boarddimmin,boarddimmax],[boarddimmin, boarddimmax]]
     plot_circuit(plfile.split('.')[0], components,comp2rot,nets,board_dim,figname)
@@ -232,7 +234,7 @@ def make_placement_anim():
             components = load_bookshelf.read_nodes(nodesfile)
             components,comp2rot,board_pins,_ = load_bookshelf.read_pl2('./cache/'+ff,components)
             nets,mod2net = load_bookshelf.read_nets2(netsfile,components,board_pins)
-            board_dim = [[-5,60],[-5,60]]
+            board_dim = [[-5,100],[-5,55]]
             plot_circuit(ff.split('.')[0], components,comp2rot,nets,board_dim,'./cache/img/'+ff.split('.')[0]+'.png')
 
     f = []

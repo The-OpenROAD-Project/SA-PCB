@@ -71,6 +71,7 @@ class Node {
     string orientation_str;
     int init_orientation;
     int orientation;
+    int layer;
     vector < int > Netlist;
 
   void setParameterNodes(string name, double width, double height, int terminal, int idx) {
@@ -114,7 +115,7 @@ class Node {
     this -> init_orientation = str2orient(orientation_str);
     this -> setRotation(str2orient(orientation_str));
     this -> fixed = fixed;
-    this -> sigma = 10.0;
+    this -> sigma = 50.0;
   }
 
   void setNetList(int NetId) {
@@ -259,6 +260,7 @@ class Node {
     for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {
       cout << * it2 << " ";
     }
+    this -> printExterior();
     cout << "\n" << endl;
   }
 };

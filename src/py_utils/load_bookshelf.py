@@ -94,7 +94,7 @@ def read_pl2(fname,components):
 	with open(fname,'r') as f:
 		lines = f.read().splitlines()
 
-	lines = lines[5:]
+	lines = lines[4:]
 	bp = 0
 	comp2rot = {}
 	board_pins = {}
@@ -115,8 +115,8 @@ def read_pl2(fname,components):
 					if '/FIXED' in l[5]:
 						static_components.append(pname)
 				comp2rot[pname] = r
-				rot2deg = {'N':0,'NE':45,'E':90,'SE':135,'S':180,'SW':225,'W':270,'NW':315}
-				components[pname] = rotate(components[pname],rot2deg[r])
+				rot2deg = {'N':0,'NE':-45,'E':-90,'SE':-135,'S':-180,'SW':-225,'W':-270,'NW':-315}
+				components[pname] = rotate(components[pname],rot2deg[r],origin = (0,0))
 				minx, miny, maxx, maxy = components[pname].bounds
 				components[pname] = translate(components[pname],newx-minx,newy-miny)
 			else:
@@ -290,7 +290,7 @@ def read_nodes(fname):
 		if bp == 0:
 			l = line.split()
 			cname = l[0]
-			w = float(l[1])
+			w = float(l[1]) # 1000000
 			h = float(l[2])
 			poly = Polygon([[0,0],[w,0],[w,h],[0,h]])
 			#print(l)

@@ -1,5 +1,7 @@
 __pycache__
 src/*.o
+bin/*
+bin_backup/*
 bin/cache/*
 bin/annealer
 designs/bm*

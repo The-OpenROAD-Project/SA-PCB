@@ -34,6 +34,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_NO_AUTO_PTR
+
+#include <functional>
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -144,3 +147,5 @@ vector < Node > ::iterator random_node();
 struct boundaries {
   double minX, maxX, minY, maxY = 0.0;
 };
+
+int fact(int n);

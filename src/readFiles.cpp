@@ -63,7 +63,7 @@ int readNodesFile(string fname) {
       } else {
         value = 0;
       }
-      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value, idx);
+      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value, idx); // /1000000
       nodeId.push_back(n);
       name2id.insert(pair < string, int > (strVec[0], idx));
       idx += 1;

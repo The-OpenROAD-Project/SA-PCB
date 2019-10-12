@@ -4,3 +4,6 @@
 [submodule "eagle2bookshelf"]
 	path = module/eagle2bookshelf
 	url = https://github.com/djmerrill/eagle2bookshelf.git
+[submodule "module/KicadParser"]
+	path = module/KicadParser
+	url = https://github.com/The-OpenROAD-Project/KicadParser.git

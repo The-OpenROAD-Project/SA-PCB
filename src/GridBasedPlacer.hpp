@@ -184,7 +184,7 @@ private:
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;
 
-  bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY) + 1), static_cast<int>(abs(b.maxX)+abs(b.minX) + 1), 0.0);
+  //bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY) + 1), static_cast<int>(abs(b.maxX)+abs(b.minX) + 1), 0.0);
 
   std::pair <double,double> *wl_normalization = nullptr;
   std::pair <double,double> *area_normalization = nullptr;

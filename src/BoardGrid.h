@@ -22,7 +22,7 @@ struct LocationQueue
 {
   typedef std::pair<priority_t, T> PQElement;
   std::priority_queue<PQElement, std::vector<PQElement>,
-                      std::greater<PQElement>>
+                      std::greater<PQElement> >
       elements;
 
   inline bool empty() const
@@ -91,7 +91,7 @@ struct hash<Location>
 namespace std
 {
 template <>
-struct greater<std::pair<float, Location>>
+struct greater<std::pair<float, Location> >
 {
   bool operator()(std::pair<float, Location> const &x, std::pair<float, Location>
                   const &y) const
@@ -105,7 +105,7 @@ class MultipinRoute
 {
 public:
   std::vector<Location> pins;
-  std::vector<std::unordered_map<Location, Location>> came_from;
+  std::vector<std::unordered_map<Location, Location> > came_from;
   std::vector<Location> features;
   std::vector<Location> vias;
   int netId;

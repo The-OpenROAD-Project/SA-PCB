@@ -61,7 +61,7 @@ float l1 = 0.4;
 void GridBasedPlacer::test_placer() {
   srand(time(NULL));
   int opt;
-  int outer_loop_iter = 105;
+  int outer_loop_iter = 100;
   int inner_loop_iter = 2;
   double eps = -1.0;
   double t_0 = 1.0;
@@ -187,7 +187,7 @@ void GridBasedPlacer::test_placer() {
 
           auto &comp = mDb.getComponent(pin.m_comp_id);
           point_2d pos;
-          mDb.getPinPosition(pin, &pos);
+	  //mDb.getPinPosition(pin, &pos);
 
           auto &pad = comp.getPadstack(pin.m_padstack_id);
           //cout << pos.m_x << " " << inst.getX() <<  " " << nodeId[name2id[inst.getName()]].xCoordinate << " " <<  pos.m_x - nodeId[name2id[inst.getName()]].xCoordinate << endl;
@@ -199,8 +199,8 @@ void GridBasedPlacer::test_placer() {
     }
 
   cout << "annealing" << endl;
-  //float cost = this->annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, initial_pl, rotate_flag);
-  writePlFile("./final_placement.pl");
+  float cost = this->annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, initial_pl, rotate_flag);
+  //writePlFile("./final_placement.pl");
   //cout << " " << idx << " " << cost << endl;
 }
 
@@ -300,6 +300,7 @@ void GridBasedPlacer::initialize_params(std::pair <double,double> &wl_normalizat
 
   area.first = 0.0;
   area.second = sum_oa / 1000.0;
+  area.second = max(area.second, 1.0); 
 
   rn.first = 0.0;
   rn.second = sum_rn / 1000.0;
@@ -534,6 +535,7 @@ double GridBasedPlacer::cell_overlap() {
       if (i == j) {continue;}
       //if(nodeId[j].terminal) { continue; }
       if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
+	cout << "oof" << endl;
         continue;
       } else {
         double oa = 0.0;
@@ -1182,7 +1184,7 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
     this->random_initial_placement(rotate_flag);
   }
 
-  double cst = this->cost(wl_normalization, area_normalization, routability_normalization, netToCell);
+  double cst = this->cost(wl_normalization, area_normalization, routability_normalization, netToCell,-1);
   if(var) {
     Temperature = this->initialize_temperature(accept_history,
                                          Temperature,
@@ -1208,7 +1210,7 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
   int i = 0; // inner loop iterator
   if(debug) { cout << "annealing..." << endl; }
   while (ii < outer_loop_iter) {
-    i = inner_loop_iter*num_components;
+    i = inner_loop_iter*num_components; 
     if(ii > 1 && ii % 10 == 0 && debug) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
@@ -1248,7 +1250,7 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
     this->update_temperature(Temperature);
     ii += 1;
     if (ii % 10 == 0) {
-      writePlFile("./cache/"+std::to_string( ii )+".pl");
+      //writePlFile("./cache/"+std::to_string( ii )+".pl");
     }
   }
   return this->cost(wl_normalization, area_normalization, routability_normalization, netToCell);

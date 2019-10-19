@@ -98,7 +98,7 @@ inline bool createDirectory(const string dirName)
     {
         if (mkdir(dirName.c_str(), 0777) == -1)
         {
-            cerr << "Error creating directory " << dirName << " :  " << strerror(errno) << endl;
+            //cerr << "Error creating directory " << dirName << " :  " << strerror(errno) << endl;
             return false;
         }
         cout << "Directory created: " << dirName << endl;

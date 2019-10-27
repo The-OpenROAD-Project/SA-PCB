@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl,--no-as-needed -ldl -lutil")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl,--no-as-needed -ldl -lutil -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 
 #set(BOOST_ROOT /usr/local/boost-1.62.0/)
@@ -40,7 +40,7 @@ set (PCBPLACER_SRC
   src/GridBasedPlacer.cpp
   src/globalParam.cpp
   src/readFiles.cpp
-  src/placer_wrapper.cpp
+  src/PcbPlacer_wrapper.cpp
   )
 
 set (PCBPLACER_HEADER
@@ -54,7 +54,7 @@ set (PCBPLACER_HEADER
   )
 
 set (PLACER_SWIG_FILES
-  src/placer.i
+  src/PcbPlacer.i
 )
 
 #set (PCBPLACER_LIB_FILES
@@ -90,8 +90,8 @@ set_target_properties( PCBPLACERlib
 ############################################################
 # Create an executable
 ############################################################
-add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/placer_wrapper.cpp ${PCBPLACER_LIB_FILES}
-  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/placer_wrapper.cpp ${PCBPLACER_HOME}/src/placer.i   
+add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
+  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
   WORKING_DIRECTORY ${PCBPLACER_HOME}
   DEPENDS ${PLACER_SWIG_FILES}
 )

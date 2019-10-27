@@ -58,10 +58,10 @@ map < string, int > name2id;
 float l1 = 0.4;
 
 //int main(int argc, char *argv[]) {
-void GridBasedPlacer::test_placer() {
+kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
   srand(time(NULL));
   int opt;
-  int outer_loop_iter = 100;
+  int outer_loop_iter = 102;
   int inner_loop_iter = 2;
   double eps = -1.0;
   double t_0 = 1.0;
@@ -124,8 +124,8 @@ void GridBasedPlacer::test_placer() {
   */
 
   
-  parg = "../designs/bm1";
-  cout << "circuit: " << parg << endl;
+  parg = "../designs/bm2";
+  //cout << "circuit: " << parg << endl;
 
   string nodesfname  = parg + ".nodes";
   string shapesfname = parg + ".shapes";
@@ -140,13 +140,13 @@ void GridBasedPlacer::test_placer() {
 
   string wtsfname    = parg + ".wts";
 
-  cout << nodesfname << endl;
-  cout << shapesfname << endl;
-  cout << netsfname << endl;
-  cout << plfname << endl;
-  
+  //cout << nodesfname << endl;
+  //cout << shapesfname << endl;
+  //cout << netsfname << endl;
+  //cout << plfname << endl;
+ 
   map<int, vector<Pin> > netToCell;
-
+  cout << "init netToCell" << endl;
   if(debug) { cout << "reading nodes..." << endl; }
   //readNodesFile(nodesfname);
   //readShapesFile(shapesfname);
@@ -155,23 +155,42 @@ void GridBasedPlacer::test_placer() {
   //readPlFile(plfname);
 
   //mDb.printInst();
+
+  //std::string designName = "../designs/bm2.unrouted.kicad_pcb";
+  //std::cout << "Parsing design: " << designName << std::endl;
+  //kicadPcbDataBase mDb(designName);
+
   std::vector<instance> &instances =  mDb.getInstances();
   std::vector<net> &nets = mDb.getNets();
-  
   for (int i = 0; i < instances.size(); ++i) {
     Node n;
     nodeId.push_back(n);
   }
   for (auto &inst : instances) {
+      point_2d bbox;
+      mDb.getCompBBox(inst.getComponentId(), &bbox); 
+
       Node n;
-      n.setParameterNodes(inst.getName(), inst.getWidth(), inst.getHeight(), 1, inst.getId());
-      //nodeId.push_back(n);
+      n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, 0, inst.getId());
       nodeId[inst.getId()] = n;
       name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
-      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - inst.getWidth()/2, inst.getY() - inst.getHeight()/2, "N", 0);
+
+      double angle = inst.getAngle();
+      string ang = "";
+      if (angle == 0) {
+          ang = "N";
+      } else if (angle == 90) {
+          ang = "E";
+      } else if (angle == 180) {
+          ang = "S";
+      } else if (angle == 270) {
+          ang = "W";
+      }
+      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, 0);
+      nodeId[name2id[inst.getName()]].printParameter();
   }
   if(debug) { cout << "reading nets..." << endl; }
-  netToCell = readNetsFile(netsfname);
+  //netToCell = readNetsFile(netsfname);
   if(debug) { cout << "calculating boundaries..." << endl; }
   set_boundaries();
   if(debug) { cout << "annealing" << endl; }
@@ -182,14 +201,14 @@ void GridBasedPlacer::test_placer() {
       for (auto &pin : net.getPins())
       {
           Pin p;
-          auto &inst = mDb.getInstance(pin.m_inst_id);
+          auto &inst = mDb.getInstance(pin.getInstId());
           nodeId[name2id[inst.getName()]].setNetList(net.getId());
 
-          auto &comp = mDb.getComponent(pin.m_comp_id);
+          auto &comp = mDb.getComponent(pin.getCompId());
           point_2d pos;
 	  //mDb.getPinPosition(pin, &pos);
 
-          auto &pad = comp.getPadstack(pin.m_padstack_id);
+          auto &pad = comp.getPadstack(pin.getPadstackId());
           //cout << pos.m_x << " " << inst.getX() <<  " " << nodeId[name2id[inst.getName()]].xCoordinate << " " <<  pos.m_x - nodeId[name2id[inst.getName()]].xCoordinate << endl;
           p.set_params(inst.getName(), pos.m_x - nodeId[name2id[inst.getName()]].xBy2, pos.m_y - nodeId[name2id[inst.getName()]].yBy2, nodeId[name2id[inst.getName()]].idx);
           pinTemp.push_back(p);
@@ -200,6 +219,29 @@ void GridBasedPlacer::test_placer() {
 
   cout << "annealing" << endl;
   float cost = this->annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, initial_pl, rotate_flag);
+  
+  // write back to db
+  cout << "writing back to db..." << endl;
+  for (auto &inst : instances) {
+      point_2d bbox;
+      mDb.getCompBBox(inst.getComponentId(), &bbox);
+
+      int angle = nodeId[inst.getId()].orientation;
+      double ang = 0;
+      if (angle == 0) {
+          ang = 0;
+      } else if (angle == 2) {
+          ang = 90;
+      } else if (angle == 4) {
+          ang = 180;
+      } else if (angle == 6) {
+          ang = 180;
+      }
+      inst.setAngle(ang);
+      inst.setX(nodeId[inst.getId()].xBy2);
+      inst.setY(nodeId[inst.getId()].yBy2);
+  }
+  return mDb;
   //writePlFile("./final_placement.pl");
   //cout << " " << idx << " " << cost << endl;
 }
@@ -530,12 +572,12 @@ double GridBasedPlacer::cell_overlap() {
   double overlap = 0.0;
 
   for(size_t i = 0; i < nodeId.size(); i++) {
+    //nodeId[i].printParameter();
     //if(nodeId[i].terminal) { continue; }
     for(size_t j = i; j < nodeId.size(); j++) {
       if (i == j) {continue;}
       //if(nodeId[j].terminal) { continue; }
       if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
-	cout << "oof" << endl;
         continue;
       } else {
         double oa = 0.0;
@@ -678,6 +720,7 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
     double rudy = 0.0;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       int orient = nodeId[itCellList->idx].orientation;
+ 
       xVal = nodeId[itCellList->idx].xBy2;
       yVal = nodeId[itCellList->idx].yBy2;
 
@@ -716,11 +759,15 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
           }
       }*/
     }
-
+    minXW = max(minXW, b.minX);
+    minYW = max(minYW, b.minY);
+    maxXW = min(maxXW, b.maxX);
+    maxYW = min(maxYW, b.maxY);
     // now have boundary of net
     hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)));
     rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0)); // rudy density
     // set read_net
+
     for (unsigned i = max(minYW,0.0); i < maxYW; ++ i) {
         for (unsigned j = max(minXW,0.0); j < maxXW; ++ j) {
           D (i,j) += rudy;
@@ -757,8 +804,8 @@ double GridBasedPlacer::cost(
             map<int, vector<Pin> > &netToCell,
             int temp_debug) {
   double l2 = 1 - l1;
-  double wirelength_cost = l1*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
-  double overlap_cost = l2  * 0.9 * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
+  double wirelength_cost = l1*0.9*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
+  double overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
   double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   if(debug > 1 || temp_debug == -1) {
@@ -780,7 +827,7 @@ double GridBasedPlacer::cost_partial(vector < Node *> &nodes,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * this->cell_overlap() + //(cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+         l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
          l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 
 }
@@ -1177,7 +1224,6 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
   if(debug) { cout << "calculating initial params..." << endl; }
   cout << "calculating initial params..." << endl;
   this->initialize_params(wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
-  cout << "initial palcement..." << endl;
   if (initial_pl != "") {
     readPlFile(initial_pl);
   } else {

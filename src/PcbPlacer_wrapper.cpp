@@ -2699,16 +2699,16 @@ static swig_module_info swig_module = {swig_types, 3, 0, 0, 0, 0};
 #endif
 
 /*-----------------------------------------------
-              @(target):= _placer.so
+              @(target):= _PcbPlacer.so
   ------------------------------------------------*/
 #if PY_VERSION_HEX >= 0x03000000
-#  define SWIG_init    PyInit__placer
+#  define SWIG_init    PyInit__PcbPlacer
 
 #else
-#  define SWIG_init    init_placer
+#  define SWIG_init    init_PcbPlacer
 
 #endif
-#define SWIG_name    "_placer"
+#define SWIG_name    "_PcbPlacer"
 
 #define SWIGVERSION 0x010340 
 #define SWIG_VERSION SWIGVERSION
@@ -2785,10 +2785,13 @@ namespace swig {
 
 #include "GridBasedPlacer.hpp"
 
+
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-SWIGINTERN PyObject *_wrap_new_GridBasedPlacer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_GridBasedPlacer__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   kicadPcbDataBase *arg1 = 0 ;
   void *argp1 = 0 ;
@@ -2809,6 +2812,51 @@ SWIGINTERN PyObject *_wrap_new_GridBasedPlacer(PyObject *SWIGUNUSEDPARM(self), P
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_GridBasedPlacer, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GridBasedPlacer__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GridBasedPlacer *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_GridBasedPlacer")) SWIG_fail;
+  result = (GridBasedPlacer *)new GridBasedPlacer();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_GridBasedPlacer, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GridBasedPlacer(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[2];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 1); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    return _wrap_new_GridBasedPlacer__SWIG_1(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_kicadPcbDataBase, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_GridBasedPlacer__SWIG_0(self, args);
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_GridBasedPlacer'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    GridBasedPlacer(kicadPcbDataBase &)\n"
+    "    GridBasedPlacer()\n");
   return NULL;
 }
 
@@ -2834,21 +2882,44 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_GridBasedPlacer_test_placer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_GridBasedPlacer_test_placer_flow(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
+  kicadPcbDataBase *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:GridBasedPlacer_test_placer",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:GridBasedPlacer_test_placer_flow",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GridBasedPlacer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GridBasedPlacer_test_placer" "', argument " "1"" of type '" "GridBasedPlacer *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GridBasedPlacer_test_placer_flow" "', argument " "1"" of type '" "GridBasedPlacer *""'"); 
   }
   arg1 = reinterpret_cast< GridBasedPlacer * >(argp1);
-  (arg1)->test_placer();
-  resultobj = SWIG_Py_Void();
+  result = (kicadPcbDataBase *) &(arg1)->test_placer_flow();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_kicadPcbDataBase, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GridBasedPlacer_getDb(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  kicadPcbDataBase *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:GridBasedPlacer_getDb",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GridBasedPlacer, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GridBasedPlacer_getDb" "', argument " "1"" of type '" "GridBasedPlacer *""'"); 
+  }
+  arg1 = reinterpret_cast< GridBasedPlacer * >(argp1);
+  result = (kicadPcbDataBase *) &(arg1)->getDb();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_kicadPcbDataBase, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -2866,7 +2937,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"new_GridBasedPlacer", _wrap_new_GridBasedPlacer, METH_VARARGS, NULL},
 	 { (char *)"delete_GridBasedPlacer", _wrap_delete_GridBasedPlacer, METH_VARARGS, NULL},
-	 { (char *)"GridBasedPlacer_test_placer", _wrap_GridBasedPlacer_test_placer, METH_VARARGS, NULL},
+	 { (char *)"GridBasedPlacer_test_placer_flow", _wrap_GridBasedPlacer_test_placer_flow, METH_VARARGS, NULL},
+	 { (char *)"GridBasedPlacer_getDb", _wrap_GridBasedPlacer_getDb, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_swigregister", GridBasedPlacer_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };

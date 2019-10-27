@@ -91,26 +91,28 @@ class GridBasedPlacer
 public:
   //ctor
   GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
+  GridBasedPlacer() {}
   //dtor
   ~GridBasedPlacer(){}
 
-  void test_placer();
+  kicadPcbDataBase &test_placer_flow();
 
   struct boundaries {
     double minX, maxX, minY, maxY = 0.0;
   };
-
+  kicadPcbDataBase &getDb() { return mDb; }
 private:
   // Utility
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
-
+ /*
   bool dbPointToGridPoint(const point_2d &dbPt, point_2d &gridPt);
   bool gridPointToDbPoint(const point_2d &gridPt, point_2d &dbPt);
   void addPinCost(const pin &, const float);
   void addPinCost(const padstack &, const instance &, const float);
   void add_pin_cost_to_via_cost(const pin &, const float);
   void add_pin_cost_to_via_cost(const padstack &, const instance &, const float);
-
+*/
+  kicadPcbDataBase &mDb;
   void random_initial_placement(int rotate_flag);
   void set_boundaries();
   void initialize_params(std::pair <double,double> &wl_normalization,
@@ -179,7 +181,6 @@ private:
 
 private:
   BoardGrid mBg;
-  kicadPcbDataBase &mDb;
 
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;

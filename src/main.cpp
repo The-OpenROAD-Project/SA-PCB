@@ -40,7 +40,6 @@
 #include "util.h"
 int test_flow()
 {
-  //util::showSysInfoComdLine(argc, argv);
   GlobalParam::setFolders();
   GlobalParam::setUsageStart();
 
@@ -61,7 +60,7 @@ int test_flow()
 
   std::cout << "Starting placer..." << std::endl;
   GridBasedPlacer placer(db);
-  placer.test_placer();
+  placer.test_placer_flow();
 
   GlobalParam::showCurrentUsage("GridBasedPlacer");
   GlobalParam::showFinalUsage("End of Program");
@@ -97,7 +96,7 @@ int main(int argc, char *argv[])
 
   std::cout << "Starting placer..." << std::endl;
   GridBasedPlacer placer(db);
-  placer.test_placer();
+  placer.test_placer_flow();
 
   GlobalParam::showCurrentUsage("GridBasedPlacer");
   GlobalParam::showFinalUsage("End of Program");

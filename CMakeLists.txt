@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl,--no-as-needed -ldl -lutil -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl --no-as-needed -ldl -lutil -fPIC")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl -ldl -lutil -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 
 #set(BOOST_ROOT /usr/local/boost-1.62.0/)
@@ -18,7 +19,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 #set(BOOST_LIBRARYDIR /usr/local/boost-1.62.0/lib)
 find_package(Boost REQUIRED)
 #find_package(Swig REQUIRED)
-set(SWIG_EXECUTABLE "/usr/bin/swig")
+#set(SWIG_EXECUTABLE "/usr/bin/swig")
+set(SWIG_EXECUTABLE "/usr/local/bin/swig")
 #find_package(Python REQUIRED)
 #find_package(PythonLibs REQUIRED)
 find_package( PythonInterp 2.7 REQUIRED )
@@ -57,10 +59,6 @@ set (PLACER_SWIG_FILES
   src/PcbPlacer.i
 )
 
-#set (PCBPLACER_LIB_FILES
-#  bin/CMakeFiles/PCBPLACERlib.dir/src/*.o
-#)
-
 ############################################################
 # include directories
 ############################################################
@@ -95,12 +93,6 @@ add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLAC
   WORKING_DIRECTORY ${PCBPLACER_HOME}
   DEPENDS ${PLACER_SWIG_FILES}
 )
-
-#add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/_placer.so
-#  COMMAND gcc -shared ${PCBPLACER_HOME}/bin/CMakeFiles/PCBPLACERlib.dir/src/GridBasedPlacer.cpp.o ${PCBPLACER_HOME}/bin/CMakeFiles/PCBPLACERlib.dir/src/BoardGrid.cpp.o  ${PCBPLACER_HOME}/bin/CMakeFiles/PCBPLACERlib.dir/src/globalParam.cpp.o ${PCBPLACER_HOME}/bin/CMakeFiles/PCBPLACERlib.dir/src/readFiles.cpp.o ${PCBPLACER_HOME}/bin/CMakeFiles/PCBPLACERlib.dir/src/placer_wrapper.cpp.o -o ${PCBPLACER_HOME}/src/_placer.so -lstdc++
-#  WORKING_DIRECTORY ${PCBPLACER_HOME}
-#  DEPENDS ${PCBPLACER_HOME}/src/placer_wrapper.cpp ${PCBPLACER_LIB_FILES}
-#)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/bin)
 

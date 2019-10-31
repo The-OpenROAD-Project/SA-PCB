@@ -91,9 +91,9 @@ class GridBasedPlacer
 public:
   //ctor
   GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
-  GridBasedPlacer() {}
+  //GridBasedPlacer() {}
   //dtor
-  ~GridBasedPlacer(){}
+  //~GridBasedPlacer(){}
 
   kicadPcbDataBase &test_placer_flow();
 

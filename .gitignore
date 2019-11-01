@@ -4,7 +4,7 @@ bin/*
 bin_backup/*
 bin/cache/*
 bin/annealer
-designs/bm*
+designs/*
 reports/*
 boost/
 taskflow/

@@ -152,7 +152,6 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   map<int, vector<Pin> > netToCell;
 
   string pat = "NetDegree : ";
-  //string pat = "_net";
   string Out;
 
   file.open(fname, ios:: in );
@@ -163,7 +162,10 @@ map<int, vector<Pin> > readNetsFile(string fname) {
 
       std::size_t found = buf.find(pat);
       if(found!=std::string::npos) {
-        Out = buf.substr(buf.rfind(" ") + 1);
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        //Out = buf.substr(buf.rfind(" ") + 1);
+        Out = results.at(2);
       } else {
         continue;
       }

@@ -38,7 +38,7 @@
 
 #include <cstdio>
 #include "BoardGrid.h"
-#include "kicadPcbDataBase.h"
+//#include "kicadPcbDataBase.h"
 #include "globalParam.h"
 #include "util.h"
 
@@ -90,90 +90,46 @@ class GridBasedPlacer
 {
 public:
   //ctor
-  GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
-  //GridBasedPlacer() {}
+  GridBasedPlacer() {}
   //dtor
-  //~GridBasedPlacer(){}
+  ~GridBasedPlacer(){}
 
-  kicadPcbDataBase &test_placer_flow();
+  void test_placer_flow();
 
-  struct boundaries {
-    double minX, maxX, minY, maxY = 0.0;
-  };
-  kicadPcbDataBase &getDb() { return mDb; }
+
 private:
   // Utility
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
- /*
-  bool dbPointToGridPoint(const point_2d &dbPt, point_2d &gridPt);
-  bool gridPointToDbPoint(const point_2d &gridPt, point_2d &dbPt);
-  void addPinCost(const pin &, const float);
-  void addPinCost(const padstack &, const instance &, const float);
-  void add_pin_cost_to_via_cost(const pin &, const float);
-  void add_pin_cost_to_via_cost(const padstack &, const instance &, const float);
-*/
-  kicadPcbDataBase &mDb;
-  void random_initial_placement(int rotate_flag);
+
+  void random_initial_placement();
   void set_boundaries();
-  void initialize_params(std::pair <double,double> &wl_normalization,
-                         std::pair <double,double> &area_normalization,
-                         std::pair <double,double> &routability_normalization,
-                         map<int, vector<Pin> > &netToCell,
-                         int rotate_flag);
+  void initialize_params(map<int, vector<Pin> > &netToCell);
   void validate_move(Node &node, double rx, double ry);
-  double cost(
-              std::pair <double,double> &wl_normalization,
-              std::pair <double,double> &area_normalization,
-              std::pair <double,double> &routability_normalization,
-              map<int, vector<Pin> > &netToCell,
+  double cost(map<int, vector<Pin> > &netToCell,
               int temp_debug = 0);
-  double cost_partial(vector < Node *> &nodes,
-                      std::pair <double,double> &wl_normalization,
-                      std::pair <double,double> &area_normalization,
-                      std::pair <double,double> &routability_normalization,
-                      map<int, vector<Pin> > &netToCell);
+  double cost_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell);
   double cell_overlap();
   double wirelength(map<int, vector<Pin> > &netToCell);
   double cell_overlap_partial(vector < Node* > &nodes);
   double wirelength_partial(vector < Node* > &nodes, map<int, vector<Pin> > &netToCell);
   double rudy(map<int, vector<Pin> > &netToCell);
-  float annealer(int outer_loop_iter,
-                            int inner_loop_iter,
-                            double eps,
-                            double t_0,bool var,
-                            map<int, vector<Pin> > &netToCell,
-                            string initial_pl,
-                            int rotate_flag);
+  float annealer(map<int, vector<Pin> > &netToCell,
+                string initial_pl);
   float multistart();
-  double initialize_temperature(vector< int > &accept_history,
-                                double &Temperature,
-                                std::pair <double,double> &wl_normalization,
-                                std::pair <double,double> &area_normalization,
-                                std::pair <double,double> &routability_normalization,
-                                map<int, vector<Pin> > &netToCell,
-                                int rotate_flag);
+  double initialize_temperature(double &Temperature, map<int, vector<Pin> > &netToCell);
   void update_temperature(double& Temperature);
   double initiate_move(double current_cost,
-                       vector< int > &accept_history,
                        double & Temperature,
-                       std::pair <double,double> &wl_normalization,
-                       std::pair <double,double> &area_normalization,
-                       std::pair <double,double> &routability_normalization,
-                       map<int, vector<Pin> > &netToCell,
-                       int rotate_flag);
+                       map<int, vector<Pin> > &netToCell);
   bool check_move(double prevCost,
                   double newCost,
-                  vector< int > &accept_history,
                   double &Temperature);
   void project_soln();
-  void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n, int rotate_flag);
+  void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
   void gen_report(map<string, vector<double> > &report,
                   vector< double > &accept_ratio_history,
-                  std::pair <double,double> &wl_normalization,
-                  std::pair <double,double> &area_normalization,
-                  std::pair <double,double> &routability_normalization,
                   map<int, vector<Pin> > &netToCell);
-  void update_accept_history(vector< int > &accept_history, vector< double > &accept_ratio_history, float &accept_ratio);
+  void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
   void update_rtree(int idx);
   vector < Node > ::iterator random_node();
 
@@ -181,23 +137,27 @@ private:
 
 private:
   BoardGrid mBg;
+  //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;
 
-  //bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY) + 1), static_cast<int>(abs(b.maxX)+abs(b.minX) + 1), 0.0);
-
-  std::pair <double,double> *wl_normalization = nullptr;
-  std::pair <double,double> *area_normalization = nullptr;
-  std::pair <double,double> *routability_normalization = nullptr;
+  std::pair <double,double> wl_normalization;
+  std::pair <double,double> area_normalization;
+  std::pair <double,double> routability_normalization;
   map<int, vector<Pin> > *netToCell = nullptr;
   vector < vector < Pin > > *netToCellVec = nullptr;
-  vector< int > *accept_history = nullptr;
-  double *Temperature = nullptr;
-  bool rotate_flag = false;
-  const int debug = 0;
+  vector< int > accept_history;
+  double Temperature = 0.0;
+  int outer_loop_iter = 101;
+  int inner_loop_iter = 20;
+  double eps = -1.0;
+  double t_0 = 1.0;
+  bool var = false;
 
-  // Put below stuff to globalParam:: ??
+  bool rotate_flag = 0;
+  boost::mt19937 rng;
+
   double mMinX = std::numeric_limits<double>::max();
   double mMaxX = std::numeric_limits<double>::min();
   double mMinY = std::numeric_limits<double>::max();
@@ -205,5 +165,6 @@ private:
   // Take const to below?
   const unsigned int inputScale = 10;
   const unsigned int enlargeBoundary = 10;
-  const float grid_factor = 0.1; //For outputing
+  const float grid_factor = 0.1; 
+  const int debug = 0;
 };

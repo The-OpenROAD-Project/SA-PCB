@@ -7,3 +7,6 @@
 [submodule "module/KicadParser"]
 	path = module/KicadParser
 	url = https://github.com/The-OpenROAD-Project/KicadParser.git
+[submodule "module/Limbo"]
+	path = module/Limbo
+	url = https://github.com/limbo018/Limbo.git

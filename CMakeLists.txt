@@ -10,19 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl --no-as-needed -ldl -lutil -fPIC")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -Wl -ldl -lutil -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 
-#set(BOOST_ROOT /usr/local/boost-1.62.0/)
-#set(Boost_INCLUDE_DIR /usr/local/boost-1.62.0/include/)
-#set(BOOST_LIBRARYDIR /usr/local/boost-1.62.0/lib)
 find_package(Boost REQUIRED)
-#find_package(Swig REQUIRED)
-#set(SWIG_EXECUTABLE "/usr/bin/swig")
 set(SWIG_EXECUTABLE "/usr/local/bin/swig")
-#find_package(Python REQUIRED)
-#find_package(PythonLibs REQUIRED)
 find_package( PythonInterp 2.7 REQUIRED )
 find_package( PythonLibs 2.7 REQUIRED )
 
@@ -33,8 +25,12 @@ set(PCBPLACER_HOME ${PROJECT_SOURCE_DIR} )
 set(KICADPARSER_HOME
   ${PROJECT_SOURCE_DIR}/module/KicadParser
 )
+set(LIMBO_HOME
+  ${PROJECT_SOURCE_DIR}/module/Limbo
+)
 
-add_subdirectory(${KICADPARSER_HOME})
+#add_subdirectory(${LIMBO_HOME})
+#add_subdirectory(${KICADPARSER_HOME})
 
 
 set (PCBPLACER_SRC  
@@ -42,7 +38,6 @@ set (PCBPLACER_SRC
   src/GridBasedPlacer.cpp
   src/globalParam.cpp
   src/readFiles.cpp
-  src/PcbPlacer_wrapper.cpp
   )
 
 set (PCBPLACER_HEADER
@@ -63,8 +58,8 @@ set (PLACER_SWIG_FILES
 # include directories
 ############################################################
 include_directories(
-  ${KICADPARSER_HOME}/src
-  ${PYTHON_INCLUDE_DIRS}
+#  ${KICADPARSER_HOME}/src
+#  ${PYTHON_INCLUDE_DIRS}
   )
 
 ############################################################
@@ -72,10 +67,6 @@ include_directories(
 ############################################################
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
-
-#add_library( PCBPLACERlib STATIC
-#  ${PCBPLACER_SRC}
-#)
 
 add_library( PCBPLACERlib SHARED
   ${PCBPLACER_SRC}
@@ -88,20 +79,20 @@ set_target_properties( PCBPLACERlib
 ############################################################
 # Create an executable
 ############################################################
-add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
-  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
-  WORKING_DIRECTORY ${PCBPLACER_HOME}
-  DEPENDS ${PLACER_SWIG_FILES}
-)
+#add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
+#  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
+#  WORKING_DIRECTORY ${PCBPLACER_HOME}
+#  DEPENDS ${PLACER_SWIG_FILES}
+#)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/bin)
 
 add_executable( PCBPLACER src/main.cpp )
-add_dependencies( PCBPLACER kicadpcbparserlib )
+#add_dependencies( PCBPLACER kicadpcbparserlib )
 
 target_link_libraries( PCBPLACER
   PCBPLACERlib
-  kicadpcbparserlib
+#  kicadpcbparserlib
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )

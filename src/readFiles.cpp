@@ -70,6 +70,57 @@ int readNodesFile(string fname) {
     }
   }
   file.close();
+  return 0; 
+}
+
+int readClstFile(string fname) {
+  fstream file;
+  string buf;
+  int i = 0;
+  vector < string > strVec;
+  int value = 2;
+  int idx = 0;
+
+  int num_levels = 0;
+  vector < int > num_modules;
+  string Out = ""; // tmp string
+
+  file.open(fname, ios:: in);
+  while (getline(file, buf)) {
+    i++;
+    boost::trim(buf);
+    boost::algorithm::split(strVec, buf, is_any_of("\t, "), boost::token_compress_on);
+    if (i == 1) {
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        num_levels = atoi(results.at(1).c_str());
+    } else if (i == 2) {
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        results.erase (results.begin());
+        for (auto &res : results) {
+          num_modules.push_back(atoi(res.c_str()));
+        }
+        // INIT HIERARCHY
+        H.init_hierarchy(num_levels, num_modules);
+    } else {
+      idx += 1;
+      
+      std::vector<std::string> results;
+      boost::split(results, buf, [](char c){return c == '\t';});
+      string cell_name = results[0];
+      results.erase (results.begin());
+
+      vector <int> cluster_id_vec;
+      for (auto &res : results) {
+        // insert cells into hierarchy
+        cluster_id_vec.push_back(atoi(res.c_str()));
+      }
+      H.insert_cell(name2id[strVec[0]], cluster_id_vec, H.root, 0);
+    }
+  }
+
+  file.close();
   return 0;
 }
 
@@ -79,7 +130,7 @@ int readShapesFile(string fname) {
   int i = 0;
   vector < string > strVec;
 
-  file.open(fname, ios:: in );
+  file.open(fname, ios:: in);
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
@@ -152,7 +203,6 @@ map<int, vector<Pin> > readNetsFile(string fname) {
   map<int, vector<Pin> > netToCell;
 
   string pat = "NetDegree : ";
-  //string pat = "_net";
   string Out;
 
   file.open(fname, ios:: in );
@@ -163,7 +213,10 @@ map<int, vector<Pin> > readNetsFile(string fname) {
 
       std::size_t found = buf.find(pat);
       if(found!=std::string::npos) {
-        Out = buf.substr(buf.rfind(" ") + 1);
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        //Out = buf.substr(buf.rfind(" ") + 1);
+        Out = results.at(2);
       } else {
         continue;
       }
@@ -178,7 +231,8 @@ map<int, vector<Pin> > readNetsFile(string fname) {
         nodeId[name2id[strVec[0]]].setNetList(NetId);
         Pin p;
         if(strVec.size() > 2) {
-          p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
+          //p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
+          p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), name2id[strVec[0]]);
         } else {
           p.set_params(strVec[0].c_str(), 0, 0, -1);
         }

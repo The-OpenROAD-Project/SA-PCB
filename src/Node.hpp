@@ -74,6 +74,8 @@ class Node {
     int layer;
     vector < int > Netlist;
 
+    vector < int > modules;
+
   void setParameterNodes(string name, double width, double height, int terminal, int idx) {
     // Sets parameters given an entry in Nodes file
     this -> name = name;
@@ -93,6 +95,10 @@ class Node {
       this -> poly = poly;
       boost::geometry::envelope(poly, envelope);
     }
+  }
+
+  void setModuleParams(vector < int > m) {
+    modules = m;
   }
 
   void setParameterShapes(string wkt) {

@@ -47,89 +47,33 @@ namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
-int debug = 1;
-GridBasedPlacer::boundaries b;
-boost::mt19937 rng;
-
 vector < Node > nodeId;
 map < string, int > name2id;
-//bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
+Hierarchy H;
 
 float l1 = 0.4;
 
-//int main(int argc, char *argv[]) {
-kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
+//kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
+void GridBasedPlacer::test_placer_flow() {
   srand(time(NULL));
   int opt;
-  int outer_loop_iter = 102;
-  int inner_loop_iter = 2;
-  double eps = -1.0;
-  double t_0 = 1.0;
   string out_file;
-  int rotate_flag = 0;
 
   long long int idx = -1;
 
   string parg = "";
   string initial_pl = "";
   int bound_inc = 0;
-  bool var = false;
 
   std::cout << "=================test_placer==================" << std::endl;
-  /*
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:r::h")) != EOF) {
-      switch(opt) {
-          case 'x': idx = atoi(optarg); break;
-          case 'p': parg=string(optarg); break;
-          case 'l': initial_pl=string(optarg); break;
-          case 'd': debug=atoi(optarg); break;
-          case 'i': outer_loop_iter = atoi(optarg); break;
-          case 'j': inner_loop_iter = atoi(optarg); break;
-          case 't': t_0 = atof(optarg); break;
-          case 'e': eps = atof(optarg); break;
-          case 'v': var = true; break;
-          case 'f': out_file=string(optarg); break;
-          case 'r': rotate_flag=atoi(optarg); break;
-          case 'b':
-            bound_inc += 1;
-            switch(bound_inc) { // TODO: have 4 different argument flags for each point
-              case 1: b.minX = atoi(optarg) - 1;
-              case 2: b.minY = atoi(optarg) - 1;
-              case 3: b.maxX = atoi(optarg) + 1;
-              case 4: b.maxY = atoi(optarg) + 1;
-            }
-          case 'h': fprintf(stderr, "./sa usuage is \n \
-                                    -i <optional, value> : for denoting # outer iterations PER SA INSTANCE \n \
-                                    -j <optional, value> : for denoting 'j'*#nodes inner iterations \n \
-                                    -t <optional, value> : for denoting initial temperature \n \
-                                    -f <optional, str>   : for output filename \n \
-                                    -e <optional, float> : convergence epsilon \n \
-                                    -v <optional>        : ben-amur flag \n \
-                                    -x <optional, int>   : simulated annealing instance index \n \
-                                    -p <required, string>: prefix of board to place \n \
-                                    -l <optional, string>: prefix of initial placement \n \
-                                    -d <optional, {0-3}> : debug verbosity \n \
-                                    -r <optional, {0-3}> : rotation \n \
-                                    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output");
-          default: cout<<endl; abort();
-      }
-  }
-  if(parg == "")   {
-    cout << "./main: option requires an argument -- p\n";
-    exit(1);
-  }
-  if(parg == "")   {
-    out_file = std::to_string( idx );
-  } 
-  */
-
   
-  parg = "../designs/bm2";
-  //cout << "circuit: " << parg << endl;
+  parg = "../designs/ispd2005/adaptec2/adaptec2";
+  //parg = "../test/apte";
+  cout << "circuit: " << parg << endl;
 
   string nodesfname  = parg + ".nodes";
-  string shapesfname = parg + ".shapes";
   string netsfname   = parg + ".nets";
+  string clstname = parg + ".clst";
   string plfname     = "";
 
   if (initial_pl != "") {
@@ -140,122 +84,43 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
   string wtsfname    = parg + ".wts";
 
-  //cout << nodesfname << endl;
-  //cout << shapesfname << endl;
-  //cout << netsfname << endl;
-  //cout << plfname << endl;
+  cout << nodesfname << endl;
+  cout << netsfname << endl;
+  cout << plfname << endl;
+  cout << clstname << endl;
  
   map<int, vector<Pin> > netToCell;
-  cout << "init netToCell" << endl;
-  if(debug) { cout << "reading nodes..." << endl; }
-  //readNodesFile(nodesfname);
-  //readShapesFile(shapesfname);
-  //readWtsFile(wtsfname);
-  //if(debug) { cout << "reading pl..." << endl; }
-  //readPlFile(plfname);
-
-  //mDb.printInst();
-
-  //std::string designName = "../designs/bm2.unrouted.kicad_pcb";
-  //std::cout << "Parsing design: " << designName << std::endl;
-  //kicadPcbDataBase mDb(designName);
-
-  std::vector<instance> &instances =  mDb.getInstances();
-  std::vector<net> &nets = mDb.getNets();
-  for (int i = 0; i < instances.size(); ++i) {
-    Node n;
-    nodeId.push_back(n);
-  }
-  for (auto &inst : instances) {
-      point_2d bbox;
-      mDb.getCompBBox(inst.getComponentId(), &bbox); 
-
-      Node n;
-      n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, 0, inst.getId());
-      nodeId[inst.getId()] = n;
-      name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
-
-      double angle = inst.getAngle();
-      string ang = "";
-      if (angle == 0) {
-          ang = "N";
-      } else if (angle == 90) {
-          ang = "E";
-      } else if (angle == 180) {
-          ang = "S";
-      } else if (angle == 270) {
-          ang = "W";
-      }
-      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, 0);
-      nodeId[name2id[inst.getName()]].printParameter();
-  }
-  if(debug) { cout << "reading nets..." << endl; }
-  //netToCell = readNetsFile(netsfname);
-  if(debug) { cout << "calculating boundaries..." << endl; }
-  set_boundaries();
-  if(debug) { cout << "annealing" << endl; }
-
-    for (auto &net : nets){
-
-      vector < Pin > pinTemp;
-      for (auto &pin : net.getPins())
-      {
-          Pin p;
-          auto &inst = mDb.getInstance(pin.getInstId());
-          nodeId[name2id[inst.getName()]].setNetList(net.getId());
-
-          auto &comp = mDb.getComponent(pin.getCompId());
-          point_2d pos;
-	  //mDb.getPinPosition(pin, &pos);
-
-          auto &pad = comp.getPadstack(pin.getPadstackId());
-          //cout << pos.m_x << " " << inst.getX() <<  " " << nodeId[name2id[inst.getName()]].xCoordinate << " " <<  pos.m_x - nodeId[name2id[inst.getName()]].xCoordinate << endl;
-          p.set_params(inst.getName(), pos.m_x - nodeId[name2id[inst.getName()]].xBy2, pos.m_y - nodeId[name2id[inst.getName()]].yBy2, nodeId[name2id[inst.getName()]].idx);
-          pinTemp.push_back(p);
-
-      }
-      netToCell.insert(pair < int, vector< Pin > > (net.getId(), pinTemp));
-    }
+  cout << "reading nodes..." << endl;
+  readNodesFile(nodesfname);
+  cout << "reading pl..." << endl;
+  readPlFile(plfname);
+  cout << "reading nets..." << endl;
+  netToCell = readNetsFile(netsfname); // mapping from net ids to vectors of pins - need to add weights
+  cout << "reading cluster heirarchy..." << endl;
+  readClstFile(clstname);
+  cout << "computing netlist heirarchy..." << endl;
+  H.set_netlist_hierarchy(netToCell);
+  cout << "composing module geometries..." << endl;
+  H.set_module_geometries(nodeId);
 
   cout << "annealing" << endl;
-  float cost = this->annealer(outer_loop_iter, inner_loop_iter, eps, t_0, var, netToCell, initial_pl, rotate_flag);
-  
-  // write back to db
-  cout << "writing back to db..." << endl;
-  for (auto &inst : instances) {
-      point_2d bbox;
-      mDb.getCompBBox(inst.getComponentId(), &bbox);
-
-      int angle = nodeId[inst.getId()].orientation;
-      double ang = 0;
-      if (angle == 0) {
-          ang = 0;
-      } else if (angle == 2) {
-          ang = 90;
-      } else if (angle == 4) {
-          ang = 180;
-      } else if (angle == 6) {
-          ang = 180;
-      }
-      inst.setAngle(ang);
-      inst.setX(nodeId[inst.getId()].xBy2);
-      inst.setY(nodeId[inst.getId()].yBy2);
-  }
-  return mDb;
-  //writePlFile("./final_placement.pl");
-  //cout << " " << idx << " " << cost << endl;
+  //float cost = this->annealer(netToCell, initial_pl);
+  writePlFile("./final_placement.pl");
 }
+
+//void GridBasedPlacer::HPlace() {
+  // top down placement
+//  for (auto &lvl : H.levels) {
+    
+//  } 
+//}
 
 /*
 initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
-void GridBasedPlacer::initialize_params(std::pair <double,double> &wl_normalization,
-                       std::pair <double,double> &area_normalization,
-                       std::pair <double,double> &routability_normalization,
-                       map<int, vector<Pin> > &netToCell,
-                       int rotate_flag) {
+void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
 
   vector < std::pair <double,double> > normalization_terms;
 
@@ -266,86 +131,29 @@ void GridBasedPlacer::initialize_params(std::pair <double,double> &wl_normalizat
       num_components += 1;
     }
   }
-  // min/max wl
   std::pair < double, double > wl;
-//  double min_wl = std::numeric_limits<double>::max();
-//  double max_wl = 0.0;
-
-  // min/max overlap area
   std::pair < double, double > area;
-//  double min_area = 0.0;
-//  double max_area = 0.0;
-
   std::pair < double, double > rn;
-//  double min_rudy = 0.0;
-//  double max_rudy = 0.0;
-
-/*
-  vector < Node > ::iterator nodeit1;
-  vector < Node > ::iterator nodeit2;
-
-  for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
-    if(nodeit1->terminal) {
-      continue;
-    } else {
-        double cell_wl = nodeit1->width + nodeit1->height;
-        if (cell_wl < min_wl) {
-          min_wl = cell_wl;
-        }
-        for (nodeit2 = nodeit1++; nodeit2 != nodeId.end(); ++nodeit2) {
-          if(nodeit2->idx == nodeit1->idx){continue;}
-          if(nodeit1->fixed && nodeit2->fixed) {
-              if(intersects(nodeit1->poly, nodeit2->poly)) {
-                double oa = 0.0;
-                std::deque<polygon> intersect_poly;
-                boost::geometry::intersection(nodeit1->poly, nodeit2->poly, intersect_poly);
-
-                BOOST_FOREACH(polygon const& p, intersect_poly) {
-                    oa += bg::area(p);
-                }
-                min_area += pow(oa,2);
-                max_area += pow(oa,2);
-              }
-            } else {
-              max_area += pow(min(nodeit1->width, nodeit2->width) * min(nodeit1->height, (nodeit2->width)), 2);
-            }
-        }
-      }
-  }
-
-  min_wl = min_wl*num_components;
-  max_wl = ((b.maxX - b.minX) + (b.maxY - b.minY))*netToCell.size();
-
-  wl.first = 0.0; // min_area
-  wl.second = max(wirelength(netToCell), 1.0); // max_area
-
-  area.first = 0.0; // min_area;
-  area.second = max(cell_overlap(), 1.0); // max_area;
-
-  routability_normalization.first = 0.0;
-  routability_normalization.second = max(rudy(netToCell),1.0);
-*/
-
 
   double sum_wl = 0.0;
   double sum_oa = 0.0;
   double sum_rn = 0.0;
-  for (int i = 0; i<1000; i++) {
-    this->random_initial_placement(rotate_flag);
+  for (int i = 0; i<100; i++) {
+    this->random_initial_placement();
     sum_wl += this->wirelength(netToCell);
     sum_oa += this->cell_overlap();
     sum_rn += this->rudy(netToCell);
   }
 
   wl.first = 0.0;
-  wl.second = sum_wl / 1000.0;
+  wl.second = sum_wl / 100.0;
 
   area.first = 0.0;
-  area.second = sum_oa / 1000.0;
+  area.second = sum_oa / 100.0;
   area.second = max(area.second, 1.0); 
 
   rn.first = 0.0;
-  rn.second = sum_rn / 1000.0;
+  rn.second = sum_rn / 100.0;
 
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
@@ -372,38 +180,35 @@ void GridBasedPlacer::set_boundaries() {
     if (itNode -> terminal || itNode->fixed) {
       xval = itNode -> xCoordinate;
       yval = itNode -> yCoordinate;
-      if (xval < b.minX) {
-        b.minX = xval - 2;
+      if (xval < mMinX) {
+        mMinX = xval - 2;
       }
-      if (xval > b.maxX) {
-        b.maxX = xval + width + 2;
+      if (xval > mMaxX) {
+        mMaxX = xval + width + 2;
       }
-      if (yval < b.minY) {
-        b.minY = yval - 2;
+      if (yval < mMinY) {
+        mMinY = yval - 2;
       }
-      if (yval > b.maxY) {
-        b.maxY = yval + height + 2;
+      if (yval > mMaxY) {
+        mMaxY = yval + height + 2;
       }
     }
   }
 
-  if (b.minX == 0 && b.maxX == 0 && b.minY == 0 && b.maxY == 0) {
+  if (mMinX == 0 && mMaxX == 0 && mMinY == 0 && mMaxY == 0) {
     cout << "no boundary found" << endl;
-    b.maxX = sqrt(1.8*total_area);
-    b.maxY = sqrt(1.8*total_area);
+    mMaxX = sqrt(1.8*total_area);
+    mMaxY = sqrt(1.8*total_area);
   }
-
-  if(debug) {
-    cout << "min: " << b.minX << " " << b.minY << endl;
-    cout << "max: " << b.maxX << " " << b.maxY << endl;
-  }
+  cout << "min: " << mMinX << " " << mMinY << endl;
+  cout << "max: " << mMaxX << " " << mMaxY << endl;
 }
 
 /*
 random_placement
 Randomly place and orient a single component within a bounded region
 */
-void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, Node &n, int rotate_flag) {
+void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, Node &n) {
   boost::uniform_int<> uni_distx(xmin,xmax);
   boost::variate_generator<boost::mt19937&, boost::uniform_int<> > unix(rng, uni_distx);
   int rx = unix();
@@ -433,11 +238,11 @@ void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, N
 initial_placement
 Randomly place and orient all movable components in the board area
 */
-void GridBasedPlacer::random_initial_placement(int rotate_flag) {
+void GridBasedPlacer::random_initial_placement() {
   vector < Node > ::iterator itNode;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     if (!itNode -> fixed) {
-      this->random_placement(b.minX, b.maxX - max(itNode -> width, itNode -> height), b.minY, b.maxY - max(itNode -> width, itNode -> height), *itNode, rotate_flag);
+      this->random_placement(mMinX, mMaxX - max(itNode -> width, itNode -> height), mMinY, mMaxY - max(itNode -> width, itNode -> height), *itNode);
     }
   }
 }
@@ -448,7 +253,6 @@ projects the final solution to enforce 0 overlap by iteratively
 shifting overlapped components until cumulative overlap reduces below an eps.
 */
 void GridBasedPlacer::project_soln() {
-  // ensure zero overlap
   double oa = cell_overlap();
   double eps = 10.0e-5;
 
@@ -523,7 +327,7 @@ double GridBasedPlacer::wirelength(map<int, vector<Pin> > &netToCell) {
   vector < Pin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
-    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+    double minXW = mMaxX, minYW = mMaxY, maxXW = mMinX, maxYW = mMinY;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       if(itCellList->name == "") {
         continue;
@@ -602,7 +406,6 @@ wireLength_partial
 Compute HPWL for select nets
 */
 double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell) {
-  //map < int, vector < Pin > > ::iterator itNet;
   vector < Pin > net;
   vector < int > ::iterator itNet;
   vector < Pin > ::iterator itCellList;
@@ -610,7 +413,6 @@ double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vec
   unordered_set < int > net_history;
 
   double xVal, yVal, wireLength = 0;
-  //for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
   for (itNode = nodes.begin(); itNode != nodes.end(); ++itNode) {
     for (itNet = (*itNode)->Netlist.begin(); itNet != (*itNode)->Netlist.end(); ++itNet) {
       if (net_history.find(*itNet) == net_history.end()) {
@@ -619,7 +421,7 @@ double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vec
         continue;
       }
       net = netToCell.find(*itNet)->second;
-      double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+      double minXW = mMaxX, minYW = mMaxY, maxXW = mMinX, maxYW = mMinY;
       for (itCellList = net.begin(); itCellList != net.end(); ++itCellList) {
         if(itCellList->name == "") {
           continue;
@@ -706,8 +508,8 @@ rudy
 Computes a routability score
 */
 double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
-  static bnu::matrix<double> D (static_cast<int>(abs(b.maxY)+abs(b.minY) + 1), static_cast<int>(abs(b.maxX)+abs(b.minX) + 1), 0.0);
-  static bnu::matrix<double> D_route_sup (static_cast<int>(abs(b.maxY)+abs(b.minY) + 1), static_cast<int>(abs(b.maxX)+abs(b.minX) + 1), 1.0);
+  static bnu::matrix<double> D (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 0.0);
+  static bnu::matrix<double> D_route_sup (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 1.0);
 
   D.clear();
 
@@ -716,7 +518,7 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
 
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
-    double minXW = b.maxX, minYW = b.maxY, maxXW = b.minX, maxYW = b.minY;
+    double minXW = mMaxX, minYW = mMaxY, maxXW = mMinX, maxYW = mMinY;
     double rudy = 0.0;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       int orient = nodeId[itCellList->idx].orientation;
@@ -759,10 +561,10 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
           }
       }*/
     }
-    minXW = max(minXW, b.minX);
-    minYW = max(minYW, b.minY);
-    maxXW = min(maxXW, b.maxX);
-    maxYW = min(maxYW, b.maxY);
+    minXW = max(minXW, mMinX);
+    minYW = max(minYW, mMinY);
+    maxXW = min(maxXW, mMaxX);
+    maxYW = min(maxYW, mMaxY);
     // now have boundary of net
     hpwl = (abs((maxXW - minXW)) + abs((maxYW - minYW)));
     rudy = hpwl / (max((maxXW - minXW)*(maxYW - minYW), 1.0)); // rudy density
@@ -798,9 +600,6 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
 }
 
 double GridBasedPlacer::cost(
-            std::pair <double,double> &wl_normalization,
-            std::pair <double,double> &area_normalization,
-            std::pair <double,double> &routability_normalization,
             map<int, vector<Pin> > &netToCell,
             int temp_debug) {
   double l2 = 1 - l1;
@@ -821,9 +620,6 @@ double GridBasedPlacer::cost(
 }
 
 double GridBasedPlacer::cost_partial(vector < Node *> &nodes,
-                    std::pair <double,double> &wl_normalization,
-                    std::pair <double,double> &area_normalization,
-                    std::pair <double,double> &routability_normalization,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
@@ -851,24 +647,19 @@ validate_move
 validates a shift, project within board boundary
 */
 void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
-  rx = max(rx, b.minX);
-  ry = max(ry, b.minY);
+  rx = max(rx, mMinX);
+  ry = max(ry, mMinY);
 
-  rx = min(rx, b.maxX - node.width);
-  ry = min(ry, b.maxY - node.height);
+  rx = min(rx, mMaxX - node.width);
+  ry = min(ry, mMaxY - node.height);
 
   node.setPos(rx,ry);
 }
 
 double c = 0.0;
 double GridBasedPlacer::initiate_move(double current_cost,
-                     vector< int > &accept_history,
                      double & Temperature,
-                     std::pair <double,double> &wl_normalization,
-                     std::pair <double,double> &area_normalization,
-                     std::pair <double,double> &routability_normalization,
-                     map<int, vector<Pin> > &netToCell,
-                     int rotate_flag) {
+                     map<int, vector<Pin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -912,7 +703,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
       rand_node2 = this->random_node();
     }
     perturbed_nodes.push_back(&(*rand_node2));
-    prevCost = this->cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+    prevCost = this->cost_partial(perturbed_nodes,netToCell);
 
     //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
     rand_node2_orig_x = rand_node2->xCoordinate;
@@ -927,7 +718,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
     if(debug > 1) {
       cout << "shift" << endl;
     }
-    prevCost = this->cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+    prevCost = this->cost_partial(perturbed_nodes, netToCell);
 
     double sigma = rand_node1->sigma;
 
@@ -948,7 +739,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-    prevCost = this->cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+    prevCost = this->cost_partial(perturbed_nodes, netToCell);
 
     if (rotate_flag == 0) {
       boost::uniform_int<> uni_dist(0,3);
@@ -965,12 +756,11 @@ double GridBasedPlacer::initiate_move(double current_cost,
 
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
-  double transition_cost = this->cost_partial(perturbed_nodes, wl_normalization, area_normalization, routability_normalization, netToCell);
+  double transition_cost = this->cost_partial(perturbed_nodes,netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
 
   bool accept = this->check_move(current_cost,
                            updated_cost,
-                           accept_history,
                            Temperature);
   if (!accept) {
     if(debug > 1) {
@@ -1059,7 +849,7 @@ void GridBasedPlacer::update_temperature(double& Temperature) {
   }
 }
 
-void GridBasedPlacer::update_accept_history(vector< int > &accept_history, vector< double > &accept_ratio_history, float &accept_ratio) {
+void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio) {
   if (accept_history.size() > 100) {
     accept_ratio = ((accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
   } else {
@@ -1074,7 +864,6 @@ either accept or reject the move based on current & previous temperature & cost
 */
 bool GridBasedPlacer::check_move(double prevCost,
                 double newCost,
-                vector< int > &accept_history,
                 double & Temperature) {
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
@@ -1094,26 +883,22 @@ bool GridBasedPlacer::check_move(double prevCost,
   }
 }
 
-double GridBasedPlacer::initialize_temperature(vector< int > &accept_history,
+double GridBasedPlacer::initialize_temperature(
                               double &Temperature,
-                              std::pair <double,double> &wl_normalization,
-                              std::pair <double,double> &area_normalization,
-                              std::pair <double,double> &routability_normalization,
-                              map<int, vector<Pin> > &netToCell,
-                              int rotate_flag) {
+                              map<int, vector<Pin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
   double xt = 1.0;
   double x0 = 0.84;
   double p = 2.0;
-  this->random_initial_placement(rotate_flag);
+  this->random_initial_placement();
   for(int i=1; i<=10; i++){
     for(int j=1; j<=10; j++){
-      this->random_initial_placement(rotate_flag);
-      emax += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
-      this->initiate_move(0.0, accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
-      emin += exp(cost(wl_normalization, area_normalization, routability_normalization, netToCell)/t);
+      this->random_initial_placement();
+      emax += exp(cost(netToCell)/t);
+      this->initiate_move(0.0, Temperature, netToCell);
+      emin += exp(cost(netToCell)/t);
     }
     xt = emax/emin;
     t = t * pow(log(xt),1/p)/log(x0);
@@ -1127,9 +912,6 @@ generates a report and outputs files to ./reports/ directory
 */
 void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
                 vector< double > &accept_ratio_history,
-                std::pair <double,double> &wl_normalization,
-                std::pair <double,double> &area_normalization,
-                std::pair <double,double> &routability_normalization,
                 map<int, vector<Pin> > &netToCell) {
     vector < double > cost_hist = report["cost_hist"];
     vector < double > wl_hist   = report["wl_hist"];
@@ -1193,14 +975,7 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
 annealer
 main loop for sa algorithm
 */
-float GridBasedPlacer::annealer(int outer_loop_iter,
-               int inner_loop_iter,
-               double eps,
-               double t_0,
-               bool var,
-               map<int, vector<Pin> > &netToCell,
-               string initial_pl,
-               int rotate_flag) {
+float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initial_pl) {
   double Temperature = t_0;
   int num_components = 0;
 
@@ -1213,36 +988,26 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
 
-  std::pair <double,double> wl_normalization;
-  std::pair <double,double> area_normalization;
-  std::pair <double,double> routability_normalization;
-
   vector< int > accept_history;
   float accept_ratio = 0.0;
   vector< double > accept_ratio_history;
 
-  if(debug) { cout << "calculating initial params..." << endl; }
+  cout << "calculating boundaries..." << endl;
+  set_boundaries();
   cout << "calculating initial params..." << endl;
-  this->initialize_params(wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
+  this->initialize_params(netToCell);
   if (initial_pl != "") {
     readPlFile(initial_pl);
   } else {
-    this->random_initial_placement(rotate_flag);
+    this->random_initial_placement();
   }
 
-  double cst = this->cost(wl_normalization, area_normalization, routability_normalization, netToCell,-1);
+  double cst = this->cost(netToCell,-1);
   if(var) {
-    Temperature = this->initialize_temperature(accept_history,
-                                         Temperature,
-                                         wl_normalization,
-                                         area_normalization,
-                                         routability_normalization,
-                                         netToCell,
-                                         rotate_flag);
+    Temperature = this->initialize_temperature(Temperature, netToCell);
   }
   int idx = 0;
 
-  cout << "counting components..." << endl;
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     //rtree.insert(std::make_pair(itNode -> envelope, idx));
     idx+=1;
@@ -1254,7 +1019,6 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   long long int ii = 0; // outer loop iterator
   int i = 0; // inner loop iterator
-  if(debug) { cout << "annealing..." << endl; }
   while (ii < outer_loop_iter) {
     i = inner_loop_iter*num_components; 
     if(ii > 1 && ii % 10 == 0 && debug) {
@@ -1268,19 +1032,16 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
       cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
-      this->cost(wl_normalization, area_normalization, routability_normalization,netToCell,-1);
+      this->cost(netToCell,-1);
 
       this->gen_report(report,
                  accept_ratio_history,
-                 wl_normalization,
-                 area_normalization,
-                 routability_normalization,
                  netToCell);
     }
     while (i > 0) {
 
-      cst = this->initiate_move(cst, accept_history, Temperature, wl_normalization, area_normalization, routability_normalization, netToCell, rotate_flag);
-      this->update_accept_history(accept_history, accept_ratio_history, accept_ratio);
+      cst = this->initiate_move(cst, Temperature, netToCell);
+      this->update_accept_history(accept_ratio_history, accept_ratio);
       report["cost_hist"].push_back(cst);
 
       //wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
@@ -1299,7 +1060,7 @@ float GridBasedPlacer::annealer(int outer_loop_iter,
       //writePlFile("./cache/"+std::to_string( ii )+".pl");
     }
   }
-  return this->cost(wl_normalization, area_normalization, routability_normalization, netToCell);
+  return this->cost(netToCell);
 }
 
 int GridBasedPlacer::fact(int n) {

@@ -35,18 +35,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#include "kicadPcbDataBase.h"
+//#include "kicadPcbDataBase.h"
 #include "GridBasedPlacer.hpp"
 #include "util.h"
 int main(int argc, char *argv[])
 {
+  /*
   if (argc < 2)
   {
     std::cout << "Please provide input testcase filename." << std::endl;
     return 0;
   }
 
-  //util::showSysInfoComdLine(argc, argv);
+
   GlobalParam::setFolders();
   GlobalParam::setUsageStart();
 
@@ -67,10 +68,12 @@ int main(int argc, char *argv[])
 
   std::cout << "Starting placer..." << std::endl;
   GridBasedPlacer placer(db);
+  */
+  GridBasedPlacer placer;
   placer.test_placer_flow();
 
-  GlobalParam::showCurrentUsage("GridBasedPlacer");
-  GlobalParam::showFinalUsage("End of Program");
+  //GlobalParam::showCurrentUsage("GridBasedPlacer");
+  //GlobalParam::showFinalUsage("End of Program");
 
   return 0;
 }

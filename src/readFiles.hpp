@@ -52,16 +52,20 @@
 
 #include "Node.hpp"
 #include "Pin.hpp"
+#include "Module.hpp"
 //#include "readScl.hpp"
 
 class Node;
 class Pin;
+class Module;
 extern map < string, int > name2id;
 extern vector < Node > nodeId;
+extern Hierarchy H;
 
 int readNodesFile(string fname);
 int readShapesFile(string fname);
 int readWtsFile(string fname);
 int readPlFile(string fname);
+int readClstFile(string fname);
 map<int, vector<Pin> > readNetsFile(string fname);
 int writePlFile(string fname);

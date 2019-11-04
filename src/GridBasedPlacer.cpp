@@ -47,11 +47,10 @@ namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
-vector < Node > nodeId;
-map < string, int > name2id;
+//vector < Node > nodeId;
+vector < Module * > nodeId;
+//map < string, int > name2id;
 Hierarchy H;
-
-float l1 = 0.4;
 
 //kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 void GridBasedPlacer::test_placer_flow() {
@@ -67,7 +66,7 @@ void GridBasedPlacer::test_placer_flow() {
 
   std::cout << "=================test_placer==================" << std::endl;
   
-  parg = "../designs/ispd2005/adaptec2/adaptec2";
+  parg = "../designs/ ispd2005/adaptec2/adaptec2";
   //parg = "../test/apte";
   cout << "circuit: " << parg << endl;
 
@@ -105,13 +104,20 @@ void GridBasedPlacer::test_placer_flow() {
 
   cout << "annealing" << endl;
   //float cost = this->annealer(netToCell, initial_pl);
+  HPlace(netToCell, initial_pl);
+
+  cout << "writting result" << endl;
   writePlFile("./final_placement.pl");
 }
 
-void GridBasedPlacer::HPlace() {
+void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_pl) {
   // top down placement
+  map<int, vector<Pin> > tmp_netToCell = netToCell;
+  vector < Node > tmp = nodeId;
   for (auto &lvl : H.levels) {
-    
+    moduleId = lvl.modules;
+    map<int, vector<Module *> > netToCell = lvl.netToModule;
+    float cost = this->annealer(netToCell, initial_pl);
   } 
 }
 
@@ -141,7 +147,7 @@ void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
     this->random_initial_placement();
     sum_wl += this->wirelength(netToCell);
     sum_oa += this->cell_overlap();
-    sum_rn += this->rudy(netToCell);
+    //sum_rn += this->rudy(netToCell);
   }
 
   wl.first = 0.0;
@@ -151,16 +157,16 @@ void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
   area.second = sum_oa / 100.0;
   area.second = max(area.second, 1.0); 
 
-  rn.first = 0.0;
-  rn.second = sum_rn / 100.0;
+  //rn.first = 0.0;
+  //rn.second = sum_rn / 100.0;
 
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
-  normalization_terms.push_back(rn);
+  //normalization_terms.push_back(rn);
 
   wl_normalization = normalization_terms[0];
   area_normalization = normalization_terms[1];
-  routability_normalization = normalization_terms[2];
+  //routability_normalization = normalization_terms[2];
 }
 
 /*
@@ -604,7 +610,7 @@ double GridBasedPlacer::cost(
   double l2 = 1 - l1;
   double wirelength_cost = l1*0.9*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
   double overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
-  double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+  //double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   if(debug > 1 || temp_debug == -1) {
     cout << "wirelength: " << this->wirelength(netToCell) << endl;
@@ -612,7 +618,7 @@ double GridBasedPlacer::cost(
     cout << "l1: " << l1 << " l2: " << l2 << endl;
     cout << "wirelength_cost: " << wirelength_cost  << endl;
     cout << "overlap_cost: " << overlap_cost  << endl;
-    cout << "routability_cost: " << routability_cost  << endl;
+    //cout << "routability_cost: " << routability_cost  << endl;
     cout << "cost: " << total_cost << endl;
   }
   return total_cost;
@@ -622,8 +628,8 @@ double GridBasedPlacer::cost_partial(vector < Node *> &nodes,
                     map<int, vector<Pin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-         l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+         l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
+         //l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 
 }
 
@@ -692,7 +698,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double i = uni();
 
-  if (i< 0.2) { // swap
+  if (i< p_swap) { // swap
     state = 0;
     if(debug > 1) {
       cout << "swap" << endl;
@@ -712,7 +718,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
     validate_move(*rand_node2, rand_node1_orig_x, rand_node1_orig_y);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
-  } else if (i < 0.85) { // shift
+  } else if (i < p_shift) { // shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
@@ -733,7 +739,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
 
     this->validate_move(*rand_node1, rx, ry);
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
-  } else { // rotate
+  } else if (i < p_rotate) { // rotate
     state = 2;
     if(debug > 1) {
       cout << "rotate" << endl;
@@ -925,21 +931,21 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
 
     double wl = this->wirelength(netToCell);
     double oa = this->cell_overlap();
-    double routability = this->rudy(netToCell);
+    //double routability = this->rudy(netToCell);
     double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
     double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
-    double normalized_routability = routability;
+    //double normalized_routability = routability;
     double l2 = 1 - l1;
     double cost = l1 * normalized_wl +
-                  l2 * 0.9 * normalized_oa +
-                  l2 * 0.1 * normalized_routability;
+                  l2 * 0.9 * normalized_oa; //+
+                  //l2 * 0.1 * normalized_routability;
 
     std::ofstream f0("./reports/"+buffer+"_summary.txt");
     f0 << "wirelength: " << wl << '\n';
     f0 << "overlap: " << oa << '\n';
     f0 << "normalized wirelength: " << normalized_wl << '\n';
     f0 << "normalized overlap: " << normalized_oa << '\n';
-    f0 << "routability: " << routability << '\n';
+    //f0 << "routability: " << routability << '\n';
     f0 << "cost: " << cost << '\n';
     f0.close();
 

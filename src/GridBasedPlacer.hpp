@@ -95,7 +95,7 @@ public:
   ~GridBasedPlacer(){}
 
   void test_placer_flow();
-  void HPlace();
+  void HPlace(map<int, vector<Pin> > &netToCell, string initial_pl);
 
 private:
   // Utility
@@ -113,8 +113,7 @@ private:
   double cell_overlap_partial(vector < Node* > &nodes);
   double wirelength_partial(vector < Node* > &nodes, map<int, vector<Pin> > &netToCell);
   double rudy(map<int, vector<Pin> > &netToCell);
-  float annealer(map<int, vector<Pin> > &netToCell,
-                string initial_pl);
+  float annealer(map<int, vector<Pin> > &netToCell, string initial_pl);
   float multistart();
   double initialize_temperature(double &Temperature, map<int, vector<Pin> > &netToCell);
   void update_temperature(double& Temperature);
@@ -154,6 +153,12 @@ private:
   double eps = -1.0;
   double t_0 = 1.0;
   bool var = false;
+
+  float l1 = 0.4;
+
+  float p_swap = 0.2;
+  float p_shift = 0.8;
+  float p_rotate = 0.0;
 
   bool rotate_flag = 0;
   boost::mt19937 rng;

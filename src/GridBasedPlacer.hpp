@@ -95,6 +95,7 @@ public:
   ~GridBasedPlacer(){}
 
   void test_placer_flow();
+  void HPlace();
 
 
 private:

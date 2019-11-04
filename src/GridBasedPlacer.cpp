@@ -108,12 +108,12 @@ void GridBasedPlacer::test_placer_flow() {
   writePlFile("./final_placement.pl");
 }
 
-//void GridBasedPlacer::HPlace() {
+void GridBasedPlacer::HPlace() {
   // top down placement
-//  for (auto &lvl : H.levels) {
+  for (auto &lvl : H.levels) {
     
-//  } 
-//}
+  } 
+}
 
 /*
 initialize_params

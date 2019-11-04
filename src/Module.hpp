@@ -54,6 +54,7 @@ class Module {
   public:
     string name;
     int level;
+
     int idx;
     model::polygon<model::d2::point_xy<double> > poly;
     boost::geometry::model::box< model::d2::point_xy<double> > envelope;
@@ -82,12 +83,10 @@ class Module {
     bool macroModule = false;
     int fixed = 0;
 
-
   void setNetList(int NetId) {
     // Sets parameters given an entry in Nets file
     Netlist.push_back(NetId);
   }
-
   void setParameterNodes(double width, double height) {
     // Sets parameters given an entry in Nodes file
     this -> xCoordinate = 0.0;
@@ -115,6 +114,7 @@ class Module {
     boost::geometry::transform(this->poly, tmp, translate);
     this->poly = tmp;
     updateCoordinates();
+
   }
 
   /*

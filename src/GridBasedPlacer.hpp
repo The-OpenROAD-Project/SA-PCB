@@ -97,7 +97,6 @@ public:
   void test_placer_flow();
   void HPlace();
 
-
 private:
   // Utility
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }

@@ -1,0 +1,305 @@
+UCLA nets 1.0
+
+# Created    : 2019-07-19 10:59:01.515682
+# Created by : None
+
+NumNets : None
+NumPins : None
+
+NetDegree : 2
+	r_2 B : -0.597 0.0
+	r_1 B : 0.597 0.0
+NetDegree : 2
+	r_55 B : 0.597 0.0
+	r_56 B : -0.597 0.0
+NetDegree : 2
+	r_9 B : -0.597 0.0
+	r_8 B : 0.597 0.0
+NetDegree : 2
+	r_63 B : -0.597 0.0
+	r_62 B : 0.597 0.0
+NetDegree : 2
+	r_32 B : -0.597 0.0
+	r_31 B : 0.597 0.0
+NetDegree : 2
+	r_86 B : -0.597 0.0
+	r_85 B : 0.597 0.0
+NetDegree : 2
+	r_23 B : -0.597 0.0
+	r_22 B : 0.597 0.0
+NetDegree : 2
+	r_77 B : -0.597 0.0
+	r_76 B : 0.597 0.0
+NetDegree : 2
+	r_29 B : 0.597 0.0
+	r_30 B : -0.597 0.0
+NetDegree : 2
+	r_84 B : -0.597 0.0
+	r_83 B : 0.597 0.0
+NetDegree : 2
+	r_37 B : -0.597 0.0
+	r_36 B : 0.597 0.0
+NetDegree : 2
+	r_6 B : -0.597 0.0
+	r_5 B : 0.597 0.0
+NetDegree : 2
+	r_76 B : -0.597 0.0
+	r_75 B : 0.597 0.0
+NetDegree : 2
+	r_98 B : -0.597 0.0
+	r_97 B : 0.597 0.0
+NetDegree : 2
+	r_50 B : 0.597 0.0
+	r_51 B : -0.597 0.0
+NetDegree : 2
+	r_3 B : 0.597 0.0
+	r_4 B : -0.597 0.0
+NetDegree : 2
+	r_58 B : -0.597 0.0
+	r_57 B : 0.597 0.0
+NetDegree : 2
+	r_27 B : -0.597 0.0
+	r_26 B : 0.597 0.0
+NetDegree : 2
+	r_97 B : -0.597 0.0
+	r_96 B : 0.597 0.0
+NetDegree : 2
+	r_18 B : -0.597 0.0
+	r_17 B : 0.597 0.0
+NetDegree : 2
+	r_72 B : -0.597 0.0
+	r_71 B : 0.597 0.0
+NetDegree : 2
+	r_24 B : 0.597 0.0
+	r_25 B : -0.597 0.0
+NetDegree : 2
+	r_79 B : -0.597 0.0
+	r_78 B : 0.597 0.0
+NetDegree : 2
+	r_48 B : -0.597 0.0
+	r_47 B : 0.597 0.0
+NetDegree : 2
+	r_16 B : 0.597 0.0
+	r_17 B : -0.597 0.0
+NetDegree : 2
+	r_38 B : 0.597 0.0
+	r_39 B : -0.597 0.0
+NetDegree : 2
+	r_93 B : -0.597 0.0
+	r_92 B : 0.597 0.0
+NetDegree : 2
+	r_46 B : -0.597 0.0
+	r_45 B : 0.597 0.0
+NetDegree : 2
+	r_99 B : 0.597 0.0
+	r_100 B : -0.597 0.0
+NetDegree : 2
+	r_53 B : -0.597 0.0
+	r_52 B : 0.597 0.0
+NetDegree : 2
+	r_22 B : -0.597 0.0
+	r_21 B : 0.597 0.0
+NetDegree : 2
+	r_92 B : -0.597 0.0
+	r_91 B : 0.597 0.0
+NetDegree : 2
+	r_13 B : -0.597 0.0
+	r_12 B : 0.597 0.0
+NetDegree : 2
+	r_67 B : -0.597 0.0
+	r_66 B : 0.597 0.0
+NetDegree : 2
+	r_20 B : -0.597 0.0
+	r_19 B : 0.597 0.0
+NetDegree : 2
+	r_74 B : -0.597 0.0
+	r_73 B : 0.597 0.0
+NetDegree : 2
+	r_43 B : -0.597 0.0
+	r_42 B : 0.597 0.0
+NetDegree : 2
+	r_11 B : 0.597 0.0
+	r_12 B : -0.597 0.0
+NetDegree : 2
+	r_33 B : 0.597 0.0
+	r_34 B : -0.597 0.0
+NetDegree : 2
+	r_88 B : -0.597 0.0
+	r_87 B : 0.597 0.0
+NetDegree : 2
+	r_41 B : -0.597 0.0
+	r_40 B : 0.597 0.0
+NetDegree : 2
+	r_94 B : 0.597 0.0
+	r_95 B : -0.597 0.0
+NetDegree : 2
+	r_64 B : -0.597 0.0
+	r_63 B : 0.597 0.0
+NetDegree : 2
+	r_33 B : -0.597 0.0
+	r_32 B : 0.597 0.0
+NetDegree : 2
+	r_55 B : -0.597 0.0
+	r_54 B : 0.597 0.0
+NetDegree : 2
+	r_8 B : -0.597 0.0
+	r_7 B : 0.597 0.0
+NetDegree : 2
+	r_62 B : -0.597 0.0
+	r_61 B : 0.597 0.0
+NetDegree : 2
+	r_15 B : -0.597 0.0
+	r_14 B : 0.597 0.0
+NetDegree : 2
+	r_68 B : 0.597 0.0
+	r_69 B : -0.597 0.0
+NetDegree : 2
+	r_38 B : -0.597 0.0
+	r_37 B : 0.597 0.0
+NetDegree : 2
+	r_29 B : -0.597 0.0
+	r_28 B : 0.597 0.0
+NetDegree : 2
+	r_83 B : -0.597 0.0
+	r_82 B : 0.597 0.0
+NetDegree : 2
+	r_36 B : -0.597 0.0
+	r_35 B : 0.597 0.0
+NetDegree : 2
+	r_89 B : 0.597 0.0
+	r_90 B : -0.597 0.0
+NetDegree : 2
+	r_59 B : -0.597 0.0
+	r_58 B : 0.597 0.0
+NetDegree : 2
+	r_28 B : -0.597 0.0
+	r_27 B : 0.597 0.0
+NetDegree : 2
+	r_50 B : -0.597 0.0
+	r_49 B : 0.597 0.0
+NetDegree : 2
+	r_3 B : -0.597 0.0
+	r_2 B : 0.597 0.0
+NetDegree : 2
+	r_57 B : -0.597 0.0
+	r_56 B : 0.597 0.0
+NetDegree : 2
+	r_10 B : -0.597 0.0
+	r_9 B : 0.597 0.0
+NetDegree : 2
+	r_80 B : -0.597 0.0
+	r_79 B : 0.597 0.0
+NetDegree : 2
+	r_49 B : -0.597 0.0
+	r_48 B : 0.597 0.0
+NetDegree : 2
+	r_71 B : -0.597 0.0
+	r_70 B : 0.597 0.0
+NetDegree : 2
+	r_24 B : -0.597 0.0
+	r_23 B : 0.597 0.0
+NetDegree : 2
+	r_77 B : 0.597 0.0
+	r_78 B : -0.597 0.0
+NetDegree : 2
+	r_31 B : -0.597 0.0
+	r_30 B : 0.597 0.0
+NetDegree : 2
+	r_85 B : -0.597 0.0
+	r_84 B : 0.597 0.0
+NetDegree : 2
+	r_54 B : -0.597 0.0
+	r_53 B : 0.597 0.0
+NetDegree : 2
+	r_45 B : -0.597 0.0
+	r_44 B : 0.597 0.0
+NetDegree : 2
+	r_99 B : -0.597 0.0
+	r_98 B : 0.597 0.0
+NetDegree : 2
+	r_52 B : -0.597 0.0
+	r_51 B : 0.597 0.0
+NetDegree : 2
+	r_5 B : -0.597 0.0
+	r_4 B : 0.597 0.0
+NetDegree : 2
+	r_75 B : -0.597 0.0
+	r_74 B : 0.597 0.0
+NetDegree : 2
+	r_44 B : -0.597 0.0
+	r_43 B : 0.597 0.0
+NetDegree : 2
+	r_66 B : -0.597 0.0
+	r_65 B : 0.597 0.0
+NetDegree : 2
+	r_19 B : -0.597 0.0
+	r_18 B : 0.597 0.0
+NetDegree : 2
+	r_72 B : 0.597 0.0
+	r_73 B : -0.597 0.0
+NetDegree : 2
+	r_26 B : -0.597 0.0
+	r_25 B : 0.597 0.0
+NetDegree : 2
+	r_96 B : -0.597 0.0
+	r_95 B : 0.597 0.0
+NetDegree : 2
+	r_65 B : -0.597 0.0
+	r_64 B : 0.597 0.0
+NetDegree : 2
+	r_87 B : -0.597 0.0
+	r_86 B : 0.597 0.0
+NetDegree : 2
+	r_40 B : -0.597 0.0
+	r_39 B : 0.597 0.0
+NetDegree : 2
+	r_94 B : -0.597 0.0
+	r_93 B : 0.597 0.0
+NetDegree : 2
+	r_46 B : 0.597 0.0
+	r_47 B : -0.597 0.0
+NetDegree : 2
+	r_16 B : -0.597 0.0
+	r_15 B : 0.597 0.0
+NetDegree : 2
+	r_70 B : -0.597 0.0
+	r_69 B : 0.597 0.0
+NetDegree : 2
+	r_7 B : -0.597 0.0
+	r_6 B : 0.597 0.0
+NetDegree : 2
+	r_61 B : -0.597 0.0
+	r_60 B : 0.597 0.0
+NetDegree : 2
+	r_14 B : -0.597 0.0
+	r_13 B : 0.597 0.0
+NetDegree : 2
+	r_68 B : -0.597 0.0
+	r_67 B : 0.597 0.0
+NetDegree : 2
+	r_21 B : -0.597 0.0
+	r_20 B : 0.597 0.0
+NetDegree : 2
+	r_91 B : -0.597 0.0
+	r_90 B : 0.597 0.0
+NetDegree : 2
+	r_59 B : 0.597 0.0
+	r_60 B : -0.597 0.0
+NetDegree : 2
+	r_81 B : 0.597 0.0
+	r_82 B : -0.597 0.0
+NetDegree : 2
+	r_35 B : -0.597 0.0
+	r_34 B : 0.597 0.0
+NetDegree : 2
+	r_89 B : -0.597 0.0
+	r_88 B : 0.597 0.0
+NetDegree : 2
+	r_42 B : -0.597 0.0
+	r_41 B : 0.597 0.0
+NetDegree : 2
+	r_11 B : -0.597 0.0
+	r_10 B : 0.597 0.0
+NetDegree : 2
+	r_81 B : -0.597 0.0
+	r_80 B : 0.597 0.0

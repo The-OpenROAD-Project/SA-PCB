@@ -121,7 +121,6 @@ Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
 void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
-
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
@@ -933,7 +932,7 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
     double l2 = 1 - l1;
     double cost = l1 * normalized_wl +
                   l2 * 0.9 * normalized_oa +
-          		    l2 * 0.1 * normalized_routability;
+                  l2 * 0.1 * normalized_routability;
 
     std::ofstream f0("./reports/"+buffer+"_summary.txt");
     f0 << "wirelength: " << wl << '\n';
@@ -994,6 +993,7 @@ float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initia
 
   cout << "calculating boundaries..." << endl;
   set_boundaries();
+
   cout << "calculating initial params..." << endl;
   this->initialize_params(netToCell);
   if (initial_pl != "") {

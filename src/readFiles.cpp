@@ -131,6 +131,7 @@ int readShapesFile(string fname) {
   vector < string > strVec;
 
   file.open(fname, ios:: in);
+
   while (getline(file, buf)) {
     i++;
     if (i > 7) {
@@ -231,8 +232,8 @@ map<int, vector<Pin> > readNetsFile(string fname) {
         nodeId[name2id[strVec[0]]].setNetList(NetId);
         Pin p;
         if(strVec.size() > 2) {
-          //p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
           p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), name2id[strVec[0]]);
+
         } else {
           p.set_params(strVec[0].c_str(), 0, 0, -1);
         }

@@ -25,12 +25,14 @@ set(PCBPLACER_HOME ${PROJECT_SOURCE_DIR} )
 set(KICADPARSER_HOME
   ${PROJECT_SOURCE_DIR}/module/KicadParser
 )
+
 set(LIMBO_HOME
   ${PROJECT_SOURCE_DIR}/module/Limbo
 )
 
 #add_subdirectory(${LIMBO_HOME})
 #add_subdirectory(${KICADPARSER_HOME})
+
 
 
 set (PCBPLACER_SRC  

@@ -73,8 +73,8 @@ class Node {
     int orientation;
     int layer;
     vector < int > Netlist;
-
     vector < int > modules;
+
 
   void setParameterNodes(string name, double width, double height, int terminal, int idx) {
     // Sets parameters given an entry in Nodes file

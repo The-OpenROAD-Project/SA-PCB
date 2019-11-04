@@ -1,0 +1,14 @@
+UCLA nets 1.0
+
+#Created    :
+#Created by :
+
+NumNets : 0
+NumPins : 0
+
+NetDegree : 5
+  C1 B : 0.0 0.0
+  C10 B : 0.0 0.0
+  C100 B : 0.0 0.0
+  C101 B : 0.0 0.0
+  C102 B : 0.0 0.0

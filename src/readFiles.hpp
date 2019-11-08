@@ -61,6 +61,7 @@ class Pin;
 class Module;
 extern map < string, int > name2id;
 extern vector < Node > nodeId;
+extern vector < Module * > moduleId;
 extern Hierarchy H;
 
 int readNodesFile(string fname);

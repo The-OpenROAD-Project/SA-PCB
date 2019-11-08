@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -O3 -fpermissive 
 set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 
 find_package(Boost REQUIRED)
-set(SWIG_EXECUTABLE "/usr/local/bin/swig")
+#set(SWIG_EXECUTABLE "/usr/local/bin/swig")
 find_package( PythonInterp 2.7 REQUIRED )
 find_package( PythonLibs 2.7 REQUIRED )
 

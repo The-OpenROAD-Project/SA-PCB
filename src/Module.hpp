@@ -69,6 +69,8 @@ class Module {
     double initialY;
     int orientation = 0;
 
+    int terminal = 0;
+
     double x_offset = 0.0;
     double y_offset = 0.0; // virtual pin offsets
 
@@ -114,7 +116,6 @@ class Module {
     boost::geometry::transform(this->poly, tmp, translate);
     this->poly = tmp;
     updateCoordinates();
-
   }
 
   /*
@@ -227,7 +228,7 @@ public:
         Module *tmp = new Module;
         tmp->init_module(-cell_id, l, false);
         tmp->macroModule = true;
-        tmp->fixed = 0;
+        tmp->fixed = 1;
         tmp->insert_cell(cell_id);
         levels[l].modules.push_back(tmp);
         macroModulePath.push_back(tmp);
@@ -274,11 +275,9 @@ public:
       int netid = net.first;
       vector<Pin> pvec = net.second; //pvec_i.idx -> cell id
       vector<Module *> ms; // convert vector of pins to vector of clusters for that net add to netToModule in leaf-level
-
       for (auto &pin : pvec) {
         int cell_id = pin.idx;
         Module *m = get_leaf_module_from_id(cell_id, root);
-
         if(!m->leaf || !(std::find(m->cells.begin(), m->cells.end(), cell_id) != m->cells.end())) {
           cout << "cell not found in leaf nodes: " << cell_id << " " << m->leaf << endl; // COULD BE MACRO
           return;
@@ -295,15 +294,14 @@ public:
     }
 
     // NOW need to propagate up the hierarchy
-    cout << "propagating up.." << endl;
     propagate_netlist(levels.back().level);
   }
 
   void propagate_netlist(int lev) {
+
     if (lev <= 0) {
       return;
     }
-
     map<int, vector< Module * > >netToModules = levels[lev].netToModule;
     int netidx = 1;
     for (auto &net : netToModules) { 
@@ -315,6 +313,7 @@ public:
         Module *m = module->parent;
 
         if(!(std::find(ms.begin(), ms.end(), m) != ms.end())) { // uniqueify module-level netlist
+
           m->setNetList(netidx); // crash here, module is root for some reason so parent m is garbage
           ms.push_back(m);
         }
@@ -337,16 +336,25 @@ public:
       for (auto &cellid : m->cells) {
         double cellx = nodeId[cellid].xCoordinate;
         double celly = nodeId[cellid].yCoordinate;
+        double cellw = nodeId[cellid].width;
+        double cellh = nodeId[cellid].height;
 
         xmin = min(xmin, cellx);
         ymin = min(ymin, celly);
-        xmax = max(xmax, cellx);
-        ymax = max(ymax, celly);
+        xmax = max(xmax, cellx + cellw);
+        ymax = max(ymax, celly + cellh);
       }
+      //cout << m->idx << " " << xmax - xmin<< " " << ymax - ymin << endl;
       m->setParameterNodes(xmax - xmin, ymax - ymin);
       m->setParameterPl(xmin, ymin);
     }
     propagate_geometries(num_levels-1);
+
+    for (auto &lvl : levels) {
+      for (auto &m : lvl.modules) {
+        cout << m->idx << " " << m->width << " " << m->height << endl;
+      }
+    } 
   }
 
   void propagate_geometries(int lev) {
@@ -364,10 +372,13 @@ public:
         double cellx = m->xCoordinate;
         double celly = m->yCoordinate;
 
+        double cellw = m->width;
+        double cellh = m->height;
+
         xmin = min(xmin, cellx);
         ymin = min(ymin, celly);
-        xmax = max(xmax, cellx);
-        ymax = max(ymax, celly);
+        xmax = max(xmax, cellx + cellw);
+        ymax = max(ymax, celly + cellh);
       }
       module->setParameterNodes(xmax - xmin, ymax - ymin);
       module->setParameterPl(xmin, ymin);      

@@ -99,8 +99,7 @@ public:
 
 private:
   // Utility
-  int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
-
+/*
   void random_initial_placement();
   void set_boundaries();
   void initialize_params(map<int, vector<Pin> > &netToCell);
@@ -117,20 +116,43 @@ private:
   float multistart();
   double initialize_temperature(double &Temperature, map<int, vector<Pin> > &netToCell);
   void update_temperature(double& Temperature);
-  double initiate_move(double current_cost,
-                       double & Temperature,
-                       map<int, vector<Pin> > &netToCell);
-  bool check_move(double prevCost,
-                  double newCost,
-                  double &Temperature);
+  double initiate_move(double current_cost, double & Temperature, map<int, vector<Pin> > &netToCell);
+  bool check_move(double prevCost, double newCost, double &Temperature);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
   void gen_report(map<string, vector<double> > &report,
                   vector< double > &accept_ratio_history,
                   map<int, vector<Pin> > &netToCell);
   void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
+*/
+
+  void random_initial_placement();
+  void set_boundaries();
+  void initialize_params(map<int, vector<Module *> > &netToCell);
+  void validate_move(Module *node, double rx, double ry);
+  double cost(map<int, vector<Module *> > &netToCell,
+              int temp_debug = 0);
+  double cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
+  double cell_overlap();
+  double wirelength(map<int, vector<Module *> > &netToCell);
+  double cell_overlap_partial(vector < Module * > &nodes);
+  double wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
+  //double rudy(map<int, vector<Module *> > &netToCell);
+  float annealer(map<int, vector<Module *> > &netToCell, string initial_pl);
+  float multistart();
+  double initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
+  void update_temperature(double& Temperature);
+  double initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
+  bool check_move(double prevCost, double newCost, double &Temperature);
+  void project_soln();
+  void random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
+  //void gen_report(map<string, vector<double> > &report,
+  //                vector< double > &accept_ratio_history,
+  //                map<int, vector<Module *> > );
+  void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
+
   void update_rtree(int idx);
-  vector < Node > ::iterator random_node();
+  vector < Module * > ::iterator random_node();
 
   int fact(int n);
 
@@ -144,8 +166,10 @@ private:
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
-  map<int, vector<Pin> > *netToCell = nullptr;
-  vector < vector < Pin > > *netToCellVec = nullptr;
+  //map<int, vector<Pin> > *netToCell = nullptr;
+  //vector < vector < Pin > > *netToCellVec = nullptr;
+  map<int, vector<Module *> > *netToCell = nullptr;
+  vector < vector < Module * > > *netToCellVec = nullptr;
   vector< int > accept_history;
   double Temperature = 0.0;
   int outer_loop_iter = 101;

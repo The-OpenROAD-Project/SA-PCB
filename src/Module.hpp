@@ -95,10 +95,10 @@ class Module {
     this -> width = width;
     this -> height = height;
     double points[][2] = {{0.0, 0.0}, {width, 0.0}, {width, height}, {0.0, height}};
-    model::polygon< model::d2::point_xy<double> > poly;
-    append(poly, points);
-    boost::geometry::correct(poly);
-    this -> poly = poly;
+    model::polygon< model::d2::point_xy<double> > tmp;
+    append(tmp, points);
+    boost::geometry::correct(tmp);
+    this -> poly = tmp;
     boost::geometry::envelope(poly, envelope);
   }
 

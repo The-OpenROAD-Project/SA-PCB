@@ -172,10 +172,10 @@ private:
   vector < vector < Module * > > *netToCellVec = nullptr;
   vector< int > accept_history;
   double Temperature = 0.0;
-  int outer_loop_iter = 101;
+  int outer_loop_iter = 11;
   int inner_loop_iter = 20;
   double eps = -1.0;
-  double t_0 = 1.0;
+  double t_0 = 0.0001;
   bool var = false;
 
   float l1 = 0.4;

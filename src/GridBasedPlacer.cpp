@@ -103,9 +103,12 @@ void GridBasedPlacer::test_placer_flow() {
   cout << "composing module geometries..." << endl;
   H.set_module_geometries(nodeId);
 
+  cout << "calculating boundaries..." << endl;
+  set_boundaries();
+
   cout << "annealing" << endl;
   //float cost = this->annealer(netToCell, initial_pl);
-  //HPlace(netToCell, initial_pl);
+  HPlace(netToCell, initial_pl);
 
   //cout << "writting result" << endl;
   //writePlFile("./final_placement.pl");
@@ -114,15 +117,15 @@ void GridBasedPlacer::test_placer_flow() {
 void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_pl) {
   // top down placement
   map<int, vector<Pin> > tmp_netToCell = netToCell;
+  //H.print_param(1); 
+  int l = 0;
   for (auto &lvl : H.levels) {
+    cout << "===== level: " << l << " =====" << endl;
     moduleId = lvl.modules;
     map<int, vector<Module *> > netToCell = lvl.netToModule;
 
-    //for (auto &m : lvl.modules) {
-    //  cout << m->idx << " " << m->width << " " << m->height << endl;
-    //}
-
     float cost = this->annealer(netToCell, initial_pl);
+    l++;
   } 
 }
 
@@ -133,12 +136,13 @@ Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
 //void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
 void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) {
+  
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
-  vector < Node > ::iterator itNode;
-  for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    if(!itNode -> terminal) {
+  vector < Module * > ::iterator itNode;
+  for (itNode = moduleId.begin(); itNode != moduleId.end(); ++itNode) {
+    if(!(*itNode) -> terminal) {
       num_components += 1;
     }
   }
@@ -150,11 +154,17 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
   double sum_oa = 0.0;
   double sum_rn = 0.0;
   for (int i = 0; i<100; i++) {
+    cout << "ria" << endl;
     this->random_initial_placement();
+    cout << "wl" << endl;
     sum_wl += this->wirelength(netToCell);
+    cout << "oa" << endl;
     sum_oa += this->cell_overlap();
     //sum_rn += this->rudy(netToCell);
   }
+
+  //double sum_wl = 100.0;
+  //double sum_oa = 100.0;
 
   wl.first = 0.0;
   wl.second = sum_wl / 100.0;
@@ -628,11 +638,13 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
 //double GridBasedPlacer::cost(map<int, vector<Pin> > &netToCell, int temp_debug) {
 double GridBasedPlacer::cost(map<int, vector<Module *> > &netToCell, int temp_debug) {
   double l2 = 1 - l1;
+  cout << "wl cost" << endl;
   double wirelength_cost = l1*0.9*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
+  cout << "oa cost" << endl;
   double overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
   //double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
   double total_cost = wirelength_cost + overlap_cost;// + routability_cost;
-  /*if(debug > 1 || temp_debug == -1) {
+  //if(debug > 1 || temp_debug == -1) {
     cout << "wirelength: " << this->wirelength(netToCell) << endl;
     cout << "overlap: " << this->cell_overlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
@@ -640,7 +652,7 @@ double GridBasedPlacer::cost(map<int, vector<Module *> > &netToCell, int temp_de
     cout << "overlap_cost: " << overlap_cost  << endl;
     //cout << "routability_cost: " << routability_cost  << endl;
     cout << "cost: " << total_cost << endl;
-  }*/
+  //}
   return total_cost;
 }
 
@@ -1024,16 +1036,14 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
   float accept_ratio = 0.0;
   vector< double > accept_ratio_history;
 
-  cout << "calculating boundaries..." << endl;
-  set_boundaries();
-
   cout << "calculating initial params..." << endl;
   this->initialize_params(netToCell);
-  if (initial_pl != "") {
+  /*if (initial_pl != "") {
     readPlFile(initial_pl);
   } else {
     this->random_initial_placement();
   }
+  */
 
   double cst = this->cost(netToCell,-1);
   /*

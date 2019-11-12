@@ -279,3 +279,37 @@ int writePlFile(string fname) {
     return 0;
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
 }
+
+int writeNodesFile(string fname) {
+  vector < string > strVec;
+  fstream file;
+  string buf;
+  ofstream myfile (fname);
+  if (myfile.is_open()) {
+    myfile << "\n\n\n\n";
+    vector <Node> ::iterator itNode;
+
+    // print components
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(!itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
+        if (itNode->fixed) {
+          myfile << " /FIXED_NI\n";
+        } else {
+          myfile << "\n";
+        }
+      }
+    }
+
+    myfile << "\n";
+    // print terminals
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation);
+        myfile << " /FIXED_NI\n";
+      }
+    }
+    myfile.close();
+    return 0;
+  } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
+}

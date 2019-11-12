@@ -74,7 +74,6 @@ class Module {
     double x_offset = 0.0;
     double y_offset = 0.0; // virtual pin offsets
 
-
     vector < int > Netlist; // vector of netlist ids this module is associated with [for online wl comp.]
     vector < int > cells;
 
@@ -202,7 +201,7 @@ public:
   //vector < vector < Module * > > levels;
   vector < Level > levels;
   Module *root;
-  vector < Node > id2cell;
+  //vector < Node > id2cell;
 
   void init_hierarchy(int nl, vector <int> nm) {
     num_levels = nl;
@@ -217,6 +216,40 @@ public:
     root->root = true;
   }
 
+  Module* create_hierarchy(int id, int lev, bool r) {
+    Module *m = new Module;
+    m->init_module(id, lev, r);
+    levels[lev].modules.push_back(m);
+
+    if (num_levels <= lev) {
+      m->leaf = true;
+      return m;
+    }
+
+    int num_children = num_modules_per_layer[lev];
+    for (int i =1; i<=num_children; ++i) {
+      Module* mc;
+      mc = create_hierarchy(i, lev+1, false);
+      mc->parent = m;
+      if(mc) {
+        m->add_child(mc);
+      }
+    }
+    return m;
+  }
+
+  void print_param(int i) {
+    int ii = 0;
+    for (auto &lvl : levels) {
+      if (i >= 0 && i == ii) { 
+        for (auto &m : lvl.modules) {
+          cout << m->idx << " " << m->width << " " << m->height << endl;
+        }
+      }
+      ii++ ;
+    } 
+  }
+
   void insert_cell(int cell_id, vector < int> cluster_id_vec, Module *m, int level) {
     if(num_levels <= level) {
       return;
@@ -226,23 +259,26 @@ public:
       vector < Module * > macroModulePath;
       for(int l=0; l<=num_levels; ++l) {
         Module *tmp = new Module;
-        tmp->init_module(-cell_id, l, false);
+        tmp->init_module(levels[l].modules.size() + 1, l, false);
         tmp->macroModule = true;
         tmp->fixed = 1;
+        tmp->terminal = 1;
         tmp->insert_cell(cell_id);
         levels[l].modules.push_back(tmp);
         macroModulePath.push_back(tmp);
       }
-      for(int l=0; l<num_levels; ++l) {
-        Module *tmp = macroModulePath[l];
-        if (l == 0) {
+      for(int l=1; l<num_levels; ++l) {
+        Module *tmp = macroModulePath[l-1];
+        if (l == 1) {
           root->children.push_back(tmp);
           tmp->parent = root;
         } else {
-          tmp->parent = macroModulePath[l-1];
+          tmp->parent = macroModulePath[l-2];
         }
-        tmp->children.push_back(macroModulePath[l+1]);
+        tmp->children.push_back(macroModulePath[l]);
       }
+      macroModulePath[num_levels-1]->parent = macroModulePath[num_levels-2];
+      macroModulePath[num_levels-1]->children.push_back(macroModulePath[num_levels]);
       macroModulePath[num_levels]->parent = macroModulePath[num_levels-1];
       macroModulePath[num_levels]->leaf = true;
     } else {
@@ -279,7 +315,7 @@ public:
         int cell_id = pin.idx;
         Module *m = get_leaf_module_from_id(cell_id, root);
         if(!m->leaf || !(std::find(m->cells.begin(), m->cells.end(), cell_id) != m->cells.end())) {
-          cout << "cell not found in leaf nodes: " << cell_id << " " << m->leaf << endl; // COULD BE MACRO
+          cout << "cell not found in leaf nodes: " << cell_id << " " << m->idx << " " << m->leaf << endl;
           return;
         }
 
@@ -292,13 +328,11 @@ public:
       levels.back().netToModule.insert(pair < int, vector < Module * > > (netidx, ms));
       netidx ++;
     }
-
-    // NOW need to propagate up the hierarchy
+    // now need to propagate up the hierarchy
     propagate_netlist(levels.back().level);
   }
 
   void propagate_netlist(int lev) {
-
     if (lev <= 0) {
       return;
     }
@@ -311,14 +345,12 @@ public:
 
       for (auto &module : pvec) {
         Module *m = module->parent;
-
         if(!(std::find(ms.begin(), ms.end(), m) != ms.end())) { // uniqueify module-level netlist
-
           m->setNetList(netidx); // crash here, module is root for some reason so parent m is garbage
           ms.push_back(m);
         }
       }
-      if (ms.size() > 0) {
+      if (ms.size() > 0 && lev > 0) {
         levels[lev-1].netToModule.insert(pair < int, vector < Module* > > (netidx, ms));
       }
       netidx ++;
@@ -328,11 +360,22 @@ public:
 
   void set_module_geometries(vector < Node > nodeId) { // should fix to be bottom up
     // first get leaf params
+    int dim = 0;
+
+    double area = 0.0;
+    double xcenter = 0.0;
+    double ycenter = 0.0;
+
     for (auto &m : levels.back().modules) {
       double xmin = 99999999999999.0;
       double ymin = 99999999999999.0;
       double xmax = 0.0;
       double ymax = 0.0;
+
+      double area = 0.0;
+      double xcenter = 0.0;
+      double ycenter = 0.0;
+
       for (auto &cellid : m->cells) {
         double cellx = nodeId[cellid].xCoordinate;
         double celly = nodeId[cellid].yCoordinate;
@@ -343,18 +386,23 @@ public:
         ymin = min(ymin, celly);
         xmax = max(xmax, cellx + cellw);
         ymax = max(ymax, celly + cellh);
+
+        area += cellw * cellh;
+        xcenter += cellx;
+        ycenter += celly;
       }
+
+      xcenter = xcenter / m->cells.size();
+      ycenter = ycenter / m->cells.size();
+
       //cout << m->idx << " " << xmax - xmin<< " " << ymax - ymin << endl;
-      m->setParameterNodes(xmax - xmin, ymax - ymin);
-      m->setParameterPl(xmin, ymin);
+      //m->setParameterNodes(xmax - xmin, ymax - ymin);
+      //m->setParameterPl(xmin, ymin);
+      dim = ceil(sqrt(area));
+      m->setParameterNodes(dim, dim);
+      m->setParameterPl(xcenter, ycenter);
     }
     propagate_geometries(num_levels-1);
-
-    for (auto &lvl : levels) {
-      for (auto &m : lvl.modules) {
-        cout << m->idx << " " << m->width << " " << m->height << endl;
-      }
-    } 
   }
 
   void propagate_geometries(int lev) {
@@ -362,16 +410,22 @@ public:
       return;
     }
 
+    int dim = 0;
+
     vector <Module *> modules = levels[lev].modules;
     for (auto &module : modules) {
       double xmin = 99999999999999.0;
       double ymin = 99999999999999.0;
       double xmax = 0.0;
       double ymax = 0.0;
+
+      double area = 0.0;
+      double xcenter = 0.0;
+      double ycenter = 0.0;
+
       for (auto &m : module->children) {
         double cellx = m->xCoordinate;
         double celly = m->yCoordinate;
-
         double cellw = m->width;
         double cellh = m->height;
 
@@ -379,33 +433,22 @@ public:
         ymin = min(ymin, celly);
         xmax = max(xmax, cellx + cellw);
         ymax = max(ymax, celly + cellh);
+
+        area += cellw * cellh;
+        xcenter += cellx;
+        ycenter += celly;
       }
-      module->setParameterNodes(xmax - xmin, ymax - ymin);
-      module->setParameterPl(xmin, ymin);      
+
+      xcenter = xcenter / module->children.size();
+      ycenter = ycenter / module->children.size();
+
+      //module->setParameterNodes(xmax - xmin, ymax - ymin);
+      //module->setParameterPl(xmin, ymin);    
+
+      dim = ceil(sqrt(area));
+      module->setParameterNodes(dim, dim);
+      module->setParameterPl(xcenter, ycenter);  
     }
     propagate_geometries(lev - 1);
-  }
-
-  Module* create_hierarchy(int id, int lev, bool r) {
-    Module *m = new Module;
-    m->init_module(id, lev, r);
-    levels[lev].modules.push_back(m);
-
-    if (num_levels <= lev) {
-      m->leaf = true;
-      return m;
-    }
-
-    int num_children = num_modules_per_layer[lev];
-    for (int i =1; i<=num_children; ++i) {
-      Module* mc;
-      mc = create_hierarchy(i, lev+1, false);
-      mc->parent = m;
-      if(mc) {
-        m->add_child(mc);
-      }
-    }
-    
-    return m;
   }
 };

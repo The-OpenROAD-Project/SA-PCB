@@ -71,3 +71,4 @@ int readPlFile(string fname);
 int readClstFile(string fname);
 map<int, vector<Pin> > readNetsFile(string fname);
 int writePlFile(string fname);
+int writeNodesFile(string fname);

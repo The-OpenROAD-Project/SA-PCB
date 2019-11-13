@@ -15,8 +15,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 
 find_package(Boost REQUIRED)
 #set(SWIG_EXECUTABLE "/usr/local/bin/swig")
-find_package( PythonInterp 2.7 REQUIRED )
-find_package( PythonLibs 2.7 REQUIRED )
+#find_package( PythonInterp 2.7 REQUIRED )
+#find_package( PythonLibs 2.7 REQUIRED )
 
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARYDIR})

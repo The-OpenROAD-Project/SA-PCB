@@ -105,6 +105,8 @@ class Module {
   void setParameterPl(double xCoordinate, double yCoordinate) {
     // Sets parameters given an entry in Pl file
     this -> setPos(xCoordinate, yCoordinate);
+    initialX = xCoordinate;
+    initialY = yCoordinate;
     this -> sigma = 50.0;
   }
 
@@ -450,5 +452,31 @@ public:
       module->setParameterPl(xcenter, ycenter);  
     }
     propagate_geometries(lev - 1);
+  }
+
+  vector < Node >  update_cell_positions(vector < Node > nodeId) {
+    for (auto &node : nodeId) {
+      int cell_id = node.idx;
+      Module *m = get_leaf_module_from_id(cell_id, root);
+      if(!m->leaf || !(std::find(m->cells.begin(), m->cells.end(), cell_id) != m->cells.end())) {
+        cout << "cell not found in leaf nodes: " << cell_id << " " << m->idx << " " << m->leaf << endl;
+        return nodeId;
+      }
+      double mx = m->xCoordinate;
+      double my = m->yCoordinate;
+      double cx = node.xCoordinate;
+      double cy = node.yCoordinate;
+      double mx_orig = m->initialX;
+      double my_orig = m->initialY;
+
+      double trans_x = mx - mx_orig;
+      double trans_y = my - my_orig;
+
+      double new_cell_x = cx + trans_x;
+      double new_cell_y = cy + trans_y;
+
+      node.setPos(new_cell_x, new_cell_y);
+    }
+    return nodeId;
   }
 };

@@ -110,8 +110,9 @@ void GridBasedPlacer::test_placer_flow() {
   //float cost = this->annealer(netToCell, initial_pl);
   HPlace(netToCell, initial_pl);
 
+
   //cout << "writting result" << endl;
-  //writePlFile("./final_placement.pl");
+  writePlFile("./final_placement.pl");
 }
 
 void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_pl) {
@@ -130,8 +131,46 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
 
     float cost = this->annealer(netToCell, initial_pl);
     l++;
+    initial_loop_iter = ceil(initial_loop_iter / 2);
     t_0 = 0.01*t_0;
+
+    cout << endl;
   } 
+
+  cout << endl;
+
+  cout << "===== greedy placement =====" << endl;
+  initial_loop_iter = 1;
+
+  nodeId = H.update_cell_positions(nodeId);
+
+  vector < Module * > moduleId_tmp;
+  map<int, vector<Module *> > netToCell_tmp;
+  for (auto &node : nodeId) {
+    Module *tmp = new Module;
+    tmp->init_module(node.idx, -1, false);
+    tmp->setParameterNodes(node.width, node.height);
+    tmp->setParameterPl(node.xCoordinate, node.yCoordinate);
+    moduleId_tmp.push_back(tmp);
+  }
+  moduleId = moduleId_tmp;
+
+  int netidx = 1;
+  for (auto &net : netToCell) { 
+    int netid = net.first;
+    vector<Pin> pvec = net.second; //pvec_i.idx -> cell id
+    vector<Module *> ms; 
+    for (auto &pin : pvec) {
+      int cell_id = pin.idx;
+      Module *m = moduleId[cell_id-1];
+      m->setNetList(netidx);
+      ms.push_back(m);
+    }
+    netToCell_tmp.insert(pair < int, vector < Module * > > (netidx, ms));
+    netidx ++;
+  }
+  t_0 = 0.0;
+  float cost = this->annealer(netToCell_tmp, initial_pl);
 }
 
 /*
@@ -141,7 +180,6 @@ Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
 //void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
 void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) {
-  
   vector < std::pair <double,double> > normalization_terms;
 
   int num_components = 0;
@@ -158,7 +196,7 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
   double sum_wl = 0.0;
   double sum_oa = 0.0;
   double sum_rn = 0.0;
-  for (int i = 0; i<10; i++) {
+  for (int i = 0; i<initial_loop_iter; i++) {
     this->random_initial_placement();
     sum_wl += this->wirelength(netToCell);
     sum_oa += this->cell_overlap();
@@ -169,10 +207,10 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
   //double sum_oa = 100.0;
 
   wl.first = 0.0;
-  wl.second = sum_wl / 10.0;
+  wl.second = sum_wl / initial_loop_iter;
 
   area.first = 0.0;
-  area.second = sum_oa / 10.0;
+  area.second = sum_oa / initial_loop_iter;
   area.second = max(area.second, 1.0); 
 
   //rn.first = 0.0;

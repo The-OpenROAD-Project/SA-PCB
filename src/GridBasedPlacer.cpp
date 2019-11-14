@@ -118,7 +118,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
           //mDb.getPinPosition(pin, &pos);
 
           auto &pad = comp.getPadstack(pin.getPadstackId());
-          //cout << pos.m_x << " " << inst.getX() <<  " " << nodeId[name2id[inst.getName()]].xCoordinate << " " <<  pos.m_x - nodeId[name2id[inst.getName()]].xCoordinate << endl;
           p.set_params(inst.getName(), pos.m_x - nodeId[name2id[inst.getName()]].xBy2, pos.m_y - nodeId[name2id[inst.getName()]].yBy2, nodeId[name2id[inst.getName()]].idx);
           pinTemp.push_back(p);
 
@@ -151,7 +150,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
       inst.setY(nodeId[inst.getId()].yBy2);
   }
   return mDb;
-  //cout << " " << idx << " " << cost << endl;
 }
 
 
@@ -1022,9 +1020,6 @@ float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initia
 
   vector < Node > ::iterator itNode;
   map < string, vector < double > > report;
-  vector < double > cost_hist;
-  vector < double > wl_hist;
-  vector < double > oa_hist;
   report["cost_hist"] = cost_hist;
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
@@ -1082,9 +1077,8 @@ float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initia
       cst = this->initiate_move(cst, Temperature, netToCell);
       this->update_accept_history(accept_ratio_history, accept_ratio);
       report["cost_hist"].push_back(cst);
-
-      //wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      //oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
+      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
 
       i -= 1;
     }
@@ -1095,9 +1089,6 @@ float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initia
     }
     this->update_temperature(Temperature);
     ii += 1;
-    if (ii % 10 == 0) {
-      //writePlFile("./cache/"+std::to_string( ii )+".pl");
-    }
   }
   return this->cost(netToCell);
 }

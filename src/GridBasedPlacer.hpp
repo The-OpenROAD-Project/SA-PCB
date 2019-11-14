@@ -144,6 +144,10 @@ private:
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;
 
+  vector < double > cost_hist;
+  vector < double > wl_hist;
+  vector < double > oa_hist;
+
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;

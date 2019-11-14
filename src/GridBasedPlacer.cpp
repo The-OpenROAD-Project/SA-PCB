@@ -110,9 +110,20 @@ void GridBasedPlacer::test_placer_flow() {
   //float cost = this->annealer(netToCell, initial_pl);
   HPlace(netToCell, initial_pl);
 
-
-  //cout << "writting result" << endl;
+  cout << "writting result" << endl;
   writePlFile("./final_placement.pl");
+
+  std::ofstream f1("./oa.txt");
+  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+      f2 << *i << '\n';
+  }
+  f1.close();
+
+  std::ofstream f2("./wl.txt");
+  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+      f2 << *i << '\n';
+  }
+  f2.close();
 }
 
 void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_pl) {
@@ -137,8 +148,6 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
     cout << endl;
   } 
 
-  cout << endl;
-
   cout << "===== greedy placement =====" << endl;
   initial_loop_iter = 1;
 
@@ -151,6 +160,8 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
     tmp->init_module(node.idx, -1, false);
     tmp->setParameterNodes(node.width, node.height);
     tmp->setParameterPl(node.xCoordinate, node.yCoordinate);
+    tmp->terminal = node.terminal;
+    tmp->fixed = node.fixed;
     moduleId_tmp.push_back(tmp);
   }
   moduleId = moduleId_tmp;
@@ -1063,12 +1074,9 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
 
   vector < Module * > ::iterator itNode;
   map < string, vector < double > > report;
-  vector < double > cost_hist;
-  vector < double > wl_hist;
-  vector < double > oa_hist;
-  report["cost_hist"] = cost_hist;
-  report["wl_hist"] = wl_hist;
-  report["oa_hist"] = oa_hist;
+  //report["cost_hist"] = cost_hist;
+  //report["wl_hist"] = wl_hist;
+  //report["oa_hist"] = oa_hist;
 
   vector< int > accept_history;
   float accept_ratio = 0.0;
@@ -1115,7 +1123,9 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
       cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
-      this->cost(netToCell,-1);
+      wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
+      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      //this->cost(netToCell,-1);
 
       //this->gen_report(report,
       //           accept_ratio_history,

@@ -166,6 +166,11 @@ private:
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
+
+  vector < double > cost_hist;
+  vector < double > wl_hist;
+  vector < double > oa_hist;
+
   //map<int, vector<Pin> > *netToCell = nullptr;
   //vector < vector < Pin > > *netToCellVec = nullptr;
   map<int, vector<Module *> > *netToCell = nullptr;

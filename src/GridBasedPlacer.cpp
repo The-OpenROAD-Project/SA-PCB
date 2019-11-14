@@ -65,69 +65,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
   int bound_inc = 0;
 
   std::cout << "=================test_placer==================" << std::endl;
-  /*
-  while ((opt = getopt(argc,argv,"i:x:j:t:f:p:b:r::h")) != EOF) {
-      switch(opt) {
-          case 'x': idx = atoi(optarg); break;
-          case 'p': parg=string(optarg); break;
-          case 'l': initial_pl=string(optarg); break;
-          case 'd': debug=atoi(optarg); break;
-          case 'i': outer_loop_iter = atoi(optarg); break;
-          case 'j': inner_loop_iter = atoi(optarg); break;
-          case 't': t_0 = atof(optarg); break;
-          case 'e': eps = atof(optarg); break;
-          case 'v': var = true; break;
-          case 'f': out_file=string(optarg); break;
-          case 'r': rotate_flag=atoi(optarg); break;
-          case 'b':
-            bound_inc += 1;
-            switch(bound_inc) { // TODO: have 4 different argument flags for each point
-              case 1: b.minX = atoi(optarg) - 1;
-              case 2: b.minY = atoi(optarg) - 1;
-              case 3: b.maxX = atoi(optarg) + 1;
-              case 4: b.maxY = atoi(optarg) + 1;
-            }
-          case 'h': fprintf(stderr, "./sa usuage is \n \
-                                    -i <optional, value> : for denoting # outer iterations PER SA INSTANCE \n \
-                                    -j <optional, value> : for denoting 'j'*#nodes inner iterations \n \
-                                    -t <optional, value> : for denoting initial temperature \n \
-                                    -f <optional, str>   : for output filename \n \
-                                    -e <optional, float> : convergence epsilon \n \
-                                    -v <optional>        : ben-amur flag \n \
-                                    -x <optional, int>   : simulated annealing instance index \n \
-                                    -p <required, string>: prefix of board to place \n \
-                                    -l <optional, string>: prefix of initial placement \n \
-                                    -d <optional, {0-3}> : debug verbosity \n \
-                                    -r <optional, {0-3}> : rotation \n \
-                                    EXAMPLE: ./sa -i 20000 -j 20 -t 1 -p input -f output");
-          default: cout<<endl; abort();
-      }
-  }
-  if(parg == "")   {
-    cout << "./main: option requires an argument -- p\n";
-    exit(1);
-  }
-  if(parg == "")   {
-    out_file = std::to_string( idx );
-  } 
-  */
-
-  
-  parg = "../designs/bm2";
-
-  string nodesfname  = parg + ".nodes";
-  string shapesfname = parg + ".shapes";
-  string netsfname   = parg + ".nets";
-  string plfname     = "";
-
-  if (initial_pl != "") {
-    plfname          = initial_pl + ".pl";
-  } else {
-    plfname          = parg + ".pl";
-  }
-
-  string wtsfname    = parg + ".wts";
-
 
   map<int, vector<Pin> > netToCell;
   cout << "init netToCell" << endl;

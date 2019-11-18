@@ -67,8 +67,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
   std::cout << "=================test_placer==================" << std::endl;
 
   map<int, vector<pPin> > netToCell;
-  cout << "init netToCell" << endl;
-  if(debug) { cout << "reading nodes..." << endl; }
 
   std::vector<instance> &instances =  mDb.getInstances();
   std::vector<net> &nets = mDb.getNets();
@@ -99,6 +97,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
           ang = "W";
       }
 
+// BM1
 if(inst.getName() == "ICSP" || 
 inst.getName() == "U$2" ||
 inst.getName() == "JP2" ||
@@ -116,17 +115,14 @@ inst.getName() == "ADCH" ||
 inst.getName() == "X2" ||
 inst.getName() == "JP3" ||
 inst.getName() == "X4" ||
-inst.getName() == "COMMUNICATION") {
-fixed = 1;	
-}
+inst.getName() == "COMMUNICATION") { fixed = 1; }
 
       nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
       nodeId[name2id[inst.getName()]].printParameter();
   }
 
-  if(debug) { cout << "calculating boundaries..." << endl; }
+  cout << "calculating boundaries..." << endl;
   set_boundaries();
-  if(debug) { cout << "annealing" << endl; }
 
     for (auto &net : nets){
 
@@ -181,8 +177,7 @@ initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
-void GridBasedPlacer::initialize_params(
-                       map<int, vector<pPin> > &netToCell) {
+void GridBasedPlacer::initialize_params(map<int, vector<pPin> > &netToCell) {
 
   vector < std::pair <double,double> > normalization_terms;
 
@@ -921,9 +916,7 @@ void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_histo
 check_move
 either accept or reject the move based on current & previous temperature & cost
 */
-bool GridBasedPlacer::check_move(double prevCost,
-                double newCost,
-                double & Temperature) {
+bool GridBasedPlacer::check_move(double prevCost, double newCost, double & Temperature) {
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -942,9 +935,7 @@ bool GridBasedPlacer::check_move(double prevCost,
   }
 }
 
-double GridBasedPlacer::initialize_temperature(
-                              double &Temperature,
-                              map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initialize_temperature(double &Temperature, map<int, vector<pPin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
@@ -1026,8 +1017,6 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
         f4 << *i << '\n';
     }
     f4.close();
-
-    //writePlFile("./reports/"+buffer+"_pl.pl");
 }
 
 /*
@@ -1075,7 +1064,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   int i = 0; // inner loop iterator
   while (ii < outer_loop_iter) {
     i = inner_loop_iter*num_components; 
-    if(ii > 1 && ii % 10 == 0 && debug) {
+    if(ii > 1) {
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 

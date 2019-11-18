@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(PCBPLACER)
 
-#set(CXX g++)
-#set(CC gcc)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -38,6 +35,7 @@ set (PCBPLACER_SRC
   src/GridBasedPlacer.cpp
   src/globalParam.cpp
   src/readFiles.cpp
+  src/PcbPlacer_wrapper.cpp
   )
 
 set (PCBPLACER_HEADER
@@ -78,11 +76,11 @@ set_target_properties( PCBPLACERlib
 ############################################################
 # Create an executable
 ############################################################
-#add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
-#  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
-#  WORKING_DIRECTORY ${PCBPLACER_HOME}
-#  DEPENDS ${PLACER_SWIG_FILES}
-#)
+add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
+  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
+  WORKING_DIRECTORY ${PCBPLACER_HOME}
+  DEPENDS ${PLACER_SWIG_FILES}
+)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/bin)
 

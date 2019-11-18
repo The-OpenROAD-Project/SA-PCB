@@ -37,7 +37,6 @@
 #define BOOST_NO_AUTO_PTR
 
 #include <cstdio>
-#include "BoardGrid.h"
 #include "kicadPcbDataBase.h"
 #include "globalParam.h"
 #include "util.h"
@@ -96,7 +95,7 @@ public:
 
   kicadPcbDataBase &test_placer_flow();
   kicadPcbDataBase &getDb() { return mDb; }
-
+  kicadPcbDataBase &mDb;
 
 private:
   // Utility
@@ -104,32 +103,24 @@ private:
 
   void random_initial_placement();
   void set_boundaries();
-  void initialize_params(map<int, vector<Pin> > &netToCell);
+  void initialize_params(map<int, vector<pPin> > &netToCell);
   void validate_move(Node &node, double rx, double ry);
-  double cost(map<int, vector<Pin> > &netToCell,
-              int temp_debug = 0);
-  double cost_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell);
+  double cost(map<int, vector<pPin> > &netToCell, int temp_debug = 0);
+  double cost_partial(vector < Node *> &nodes, map<int, vector<pPin> > &netToCell);
   double cell_overlap();
-  double wirelength(map<int, vector<Pin> > &netToCell);
+  double wirelength(map<int, vector<pPin> > &netToCell);
   double cell_overlap_partial(vector < Node* > &nodes);
-  double wirelength_partial(vector < Node* > &nodes, map<int, vector<Pin> > &netToCell);
-  double rudy(map<int, vector<Pin> > &netToCell);
-  float annealer(map<int, vector<Pin> > &netToCell,
-                string initial_pl);
+  double wirelength_partial(vector < Node* > &nodes, map<int, vector<pPin> > &netToCell);
+  double rudy(map<int, vector<pPin> > &netToCell);
+  float annealer(map<int, vector<pPin> > &netToCell, string initial_pl);
   float multistart();
-  double initialize_temperature(double &Temperature, map<int, vector<Pin> > &netToCell);
+  double initialize_temperature(double &Temperature, map<int, vector<pPin> > &netToCell);
   void update_temperature(double& Temperature);
-  double initiate_move(double current_cost,
-                       double & Temperature,
-                       map<int, vector<Pin> > &netToCell);
-  bool check_move(double prevCost,
-                  double newCost,
-                  double &Temperature);
+  double initiate_move(double current_cost, double & Temperature, map<int, vector<pPin> > &netToCell);
+  bool check_move(double prevCost, double newCost, double &Temperature);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
-  void gen_report(map<string, vector<double> > &report,
-                  vector< double > &accept_ratio_history,
-                  map<int, vector<Pin> > &netToCell);
+  void gen_report(map<string, vector<double> > &report, vector< double > &accept_ratio_history, map<int, vector<pPin> > &netToCell);
   void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
   void update_rtree(int idx);
   vector < Node > ::iterator random_node();
@@ -137,8 +128,7 @@ private:
   int fact(int n);
 
 private:
-  kicadPcbDataBase &mDb;
-  BoardGrid mBg;
+  //kicadPcbDataBase &mDb;
   //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
   std::vector<std::string> mGridLayerToName;
@@ -151,8 +141,8 @@ private:
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
-  map<int, vector<Pin> > *netToCell = nullptr;
-  vector < vector < Pin > > *netToCellVec = nullptr;
+  map<int, vector<pPin> > *netToCell = nullptr;
+  vector < vector < pPin > > *netToCellVec = nullptr;
   vector< int > accept_history;
   double Temperature = 0.0;
   int outer_loop_iter = 101;
@@ -168,9 +158,8 @@ private:
   double mMaxX = std::numeric_limits<double>::min();
   double mMinY = std::numeric_limits<double>::max();
   double mMaxY = std::numeric_limits<double>::min();
-  // Take const to below?
+
   const unsigned int inputScale = 10;
-  const unsigned int enlargeBoundary = 10;
   const float grid_factor = 0.1; 
   const int debug = 0;
 };

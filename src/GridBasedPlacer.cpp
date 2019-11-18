@@ -44,7 +44,7 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 namespace bg = boost::geometry;
 namespace bnu = boost::numeric::ublas;
 namespace bgi = boost::geometry::index;
-typedef bg::model::box< bg::model::d2::point_xy<double> > box;
+typedef bg::model::box< bg::model::d2::point_xy<double> > box2d;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
 
@@ -66,7 +66,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
   std::cout << "=================test_placer==================" << std::endl;
 
-  map<int, vector<Pin> > netToCell;
+  map<int, vector<pPin> > netToCell;
   cout << "init netToCell" << endl;
   if(debug) { cout << "reading nodes..." << endl; }
 
@@ -106,10 +106,10 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
     for (auto &net : nets){
 
-      vector < Pin > pinTemp;
+      vector < pPin > pinTemp;
       for (auto &pin : net.getPins())
       {
-          Pin p;
+          pPin p;
           auto &inst = mDb.getInstance(pin.getInstId());
           nodeId[name2id[inst.getName()]].setNetList(net.getId());
 
@@ -122,7 +122,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
           pinTemp.push_back(p);
 
       }
-      netToCell.insert(pair < int, vector< Pin > > (net.getId(), pinTemp));
+      netToCell.insert(pair < int, vector< pPin > > (net.getId(), pinTemp));
     }
 
   cout << "annealing" << endl;
@@ -159,7 +159,7 @@ Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
 void GridBasedPlacer::initialize_params(
-                       map<int, vector<Pin> > &netToCell) {
+                       map<int, vector<pPin> > &netToCell) {
 
   vector < std::pair <double,double> > normalization_terms;
 
@@ -298,8 +298,8 @@ void GridBasedPlacer::project_soln() {
   vector < Node > ::iterator nodeit1;
   vector < Node > ::iterator nodeit2;
 
-  box env1;
-  box env2;
+  box2d env1;
+  box2d env2;
 
   while (oa > eps) {
     for (nodeit1 = nodeId.begin(); nodeit1 != nodeId.end(); ++nodeit1) {
@@ -360,10 +360,10 @@ void GridBasedPlacer::project_soln() {
 wirelength
 Computes HPWL for all nets
 */
-double GridBasedPlacer::wirelength(map<int, vector<Pin> > &netToCell) {
+double GridBasedPlacer::wirelength(map<int, vector<pPin> > &netToCell) {
   // compute HPWL
-  map<int, vector < Pin > > ::iterator itNet;
-  vector < Pin > ::iterator itCellList;
+  map<int, vector < pPin > > ::iterator itNet;
+  vector < pPin > ::iterator itCellList;
   double xVal, yVal, wireLength = 0;
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double minXW = mMaxX, minYW = mMaxY, maxXW = mMinX, maxYW = mMinY;
@@ -444,10 +444,10 @@ double GridBasedPlacer::cell_overlap() {
 wireLength_partial
 Compute HPWL for select nets
 */
-double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell) {
-  vector < Pin > net;
+double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vector<pPin> > &netToCell) {
+  vector < pPin > net;
   vector < int > ::iterator itNet;
-  vector < Pin > ::iterator itCellList;
+  vector < pPin > ::iterator itCellList;
   vector < Node *>::iterator itNode;
   unordered_set < int > net_history;
 
@@ -546,14 +546,14 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
 rudy
 Computes a routability score
 */
-double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
+double GridBasedPlacer::rudy(map<int, vector<pPin> > &netToCell) {
   static bnu::matrix<double> D (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 0.0);
   static bnu::matrix<double> D_route_sup (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 1.0);
 
   D.clear();
 
-  map<int, vector < Pin > > ::iterator itNet;
-  vector < Pin > ::iterator itCellList;
+  map<int, vector < pPin > > ::iterator itNet;
+  vector < pPin > ::iterator itCellList;
 
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
@@ -638,9 +638,7 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
   return r;
 }
 
-double GridBasedPlacer::cost(
-            map<int, vector<Pin> > &netToCell,
-            int temp_debug) {
+double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug) {
   double l2 = 1 - l1;
   double wirelength_cost = l1*0.9*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
   double overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
@@ -658,8 +656,7 @@ double GridBasedPlacer::cost(
   return total_cost;
 }
 
-double GridBasedPlacer::cost_partial(vector < Node *> &nodes,
-                    map<int, vector<Pin> > &netToCell) {
+double GridBasedPlacer::cost_partial(vector < Node *> &nodes, map<int, vector<pPin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
@@ -698,7 +695,7 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
 double c = 0.0;
 double GridBasedPlacer::initiate_move(double current_cost,
                      double & Temperature,
-                     map<int, vector<Pin> > &netToCell) {
+                     map<int, vector<pPin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -924,7 +921,7 @@ bool GridBasedPlacer::check_move(double prevCost,
 
 double GridBasedPlacer::initialize_temperature(
                               double &Temperature,
-                              map<int, vector<Pin> > &netToCell) {
+                              map<int, vector<pPin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
@@ -951,7 +948,7 @@ generates a report and outputs files to ./reports/ directory
 */
 void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
                 vector< double > &accept_ratio_history,
-                map<int, vector<Pin> > &netToCell) {
+                map<int, vector<pPin> > &netToCell) {
     vector < double > cost_hist = report["cost_hist"];
     vector < double > wl_hist   = report["wl_hist"];
     vector < double > oa_hist   = report["oa_hist"];
@@ -1014,7 +1011,7 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
 annealer
 main loop for sa algorithm
 */
-float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initial_pl) {
+float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initial_pl) {
   double Temperature = t_0;
   int num_components = 0;
 

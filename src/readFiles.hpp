@@ -55,7 +55,7 @@
 //#include "readScl.hpp"
 
 class Node;
-class Pin;
+class pPin;
 extern map < string, int > name2id;
 extern vector < Node > nodeId;
 
@@ -63,5 +63,5 @@ int readNodesFile(string fname);
 int readShapesFile(string fname);
 int readWtsFile(string fname);
 int readPlFile(string fname);
-map<int, vector<Pin> > readNetsFile(string fname);
+map<int, vector<pPin> > readNetsFile(string fname);
 int writePlFile(string fname);

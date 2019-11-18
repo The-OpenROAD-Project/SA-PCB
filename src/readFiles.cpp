@@ -144,12 +144,12 @@ int readPlFile(string fname) {
   return 0;
 }
 
-map<int, vector<Pin> > readNetsFile(string fname) {
+map<int, vector<pPin> > readNetsFile(string fname) {
   fstream file;
   string buf;
   int i = 0, a = 0, j = 0, NetId = 1;
   vector < string > strVec;
-  map<int, vector<Pin> > netToCell;
+  map<int, vector<pPin> > netToCell;
 
   string pat = "NetDegree : ";
   string Out;
@@ -171,14 +171,14 @@ map<int, vector<Pin> > readNetsFile(string fname) {
       }
       a = stoi(Out);
       vector < string > strTemp;
-      vector < Pin > pinTemp;
+      vector < pPin > pinTemp;
       for (j = 0; j < a; j++) {
         getline(file, buf);
         boost::trim_all(buf);
         boost::algorithm::split(strVec, buf, is_any_of("\t,  "), boost::token_compress_on);
         strTemp.push_back(strVec[0]);
         nodeId[name2id[strVec[0]]].setNetList(NetId);
-        Pin p;
+        pPin p;
         if(strVec.size() > 2) {
           p.set_params(strVec[0].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
         } else {
@@ -186,7 +186,7 @@ map<int, vector<Pin> > readNetsFile(string fname) {
         }
         pinTemp.push_back(p);
       }
-      netToCell.insert(pair < int, vector< Pin > > (NetId, pinTemp));
+      netToCell.insert(pair < int, vector< pPin > > (NetId, pinTemp));
       NetId++;
     }
   }

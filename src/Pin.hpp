@@ -38,7 +38,7 @@
 
 using namespace std;
 
-class Pin {
+class pPin {
   public:
   string name;
   double x_offset;

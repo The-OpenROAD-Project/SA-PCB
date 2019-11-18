@@ -35,14 +35,12 @@ add_subdirectory(${KICADPARSER_HOME})
 
 
 set (PCBPLACER_SRC  
-  src/BoardGrid.cpp
   src/GridBasedPlacer.cpp
   src/globalParam.cpp
   src/readFiles.cpp
   )
 
 set (PCBPLACER_HEADER
-  src/BoardGrid.h
   src/GridBasedPlacer.h
   src/globalParam.h
   src/util.h
@@ -69,11 +67,7 @@ include_directories(
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
 
-#add_library( PCBPLACERlib STATIC
-#  ${PCBPLACER_SRC}
-#)
-
-add_library( PCBPLACERlib SHARED
+add_library( PCBPLACERlib STATIC
   ${PCBPLACER_SRC}
 )
 

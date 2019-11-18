@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 find_package(Boost REQUIRED)
 #find_package(Swig REQUIRED)
 #set(SWIG_EXECUTABLE "/usr/bin/swig")
-set(SWIG_EXECUTABLE "/usr/local/bin/swig")
+set(SWIG_EXECUTABLE "/bin/swig")
 find_package( PythonInterp 2.7 REQUIRED )
 find_package( PythonLibs 2.7 REQUIRED )
 
@@ -65,7 +65,7 @@ include_directories(
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PCBPLACER_HOME}/lib)
 
-add_library( PCBPLACERlib STATIC
+add_library( PCBPLACERlib SHARED
   ${PCBPLACER_SRC}
 )
 

@@ -6,6 +6,7 @@ bin/cache/*
 bin/annealer
 designs/*
 reports/*
+tmp/
 boost/
 taskflow/
 annealer

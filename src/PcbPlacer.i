@@ -5,5 +5,3 @@
 %}
 %include <std_string.i>
 %include "GridBasedPlacer.hpp"
-
-

@@ -76,6 +76,8 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     Node n;
     nodeId.push_back(n);
   }
+
+  int fixed = 0;
   for (auto &inst : instances) {
       point_2d bbox;
       mDb.getCompBBox(inst.getComponentId(), &bbox); 
@@ -96,7 +98,29 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
       } else if (angle == 270) {
           ang = "W";
       }
-      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, 0);
+
+if(inst.getName() == "ICSP" || 
+inst.getName() == "U$2" ||
+inst.getName() == "JP2" ||
+inst.getName() == "JP1" ||
+inst.getName() == "PWML" ||
+inst.getName() == "U$1" ||
+inst.getName() == "PWMH" ||
+inst.getName() == "POWER" ||
+inst.getName() == "JP5" ||
+inst.getName() == "JP4" ||
+inst.getName() == "X3" ||
+inst.getName() == "JP6" ||
+inst.getName() == "ADCL" ||
+inst.getName() == "ADCH" ||
+inst.getName() == "X2" ||
+inst.getName() == "JP3" ||
+inst.getName() == "X4" ||
+inst.getName() == "COMMUNICATION") {
+fixed = 1;	
+}
+
+      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
       nodeId[name2id[inst.getName()]].printParameter();
   }
 
@@ -115,12 +139,11 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
           auto &comp = mDb.getComponent(pin.getCompId());
           point_2d pos;
-          //mDb.getPinPosition(pin, &pos);
+          mDb.getPinPosition(pin, &pos);
 
           auto &pad = comp.getPadstack(pin.getPadstackId());
           p.set_params(inst.getName(), pos.m_x - nodeId[name2id[inst.getName()]].xBy2, pos.m_y - nodeId[name2id[inst.getName()]].yBy2, nodeId[name2id[inst.getName()]].idx);
           pinTemp.push_back(p);
-
       }
       netToCell.insert(pair < int, vector< pPin > > (net.getId(), pinTemp));
     }

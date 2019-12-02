@@ -162,7 +162,7 @@ inst.getName() == "COMMUNICATION") { fixed = 1; }
       } else if (angle == 4) {
           ang = 180;
       } else if (angle == 6) {
-          ang = 180;
+          ang = 270;
       }
       inst.setAngle(ang);
       inst.setX(nodeId[inst.getId()].xBy2);
@@ -711,9 +711,7 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
 }
 
 double c = 0.0;
-double GridBasedPlacer::initiate_move(double current_cost,
-                     double & Temperature,
-                     map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initiate_move(double current_cost, double & Temperature, map<int, vector<pPin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -813,10 +811,10 @@ double GridBasedPlacer::initiate_move(double current_cost,
   double transition_cost = this->cost_partial(perturbed_nodes,netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
 
-  bool accept = this->check_move(current_cost,
-                           updated_cost,
-                           Temperature);
+  bool accept = this->check_move(current_cost, updated_cost, Temperature);
+
   if (!accept) {
+    AcceptRate = 1/500 *(499*AcceptRate);
     if(debug > 1) {
       cout << "reject" << endl;
     }
@@ -840,6 +838,7 @@ double GridBasedPlacer::initiate_move(double current_cost,
     if(debug > 1) {
       cout << "accept" << endl;
     }
+    AcceptRate = 1/500 *(499*AcceptRate + 1);
     return updated_cost;
   }
 }
@@ -850,48 +849,49 @@ Update the SA parameters according to annealing schedule
 */
 void GridBasedPlacer::update_temperature(double& Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
+  l1 = 0.98*l1;
   if (Temperature > 50e-3) {
     Temperature = (0.985) * Temperature;
-    if (l1 > 92e-2) {
-      l1 -= 2e-4;
-    }
+//    if (l1 > 92e-2) {
+//      l1 -= 2e-4;
+//    }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.985*nodeit->sigma,3/4 * nodeit->sigma);
     }
   } else if (Temperature > 10e-3) {
-    Temperature = (0.9992) * Temperature;
-    if (l1 > 88.5e-2) {
-      l1 -= 4e-4;
-    }
+//    Temperature = (0.9992) * Temperature;
+//    if (l1 > 88.5e-2) {
+//      l1 -= 4e-4;
+//    }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9992*nodeit->sigma,2/4 * nodeit->sigma);
     }
   } else if (Temperature > 50e-4) {
     Temperature = (0.9955) * Temperature;
-    if (l1 > 88e-2) {
-      l1 -= 8e-4;
-    }
+//    if (l1 > 88e-2) {
+//      l1 -= 8e-4;
+//    }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9955*nodeit->sigma,1/4 * nodeit->sigma);
     }
   } else if (Temperature > 10e-4) {
     Temperature = (0.9965) * Temperature;
-    if (l1 > 85e-2) {
-      l1 -= 16e-4;
-    }
+//    if (l1 > 85e-2) {
+//      l1 -= 16e-4;
+//    }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.9965*nodeit->sigma,2.0);
     }
   } else {
     if (Temperature > 10e-8) {
       Temperature = (0.885) * Temperature;
-      if (l1 > 80e-2) {
-        l1 -= 10e-4;
-      }
+//      if (l1 > 80e-2) {
+//        l1 -= 10e-4;
+//      }
     } else {
-      if (l1 > 10e-2) {
-        l1 -= 10e-4;
-      }
+//      if (l1 > 10e-2) {
+//        l1 -= 10e-4;
+//      }
       Temperature = 0.0000000001;
     }
     if (l1 > 10e-4) {
@@ -1075,11 +1075,11 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
-      this->cost(netToCell,-1);
+      //this->cost(netToCell,-1);
 
-      this->gen_report(report,
-                 accept_ratio_history,
-                 netToCell);
+      //this->gen_report(report,
+      //           accept_ratio_history,
+      //           netToCell);
     }
     while (i > 0) {
 

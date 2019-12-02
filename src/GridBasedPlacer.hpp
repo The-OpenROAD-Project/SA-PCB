@@ -151,6 +151,9 @@ private:
   double t_0 = 1.0;
   bool var = false;
 
+  double AcceptRate = 0.5;
+  double LamRate = 0.5;
+
   bool rotate_flag = 0;
   boost::mt19937 rng;
 

@@ -662,10 +662,11 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
     cout << "overlap_cost: " << overlap_cost  << endl;
     cout << "routability_cost: " << routability_cost  << endl;
     cout << "cost: " << total_cost << endl;
-  }
-  if (cell_oa < 1 && wl < best_wl) {
-      bestSol = nodeId;
-      best_wl = wl;
+
+    if (cell_oa < 1 && wl < best_wl) {
+        bestSol = nodeId;
+        best_wl = wl;
+    }
   }
   return total_cost;
 }

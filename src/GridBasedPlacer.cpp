@@ -49,6 +49,8 @@ typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<dou
 
 
 vector < Node > nodeId;
+vector < Node > bestSol;
+double best_wl = 0.0;
 map < string, int > name2id;
 //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 float l1 = 0.4;
@@ -96,33 +98,21 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
       } else if (angle == 270) {
           ang = "W";
       }
-
-// BM1
-if(inst.getName() == "ICSP" || 
-inst.getName() == "U$2" ||
-inst.getName() == "JP2" ||
-inst.getName() == "JP1" ||
-inst.getName() == "PWML" ||
-inst.getName() == "U$1" ||
-inst.getName() == "PWMH" ||
-inst.getName() == "POWER" ||
-inst.getName() == "JP5" ||
-inst.getName() == "JP4" ||
-inst.getName() == "X3" ||
-inst.getName() == "JP6" ||
-inst.getName() == "ADCL" ||
-inst.getName() == "ADCH" ||
-inst.getName() == "X2" ||
-inst.getName() == "JP3" ||
-inst.getName() == "X4" ||
-inst.getName() == "COMMUNICATION") { fixed = 1; }
-
+     if(inst.isLocked()) {
+         fixed = 1;
+     } 
+    
       nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
       nodeId[name2id[inst.getName()]].printParameter();
   }
 
   cout << "calculating boundaries..." << endl;
-  set_boundaries();
+ // set_boundaries();
+   points_2d b = mDb.getBoardBoundary();
+mMinX = b[0].m_x;
+mMaxX = b[1].m_x;
+mMinY = b[0].m_y;
+mMaxY = b[1].m_y;
 
     for (auto &net : nets){
 
@@ -146,7 +136,7 @@ inst.getName() == "COMMUNICATION") { fixed = 1; }
 
   cout << "annealing" << endl;
   float cost = this->annealer(netToCell, initial_pl);
-  
+  nodeId = bestSol; 
   // write back to db
   cout << "writing back to db..." << endl;
   for (auto &inst : instances) {
@@ -663,6 +653,8 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
   double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   if(debug > 1 || temp_debug == -1) {
+    double wl = this->wirelength(netToCell);
+    double cell_oa = this->cell_overlap();
     cout << "wirelength: " << this->wirelength(netToCell) << endl;
     cout << "overlap: " << this->cell_overlap() << endl;
     cout << "l1: " << l1 << " l2: " << l2 << endl;
@@ -670,6 +662,10 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
     cout << "overlap_cost: " << overlap_cost  << endl;
     cout << "routability_cost: " << routability_cost  << endl;
     cout << "cost: " << total_cost << endl;
+  }
+  if (cell_oa < 1 && wl < best_wl) {
+      bestSol = nodeId;
+      best_wl = wl;
   }
   return total_cost;
 }
@@ -859,7 +855,7 @@ void GridBasedPlacer::update_temperature(double& Temperature) {
       nodeit->sigma =  max(0.985*nodeit->sigma,3/4 * nodeit->sigma);
     }
   } else if (Temperature > 10e-3) {
-//    Temperature = (0.9992) * Temperature;
+    Temperature = (0.9992) * Temperature;
 //    if (l1 > 88.5e-2) {
 //      l1 -= 4e-4;
 //    }
@@ -894,9 +890,9 @@ void GridBasedPlacer::update_temperature(double& Temperature) {
 //      }
       Temperature = 0.0000000001;
     }
-    if (l1 > 10e-4) {
-      l1 -= 10e-4;
-    }
+//    if (l1 > 10e-4) {
+//      l1 -= 10e-4;
+//    }
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       nodeit->sigma =  max(0.855*nodeit->sigma,1.0);
     }
@@ -1075,7 +1071,9 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
-      //this->cost(netToCell,-1);
+      if (ii % 25 == 0) {
+          this->cost(netToCell,-1);
+      }
 
       //this->gen_report(report,
       //           accept_ratio_history,

@@ -53,7 +53,7 @@ vector < Node > bestSol;
 double best_wl = 0.0;
 map < string, int > name2id;
 //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
-float l1 = 0.4;
+//float l1 = 0.4;
 
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
   srand(time(NULL));

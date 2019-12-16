@@ -97,6 +97,13 @@ public:
   kicadPcbDataBase &getDb() { return mDb; }
   kicadPcbDataBase &mDb;
 
+  void set_congestion_cost(double cst) {l1 = cst;}
+  void set_rudy_cost(double cst) {l1 = 1-cst;}
+  void set_wl_cost(double cst) {}
+  void set_inner_iter(int iter) {inner_loop_iter = iter;}
+  void set_outer_iter(int iter) {outer_loop_iter = iter;}
+  void set_init_tmp(double tmp) {t_0 = tmp;}
+
 private:
   // Utility
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
@@ -150,6 +157,7 @@ private:
   double eps = -1.0;
   double t_0 = 1.0;
   bool var = false;
+  double l1 = 0.4;
 
   double AcceptRate = 0.5;
   double LamRate = 0.5;

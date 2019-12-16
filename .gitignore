@@ -2,6 +2,7 @@ __pycache__
 lib/*
 src/*.o
 bin/*
+build/*
 bin_backup/*
 bin/cache/*
 bin/annealer

@@ -98,34 +98,6 @@ public:
   void HPlace(map<int, vector<Pin> > &netToCell, string initial_pl);
 
 private:
-  // Utility
-/*
-  void random_initial_placement();
-  void set_boundaries();
-  void initialize_params(map<int, vector<Pin> > &netToCell);
-  void validate_move(Node &node, double rx, double ry);
-  double cost(map<int, vector<Pin> > &netToCell,
-              int temp_debug = 0);
-  double cost_partial(vector < Node *> &nodes, map<int, vector<Pin> > &netToCell);
-  double cell_overlap();
-  double wirelength(map<int, vector<Pin> > &netToCell);
-  double cell_overlap_partial(vector < Node* > &nodes);
-  double wirelength_partial(vector < Node* > &nodes, map<int, vector<Pin> > &netToCell);
-  double rudy(map<int, vector<Pin> > &netToCell);
-  float annealer(map<int, vector<Pin> > &netToCell, string initial_pl);
-  float multistart();
-  double initialize_temperature(double &Temperature, map<int, vector<Pin> > &netToCell);
-  void update_temperature(double& Temperature);
-  double initiate_move(double current_cost, double & Temperature, map<int, vector<Pin> > &netToCell);
-  bool check_move(double prevCost, double newCost, double &Temperature);
-  void project_soln();
-  void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
-  void gen_report(map<string, vector<double> > &report,
-                  vector< double > &accept_ratio_history,
-                  map<int, vector<Pin> > &netToCell);
-  void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
-*/
-
   void random_initial_placement();
   void set_boundaries();
   void initialize_params(map<int, vector<Module *> > &netToCell);
@@ -137,8 +109,9 @@ private:
   double wirelength(map<int, vector<Module *> > &netToCell);
   double cell_overlap_partial(vector < Module * > &nodes);
   double wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
-  //double rudy(map<int, vector<Module *> > &netToCell);
-  float annealer(map<int, vector<Module *> > &netToCell, string initial_pl);
+  double rudy(map<int, vector<Module *> > &netToCell);
+  double cellDensity();
+  float annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
   float multistart();
   double initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
   void update_temperature(double& Temperature);
@@ -166,10 +139,17 @@ private:
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
+  std::pair <double,double> density_normalization;
+  double densityAlpha = 0.0001;
+  int densityFlag = 0;
 
   vector < double > cost_hist;
   vector < double > wl_hist;
   vector < double > oa_hist;
+  vector < double > l_hist;
+  vector < double > density_hist;
+  vector < double > var_hist;
+  vector < double > temp_hist;
 
   //map<int, vector<Pin> > *netToCell = nullptr;
   //vector < vector < Pin > > *netToCellVec = nullptr;
@@ -186,8 +166,8 @@ private:
 
   float l1 = 0.4;
 
-  float p_swap = 0.2;
-  float p_shift = 0.8;
+  float p_swap = 0.8;
+  float p_shift = 0.2;
   float p_rotate = 0.0;
 
   bool rotate_flag = 0;

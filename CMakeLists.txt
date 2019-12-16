@@ -21,6 +21,8 @@ find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARYDIR})
 
+file(MAKE_DIRECTORY bin/cache)
+
 set(PCBPLACER_HOME ${PROJECT_SOURCE_DIR} )
 set(KICADPARSER_HOME
   ${PROJECT_SOURCE_DIR}/module/KicadParser

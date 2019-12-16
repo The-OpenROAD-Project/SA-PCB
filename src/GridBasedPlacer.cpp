@@ -107,23 +107,8 @@ void GridBasedPlacer::test_placer_flow() {
   set_boundaries();
 
   cout << "annealing" << endl;
-  //float cost = this->annealer(netToCell, initial_pl);
   HPlace(netToCell, initial_pl);
 
-  cout << "writting result" << endl;
-  writePlFile("./final_placement.pl");
-
-  std::ofstream f1("./oa.txt");
-  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
-      f2 << *i << '\n';
-  }
-  f1.close();
-
-  std::ofstream f2("./wl.txt");
-  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
-      f2 << *i << '\n';
-  }
-  f2.close();
 }
 
 void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_pl) {
@@ -140,14 +125,56 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
     moduleId = lvl.modules;
     map<int, vector<Module *> > netToCell = lvl.netToModule;
 
-    float cost = this->annealer(netToCell, initial_pl);
+    float cost = this->annealer(netToCell, initial_pl,l);
+
+  cout << "writting result" << endl;
+  writePlFile("./final_placement_"+std::to_string(l)+".pl");
+
+  std::ofstream f1("./oa_"+std::to_string(l)+".txt");
+  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+      f1 << *i << '\n';
+  }
+  f1.close();
+
+  std::ofstream f2("./wl_"+std::to_string(l)+".txt");
+  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+      f2 << *i << '\n';
+  }
+  f2.close();
+
+  std::ofstream f3("./l_"+std::to_string(l)+".txt");
+  for(vector<double>::const_iterator i = l_hist.begin(); i != l_hist.end(); ++i) {
+      f3 << *i << '\n';
+  }
+  f3.close();
+
+  std::ofstream f4("./var_"+std::to_string(l)+".txt");
+  for(vector<double>::const_iterator i = var_hist.begin(); i != var_hist.end(); ++i) {
+      f4 << *i << '\n';
+  }
+  f4.close();
+
+  std::ofstream f5("./temp_"+std::to_string(l)+".txt");
+  for(vector<double>::const_iterator i = temp_hist.begin(); i != temp_hist.end(); ++i) {
+      f5 << *i << '\n';
+  }
+  f5.close();
+
+  wl_hist.clear();
+  oa_hist.clear();
+  l_hist.clear();
+  density_hist.clear();
+  var_hist.clear();
+  temp_hist.clear();
+
+
     l++;
     initial_loop_iter = ceil(initial_loop_iter / 2);
     t_0 = 0.01*t_0;
 
     cout << endl;
   } 
-
+/*
   cout << "===== greedy placement =====" << endl;
   initial_loop_iter = 1;
 
@@ -181,7 +208,7 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
     netidx ++;
   }
   t_0 = 0.0;
-  float cost = this->annealer(netToCell_tmp, initial_pl);
+  float cost = this->annealer(netToCell_tmp, initial_pl);*/
 }
 
 /*
@@ -189,7 +216,6 @@ initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
 */
-//void GridBasedPlacer::initialize_params(map<int, vector<Pin> > &netToCell) {
 void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) {
   vector < std::pair <double,double> > normalization_terms;
 
@@ -202,15 +228,18 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
   }
   std::pair < double, double > wl;
   std::pair < double, double > area;
+  std::pair < double, double > density;
   std::pair < double, double > rn;
 
   double sum_wl = 0.0;
   double sum_oa = 0.0;
+  double sum_density = 0.0;
   double sum_rn = 0.0;
   for (int i = 0; i<initial_loop_iter; i++) {
     this->random_initial_placement();
     sum_wl += this->wirelength(netToCell);
     sum_oa += this->cell_overlap();
+    sum_density += this->cellDensity();
     //sum_rn += this->rudy(netToCell);
   }
 
@@ -224,15 +253,21 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
   area.second = sum_oa / initial_loop_iter;
   area.second = max(area.second, 1.0); 
 
+  density.first = 0.0;
+  density.second = sum_density/ initial_loop_iter;
+  density.second = max(density.second, 1.0);
+
   //rn.first = 0.0;
   //rn.second = sum_rn / 100.0;
 
   normalization_terms.push_back(wl);
   normalization_terms.push_back(area);
+  normalization_terms.push_back(density);
   //normalization_terms.push_back(rn);
 
   wl_normalization = normalization_terms[0];
   area_normalization = normalization_terms[1];
+  density_normalization = normalization_terms[2];
   //routability_normalization = normalization_terms[2];
 }
 
@@ -325,7 +360,6 @@ project_soln
 projects the final solution to enforce 0 overlap by iteratively
 shifting overlapped components until cumulative overlap reduces below an eps.
 */
-/*
 void GridBasedPlacer::project_soln() {
   double oa = cell_overlap();
   double eps = 10.0e-5;
@@ -379,17 +413,17 @@ void GridBasedPlacer::project_soln() {
             }
             if (dx < dy) {
               // project in x direction
-              this->validate_move(*nodeit1,rx + dx,ry);
+              //this->validate_move(*nodeit1,rx + dx,ry);
             } else {
               // project in y direction
-              this->validate_move(*nodeit1,rx,ry + dy);
+              //this->validate_move(*nodeit1,rx,ry + dy);
             }
           }
         }
       }
     }
   }
-}*/
+}
 
 /*
 wirelength
@@ -549,10 +583,66 @@ double GridBasedPlacer::wirelength_partial(vector < Module *> &nodes, map<int, v
 }
 
 /*
+rudy
+Computes a routability score
+*/
+double GridBasedPlacer::cellDensity() {
+  static bnu::matrix<double> D (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 0.0);
+  static bnu::matrix<double> D_sup (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 1.0);
+
+  D.clear();
+
+  for(size_t i = 0; i < moduleId.size(); i++) {
+
+    int minXW = floor(moduleId[i]->xCoordinate);
+    int minYW = floor(moduleId[i]->yCoordinate);
+    int maxXW = ceil(moduleId[i]->xCoordinate + moduleId[i]->width);
+    int maxYW = ceil(moduleId[i]->yCoordinate + moduleId[i]->height);
+
+    //double minOverflowX = abs(minXW - moduleId[i]->xCoordinate);
+    //double maxOverflowX = abs();
+    //double minOverflowY = abs();
+    //double maxOverflowY = abs();
+
+    for (unsigned i = max(minYW, 0); i < maxYW; ++ i) {
+        for (unsigned j = max(minXW, 0); j < maxXW; ++ j) {
+          //D (i,j) += 1;
+          double xover = 1.0;
+          double yover = 1.0;
+          if (i < moduleId[i]->yCoordinate) {
+            yover += moduleId[i]->yCoordinate - floor(moduleId[i]->yCoordinate);
+          } else if (i < moduleId[i]->yCoordinate + moduleId[i]->height) {
+            yover += ceil(moduleId[i]->yCoordinate + moduleId[i]->height) - moduleId[i]->yCoordinate + moduleId[i]->height;
+          } else {
+            yover += 1.0;
+          }
+
+          if (i < moduleId[j]->xCoordinate) {
+            xover += moduleId[i]->xCoordinate - floor(moduleId[i]->xCoordinate);
+          } else if (j < moduleId[i]->xCoordinate + moduleId[i]->width) {
+            xover += ceil(moduleId[i]->xCoordinate + moduleId[i]->width) - moduleId[i]->xCoordinate + moduleId[i]->width;
+          } else {
+            xover += 1.0;
+          }
+          D(i,j) += xover * yover;
+        }
+      }
+  }
+
+  double r = 0.0;
+  for (unsigned i = 0; i < D.size1 (); ++ i) {
+      for (unsigned j = 0; j < D.size2 (); ++ j) {
+        D(i,j) = exp(densityAlpha * (D(i,j) - D_sup(i,j))/D_sup(i,j));
+        r += D(i,j);
+      }
+  }
+  return r;
+}
+
+/*
 cell_overlap_partial
 Compute sum squared overlap for select components
 */
-//double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
 double GridBasedPlacer::cell_overlap_partial(vector < Module *> &nodes) {
   double overlap = 0.0;
   unordered_set < int > cell_history;
@@ -593,43 +683,45 @@ double GridBasedPlacer::cell_overlap_partial(vector < Module *> &nodes) {
 rudy
 Computes a routability score
 */
-/*
-double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
+//double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
+double GridBasedPlacer::rudy(map<int, vector<Module *> > &netToCell) {
   static bnu::matrix<double> D (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 0.0);
   static bnu::matrix<double> D_route_sup (static_cast<int>(abs(mMaxY)+abs(mMinY) + 1), static_cast<int>(abs(mMaxX)+abs(mMinX) + 1), 1.0);
 
   D.clear();
 
-  map<int, vector < Pin > > ::iterator itNet;
-  vector < Pin > ::iterator itCellList;
+  //map<int, vector < Pin > > ::iterator itNet;
+  map<int, vector < Module* > > ::iterator itNet;
+  //vector < Pin > ::iterator itCellList;
+  vector < Module* > ::iterator itCellList;
 
   for (itNet = netToCell.begin(); itNet != netToCell.end(); ++itNet) {
     double xVal, yVal, hpwl = 0.0;
     double minXW = mMaxX, minYW = mMaxY, maxXW = mMinX, maxYW = mMinY;
     double rudy = 0.0;
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
-      int orient = nodeId[itCellList->idx].orientation;
+      int orient = nodeId[(*itCellList)->idx].orientation;
  
-      xVal = nodeId[itCellList->idx].xBy2;
-      yVal = nodeId[itCellList->idx].yBy2;
+      xVal = nodeId[(*itCellList)->idx].xBy2;
+      yVal = nodeId[(*itCellList)->idx].yBy2;
 
       // compute pin position from orientation & offsets
       if(orient == 0) { // 0
-        xVal = xVal + itCellList->x_offset;
-        yVal = yVal + itCellList->y_offset;
+        xVal = xVal + (*itCellList)->x_offset;
+        yVal = yVal + (*itCellList)->y_offset;
       } else if(orient == 2) { // 90
-        xVal = xVal + itCellList->y_offset;
-        yVal = yVal - itCellList->x_offset;
+        xVal = xVal + (*itCellList)->y_offset;
+        yVal = yVal - (*itCellList)->x_offset;
       } else if(orient == 4) { // 180
-        xVal = xVal - itCellList->x_offset;
-        yVal = yVal - itCellList->y_offset;
+        xVal = xVal - (*itCellList)->x_offset;
+        yVal = yVal - (*itCellList)->y_offset;
       } else if(orient == 6) { // 270
-        xVal = xVal - itCellList->y_offset;
-        yVal = yVal + itCellList->x_offset;
+        xVal = xVal - (*itCellList)->y_offset;
+        yVal = yVal + (*itCellList)->x_offset;
       } else {
         double rad = (orient*45.0*PI/180.0);
-        xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
-        yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
+        xVal = (*itCellList)->y_offset*sin(rad) + (*itCellList)->x_offset*cos(rad) + xVal;
+        yVal = (*itCellList)->y_offset*cos(rad) - (*itCellList)->x_offset*sin(rad) + yVal;
       }
 
       if (xVal < minXW)
@@ -684,13 +776,18 @@ double GridBasedPlacer::rudy(map<int, vector<Pin> > &netToCell) {
   //}
 
   return r;
-}*/
+}
 
 //double GridBasedPlacer::cost(map<int, vector<Pin> > &netToCell, int temp_debug) {
 double GridBasedPlacer::cost(map<int, vector<Module *> > &netToCell, int temp_debug) {
   double l2 = 1 - l1;
   double wirelength_cost = l1*0.9*(this->wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
-  double overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
+  double overlap_cost = 0.0;
+  if (densityFlag == 0) {
+    overlap_cost = l2  * (this->cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first);
+  } else {
+    overlap_cost = l2 * this->cellDensity();
+  }
   //double routability_cost = l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
   double total_cost = wirelength_cost + overlap_cost;// + routability_cost;
   //if(debug > 1 || temp_debug == -1) {
@@ -708,10 +805,15 @@ double GridBasedPlacer::cost(map<int, vector<Module *> > &netToCell, int temp_de
 //double GridBasedPlacer::cost_partial(vector < Module *> &nodes, map<int, vector<Pin> > &netToCell) {
 double GridBasedPlacer::cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
   double l2 = 1-l1;
-  return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
-         //l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
-
+  if(densityFlag == 0) {
+    return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+           l2 * (this->cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first); //+
+           //l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+  } else {
+    return l1 * 0.9 * (this->wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
+           l2 * (this->cellDensity()); //+
+           //l1 * 0.1 * (this->rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+  }
 }
 
 /*
@@ -888,6 +990,7 @@ Update the SA parameters according to annealing schedule
 */
 void GridBasedPlacer::update_temperature(double& Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
+  densityAlpha *= 1.01;
   if (Temperature > 50e-3) {
     Temperature = (0.985) * Temperature;
     if (l1 > 92e-2) {
@@ -939,6 +1042,7 @@ void GridBasedPlacer::update_temperature(double& Temperature) {
       nodeit->sigma =  max(0.855*nodeit->sigma,1.0);
     }
   }
+  var_hist.push_back((*nodeId.begin()).sigma);
 }
 
 void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio) {
@@ -1068,7 +1172,7 @@ annealer
 main loop for sa algorithm
 */
 //float GridBasedPlacer::annealer(map<int, vector<Pin> > &netToCell, string initial_pl) {
-float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string initial_pl) {
+float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level) {
   double Temperature = t_0;
   int num_components = 0;
 
@@ -1124,7 +1228,14 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
       cout << "temperature: " << Temperature << endl;
       cout << "acceptance ratio: " << accept_ratio << endl;
       wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      if (densityFlag == 0) {
+        oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+      } else {
+        oa_hist.push_back(cellDensity());
+      }
+      l_hist.push_back(l1);
+      temp_hist.push_back(Temperature);
+      writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
       //this->cost(netToCell,-1);
 
       //this->gen_report(report,
@@ -1135,9 +1246,6 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
       cst = this->initiate_move(cst, Temperature, netToCell);
       this->update_accept_history(accept_ratio_history, accept_ratio);
       report["cost_hist"].push_back(cst);
-
-      //wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      //oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
       i -= 1;
     }
 
@@ -1147,9 +1255,6 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
 //    }
     this->update_temperature(Temperature);
     ii += 1;
-    if (ii % 10 == 0) {
-      //writePlFile("./cache/"+std::to_string( ii )+".pl");
-    }
   }
   return this->cost(netToCell);
 }

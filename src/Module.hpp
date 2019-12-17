@@ -302,6 +302,18 @@ public:
     }
   }
 
+    Module *get_level_module_from_id(int idx, int level, Module *m) {
+    if(m->level == level) {
+      return m;
+    } else {
+      for (auto &child : m->children) {
+        if(std::find(child->cells.begin(), child->cells.end(), idx) != child->cells.end()) {
+          return get_level_module_from_id(idx,level, child);
+        }
+      }
+    }
+  }
+
   /*
   for each level in the hierarchy, instantiate a netlist for that level:
   associated nets for each module (list of net ids)
@@ -413,7 +425,6 @@ public:
     }
 
     int dim = 0;
-
     vector <Module *> modules = levels[lev].modules;
     for (auto &module : modules) {
       double xmin = 99999999999999.0;
@@ -445,13 +456,39 @@ public:
       ycenter = ycenter / module->children.size();
 
       //module->setParameterNodes(xmax - xmin, ymax - ymin);
-      //module->setParameterPl(xmin, ymin);    
+      //module->setParameterPl(xmin, ymin);
 
       dim = ceil(sqrt(area));
       module->setParameterNodes(dim, dim);
       module->setParameterPl(xcenter, ycenter);  
     }
     propagate_geometries(lev - 1);
+  }
+
+  vector < Node >  update_cell_positions_at_level(vector < Node > nodeId, int level) {
+    for (auto &node : nodeId) {
+      int cell_id = node.idx;
+      Module *m = get_level_module_from_id(cell_id, level, root);
+      if(!(std::find(m->cells.begin(), m->cells.end(), cell_id) != m->cells.end())) {
+        cout << "cell not found in leaf nodes: " << cell_id << " " << m->idx << " " << m->leaf << endl;
+        return nodeId;
+      }
+      double mx = m->xCoordinate;
+      double my = m->yCoordinate;
+      double cx = node.xCoordinate;
+      double cy = node.yCoordinate;
+      double mx_orig = m->initialX;
+      double my_orig = m->initialY;
+
+      double trans_x = mx - mx_orig;
+      double trans_y = my - my_orig;
+
+      double new_cell_x = cx + trans_x;
+      double new_cell_y = cy + trans_y;
+
+      node.setPos(new_cell_x, new_cell_y);
+    }
+    return nodeId;
   }
 
   vector < Node >  update_cell_positions(vector < Node > nodeId) {

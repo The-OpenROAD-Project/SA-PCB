@@ -125,47 +125,51 @@ void GridBasedPlacer::HPlace(map<int, vector<Pin> > &netToCell, string initial_p
     moduleId = lvl.modules;
     map<int, vector<Module *> > netToCell = lvl.netToModule;
 
-    float cost = this->annealer(netToCell, initial_pl,l);
+    float cost = this->annealer(netToCell, initial_pl, l);
 
-  cout << "writting result" << endl;
-  writePlFile("./final_placement_"+std::to_string(l)+".pl");
+    nodeId = H.update_cell_positions_at_level(nodeId, l);
 
-  std::ofstream f1("./oa_"+std::to_string(l)+".txt");
-  for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
-      f1 << *i << '\n';
-  }
-  f1.close();
+    // update coords
 
-  std::ofstream f2("./wl_"+std::to_string(l)+".txt");
-  for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
-      f2 << *i << '\n';
-  }
-  f2.close();
+    cout << "writting result" << endl;
+    writePlFile("./final_placement_"+std::to_string(l)+".pl");
 
-  std::ofstream f3("./l_"+std::to_string(l)+".txt");
-  for(vector<double>::const_iterator i = l_hist.begin(); i != l_hist.end(); ++i) {
-      f3 << *i << '\n';
-  }
-  f3.close();
+    std::ofstream f1("./oa_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+        f1 << *i << '\n';
+    }
+    f1.close();
 
-  std::ofstream f4("./var_"+std::to_string(l)+".txt");
-  for(vector<double>::const_iterator i = var_hist.begin(); i != var_hist.end(); ++i) {
-      f4 << *i << '\n';
-  }
-  f4.close();
+    std::ofstream f2("./wl_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+        f2 << *i << '\n';
+    }
+    f2.close();
 
-  std::ofstream f5("./temp_"+std::to_string(l)+".txt");
-  for(vector<double>::const_iterator i = temp_hist.begin(); i != temp_hist.end(); ++i) {
-      f5 << *i << '\n';
-  }
-  f5.close();
+    std::ofstream f3("./l_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = l_hist.begin(); i != l_hist.end(); ++i) {
+        f3 << *i << '\n';
+    }
+    f3.close();
 
-  wl_hist.clear();
-  oa_hist.clear();
-  l_hist.clear();
-  density_hist.clear();
-  var_hist.clear();
-  temp_hist.clear();
+    std::ofstream f4("./var_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = var_hist.begin(); i != var_hist.end(); ++i) {
+        f4 << *i << '\n';
+    }
+    f4.close();
+
+    std::ofstream f5("./temp_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = temp_hist.begin(); i != temp_hist.end(); ++i) {
+        f5 << *i << '\n';
+    }
+    f5.close();
+
+    wl_hist.clear();
+    oa_hist.clear();
+    l_hist.clear();
+    density_hist.clear();
+    var_hist.clear();
+    temp_hist.clear();
 
 
     l++;
@@ -1235,8 +1239,10 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
       }
       l_hist.push_back(l1);
       temp_hist.push_back(Temperature);
+      this->cost(netToCell,-1);
+
+      nodeId = H.update_cell_positions_at_level(nodeId, level);
       writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
-      //this->cost(netToCell,-1);
 
       //this->gen_report(report,
       //           accept_ratio_history,

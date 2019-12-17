@@ -199,7 +199,7 @@ int readPlFile(string fname) {
 map<int, vector<Pin> > readNetsFile(string fname) {
   fstream file;
   string buf;
-  int i = 0, a = 0, j = 0, NetId = 1;
+  int i = 0, a = 0, j = 0, NetId = 0;
   vector < string > strVec;
   map<int, vector<Pin> > netToCell;
 

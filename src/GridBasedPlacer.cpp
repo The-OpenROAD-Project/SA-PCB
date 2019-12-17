@@ -239,10 +239,9 @@ void GridBasedPlacer::initialize_params(map<int, vector<Module *> > &netToCell) 
     this->random_initial_placement();
     sum_wl += this->wirelength(netToCell);
     sum_oa += this->cell_overlap();
-    sum_density += this->cellDensity();
+    //sum_density += this->cellDensity();
     //sum_rn += this->rudy(netToCell);
   }
-
   //double sum_wl = 100.0;
   //double sum_oa = 100.0;
 
@@ -447,9 +446,9 @@ double GridBasedPlacer::wirelength(map<int, vector<Module *> > &netToCell) {
       //xVal = nodeId[itCellList->idx].xBy2;
       //yVal = nodeId[itCellList->idx].yBy2;
 
-      int orient = moduleId[(*itCellList)->idx]->orientation;
-      xVal = moduleId[(*itCellList)->idx]->xBy2;
-      yVal = moduleId[(*itCellList)->idx]->yBy2;
+      //int orient = moduleId[(*itCellList)->idx]->orientation;
+      xVal = moduleId[(*itCellList)->idx-1]->xBy2;
+      yVal = moduleId[(*itCellList)->idx-1]->yBy2;
 /*
       if(orient == 0) { // 0
         xVal = xVal + itCellList->x_offset;
@@ -546,8 +545,8 @@ double GridBasedPlacer::wirelength_partial(vector < Module *> &nodes, map<int, v
         //  continue;
         //}
         int orient = moduleId[(*itCellList)->idx]->orientation;
-        xVal = moduleId[(*itCellList)->idx]->xBy2;
-        yVal = moduleId[(*itCellList)->idx]->yBy2;
+        xVal = moduleId[(*itCellList)->idx-1]->xBy2;
+        yVal = moduleId[(*itCellList)->idx-1]->yBy2;
 /*
         if(orient == 0) { // 0
           xVal = xVal + itCellList->x_offset;
@@ -702,8 +701,8 @@ double GridBasedPlacer::rudy(map<int, vector<Module *> > &netToCell) {
     for (itCellList = itNet -> second.begin(); itCellList != itNet -> second.end(); ++itCellList) {
       int orient = nodeId[(*itCellList)->idx].orientation;
  
-      xVal = nodeId[(*itCellList)->idx].xBy2;
-      yVal = nodeId[(*itCellList)->idx].yBy2;
+      xVal = nodeId[(*itCellList)->idx-1].xBy2;
+      yVal = nodeId[(*itCellList)->idx-1].yBy2;
 
       // compute pin position from orientation & offsets
       if(orient == 0) { // 0
@@ -1195,6 +1194,7 @@ float GridBasedPlacer::annealer(map<int, vector<Module *> > &netToCell, string i
   }
   */
 
+  cout << "calculating initial cost..." << endl;  
   double cst = this->cost(netToCell,-1);
   
   if(var) {

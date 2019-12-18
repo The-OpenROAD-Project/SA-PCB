@@ -39,7 +39,7 @@ set (PCBPLACER_SRC
   )
 
 set (PCBPLACER_HEADER
-  src/GridBasedPlacer.h
+  src/GridBasedPlacer.hpp
   src/globalParam.h
   src/util.h
   src/Node.hpp

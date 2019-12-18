@@ -79,11 +79,16 @@ class GridBasedPlacer(_object):
         except: self.this = this
     __swig_destroy__ = _PcbPlacer.delete_GridBasedPlacer
     __del__ = lambda self : None;
-    def test_placer_flow(self): return _PcbPlacer.GridBasedPlacer_test_placer_flow(self)
-    def getDb(self): return _PcbPlacer.GridBasedPlacer_getDb(self)
+    def test_placer_flow(self) -> "kicadPcbDataBase &" : return _PcbPlacer.GridBasedPlacer_test_placer_flow(self)
+    def getDb(self) -> "kicadPcbDataBase &" : return _PcbPlacer.GridBasedPlacer_getDb(self)
     __swig_setmethods__["mDb"] = _PcbPlacer.GridBasedPlacer_mDb_set
     __swig_getmethods__["mDb"] = _PcbPlacer.GridBasedPlacer_mDb_get
     if _newclass:mDb = _swig_property(_PcbPlacer.GridBasedPlacer_mDb_get, _PcbPlacer.GridBasedPlacer_mDb_set)
+    def set_congestion_cost(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_congestion_cost(self, *args)
+    def set_wl_cost(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_wl_cost(self, *args)
+    def set_inner_iter(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_inner_iter(self, *args)
+    def set_outer_iter(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_outer_iter(self, *args)
+    def set_init_tmp(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_init_tmp(self, *args)
 GridBasedPlacer_swigregister = _PcbPlacer.GridBasedPlacer_swigregister
 GridBasedPlacer_swigregister(GridBasedPlacer)
 

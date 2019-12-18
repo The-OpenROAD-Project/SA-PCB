@@ -98,8 +98,8 @@ public:
   kicadPcbDataBase &mDb;
 
   void set_congestion_cost(double cst) {l1 = cst;}
-  void set_rudy_cost(double cst) {l1 = 1-cst;}
-  void set_wl_cost(double cst) {}
+  void set_wl_cost(double cst) {l1 = 1-cst;}
+
   void set_inner_iter(int iter) {inner_loop_iter = iter;}
   void set_outer_iter(int iter) {outer_loop_iter = iter;}
   void set_init_tmp(double tmp) {t_0 = tmp;}

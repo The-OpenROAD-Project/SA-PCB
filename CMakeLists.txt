@@ -15,8 +15,10 @@ find_library(SWIG_EXECUTABLE swig)
 if(NOT SWIG_EXECUTABLE)
 set(SWIG_EXECUTABLE "swig")
 endif()
-find_package( PythonInterp 2.7 REQUIRED )
-find_package( PythonLibs 2.7 REQUIRED )
+#find_package( PythonInterp 2.7 REQUIRED )
+find_package( PythonInterp 3 REQUIRED )
+#find_package( PythonLibs 2.7 REQUIRED )
+find_package( PythonLibs 3 REQUIRED )
 
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARYDIR})
@@ -75,7 +77,7 @@ set_target_properties( PCBPLACERlib
 # Create an executable
 ############################################################
 add_custom_command( OUTPUT ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_LIB_FILES}
-  COMMAND ${SWIG_EXECUTABLE} -python -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
+  COMMAND ${SWIG_EXECUTABLE} -python -py3 -c++ -o ${PCBPLACER_HOME}/src/PcbPlacer_wrapper.cpp ${PCBPLACER_HOME}/src/PcbPlacer.i   
   WORKING_DIRECTORY ${PCBPLACER_HOME}
   DEPENDS ${PLACER_SWIG_FILES}
 )

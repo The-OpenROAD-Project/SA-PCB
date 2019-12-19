@@ -1084,7 +1084,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
 
       cst = this->initiate_move(cst, Temperature, netToCell);
       this->update_accept_history(accept_ratio_history, accept_ratio);
-      report["cost_hist"].push_back(cst);
+      cost_hist.push_back(cst);
       wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
       oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
 

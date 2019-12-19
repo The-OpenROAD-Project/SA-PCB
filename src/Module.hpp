@@ -475,8 +475,8 @@ public:
       }
       double mx = m->xCoordinate;
       double my = m->yCoordinate;
-      double cx = node.xCoordinate;
-      double cy = node.yCoordinate;
+      double cx = node.initialX;
+      double cy = node.initialY;
       double mx_orig = m->initialX;
       double my_orig = m->initialY;
 
@@ -501,8 +501,8 @@ public:
       }
       double mx = m->xCoordinate;
       double my = m->yCoordinate;
-      double cx = node.xCoordinate;
-      double cy = node.yCoordinate;
+      double cx = node.initialX;
+      double cy = node.initialY;
       double mx_orig = m->initialX;
       double my_orig = m->initialY;
 

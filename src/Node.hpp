@@ -66,6 +66,8 @@ class Node {
     double sigma;
     double xCoordinate;
     double yCoordinate;
+    double initialX;
+    double initialY;
     double xBy2;
     double yBy2;
     string orientation_str;
@@ -117,6 +119,8 @@ class Node {
   void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
     // Sets parameters given an entry in Pl file
     this -> setPos(xCoordinate, yCoordinate);
+    this -> initialX = xCoordinate;
+    this -> initialY = yCoordinate;
     this -> orientation_str = orientation_str;
     this -> init_orientation = str2orient(orientation_str);
     this -> setRotation(str2orient(orientation_str));

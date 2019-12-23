@@ -97,8 +97,8 @@ public:
   kicadPcbDataBase &getDb() { return mDb; }
   kicadPcbDataBase &mDb;
 
-  double get_cost() { return cost_hist.back(); }
-  double get_temp() { return Temperature; }
+  //double get_cost() { return cost_hist.back(); }
+  //double get_temp() { return Temperature; }
 
   void set_congestion_cost(double cst) {l1 = cst;}
   void set_wl_cost(double cst) {l1 = 1-cst;}

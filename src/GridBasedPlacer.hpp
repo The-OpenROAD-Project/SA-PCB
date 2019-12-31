@@ -97,15 +97,18 @@ public:
   kicadPcbDataBase &getDb() { return mDb; }
   kicadPcbDataBase &mDb;
 
-  double get_cost() { return cost_hist.back(); }
-  double get_temp() { return Temperature; }
+  double get_total_cost() { return cost_hist.back(); }
+  double get_wirelength_cost() { return cost_hist.back(); }
+  double get_overlap_cost() { return cost_hist.back(); }
+  double get_temperature() { return Temperature; }
 
-  void set_congestion_cost(double cst) {l1 = cst;}
-  void set_wl_cost(double cst) {l1 = 1-cst;}
+  void set_overlap_weight(double cst) {l1 = cst;}
+  void set_wirelength_weight(double cst) {l1 = 1-cst;}
+  void  set_initial_move_radius(double eps) {  }
 
-  void set_inner_iter(int iter) {inner_loop_iter = iter;}
-  void set_outer_iter(int iter) {outer_loop_iter = iter;}
-  void set_init_tmp(double tmp) {t_0 = tmp;}
+  void set_iterations_moves(int iter) {inner_loop_iter = iter;}
+  void set_num_iterations(int iter) {outer_loop_iter = iter;}
+  void set_initial_temperature(double tmp) {t_0 = tmp;}
 
 private:
   // Utility

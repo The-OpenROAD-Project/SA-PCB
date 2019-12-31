@@ -47,72 +47,70 @@ namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box2d;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
-
 vector < Node > nodeId;
 vector < Node > bestSol;
 double best_wl = 0.0;
 map < string, int > name2id;
 //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
-//float l1 = 0.4;
 
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
-  srand(time(NULL));
-  int opt;
-  string out_file;
+    srand(time(NULL));
+    int opt;
+    string out_file;
 
-  long long int idx = -1;
+    long long int idx = -1;
 
-  string parg = "";
-  string initial_pl = "";
-  int bound_inc = 0;
+    string parg = "";
+    string initial_pl = "";
+    int bound_inc = 0;
 
-  std::cout << "=================test_placer==================" << std::endl;
+    std::cout << "=================test_placer==================" << std::endl;
 
-  map<int, vector<pPin> > netToCell;
+    map<int, vector<pPin> > netToCell;
 
-  std::vector<instance> &instances =  mDb.getInstances();
-  std::vector<net> &nets = mDb.getNets();
-  for (int i = 0; i < instances.size(); ++i) {
-    Node n;
-    nodeId.push_back(n);
-  }
-
-  int fixed = 0;
-  for (auto &inst : instances) {
-      point_2d bbox;
-      mDb.getCompBBox(inst.getComponentId(), &bbox); 
-
+    std::vector<instance> &instances =  mDb.getInstances();
+    std::vector<net> &nets = mDb.getNets();
+    for (int i = 0; i < instances.size(); ++i) {
       Node n;
-      n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, 0, inst.getId());
-      nodeId[inst.getId()] = n;
-      name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
+      nodeId.push_back(n);
+    }
 
-      double angle = inst.getAngle();
-      string ang = "";
-      if (angle == 0) {
-          ang = "N";
-      } else if (angle == 90) {
-          ang = "E";
-      } else if (angle == 180) {
-          ang = "S";
-      } else if (angle == 270) {
-          ang = "W";
-      }
-     if(inst.isLocked()) {
-         fixed = 1;
-     } 
-    
-      nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
-      nodeId[name2id[inst.getName()]].printParameter();
-  }
+    int fixed = 0;
+    for (auto &inst : instances) {
+        point_2d bbox;
+        mDb.getCompBBox(inst.getComponentId(), &bbox); 
 
-  cout << "calculating boundaries..." << endl;
- // set_boundaries();
-   points_2d b = mDb.getBoardBoundary();
-mMinX = b[0].m_x;
-mMaxX = b[1].m_x;
-mMinY = b[0].m_y;
-mMaxY = b[1].m_y;
+        Node n;
+        n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, 0, inst.getId());
+        nodeId[inst.getId()] = n;
+        name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
+
+        double angle = inst.getAngle();
+        string ang = "";
+        if (angle == 0) {
+            ang = "N";
+        } else if (angle == 90) {
+            ang = "E";
+        } else if (angle == 180) {
+            ang = "S";
+        } else if (angle == 270) {
+            ang = "W";
+        }
+       if(inst.isLocked()) {
+           fixed = 1;
+       } 
+      
+        nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
+        nodeId[name2id[inst.getName()]].printParameter();
+    }
+
+    cout << "calculating boundaries..." << endl;
+    // set_boundaries();
+    points_2d b = mDb.getBoardBoundary();
+    mMinX = b[0].m_x;
+    mMaxX = b[1].m_x;
+    mMinY = b[0].m_y;
+    mMaxY = b[1].m_y;
 
     for (auto &net : nets){
 
@@ -525,7 +523,6 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
       /*
       for ( Rtree::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
         it != rtree.qend() ; ++it ) {
-          // yeet
       }*/
       if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
         continue;

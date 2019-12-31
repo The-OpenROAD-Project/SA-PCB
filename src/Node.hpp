@@ -72,9 +72,10 @@ class Node {
     int init_orientation;
     int orientation;
     int layer;
+    int mirror;
     vector < int > Netlist;
 
-  void setParameterNodes(string name, double width, double height, int terminal, int idx) {
+  void setParameterNodes(string name, double width, double height, int terminal, int idx, int mirror=0) {
     // Sets parameters given an entry in Nodes file
     this -> name = name;
     this -> xCoordinate = 0.0;
@@ -83,6 +84,7 @@ class Node {
     this -> width = width;
     this -> height = height;
     this -> terminal = terminal;
+    this -> mirror = mirror;
     this -> orientation_str = "N";
     this -> idx = idx;
     if (!terminal) {
@@ -135,6 +137,15 @@ class Node {
         this->xCoordinate = x;
         this->yCoordinate = y;
       }
+  }
+
+  void yFlip() {
+    if(!this->terminal) {
+      model::polygon<model::d2::point_xy<double> > tmp;
+      boost::geometry::transform(this->poly, tmp, translate);
+      this->poly = tmp;
+      updateCoordinates();  
+    } 
   }
 
   int wrap_orientation(int kX) {
@@ -258,9 +269,8 @@ class Node {
     cout << "NetList       ";
     vector < int > ::iterator it2;
     for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {
-      cout << * it2 << " ";
+      cout << *it2 << " ";
     }
-    this -> printExterior();
     cout << "\n" << endl;
   }
 };

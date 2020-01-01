@@ -106,6 +106,7 @@ public:
   void set_overlap_weight(double cst) {l1 = cst;}
   void set_wirelength_weight(double cst) {l1 = 1-cst;}
   void set_initial_move_radius(double eps) {  }
+  void set_rtree(bool _rt) { rt = _rt; }
 
   void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_num_iterations(int iter) {outer_loop_iter = iter;}

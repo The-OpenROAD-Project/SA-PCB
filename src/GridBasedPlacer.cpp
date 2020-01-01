@@ -1081,7 +1081,7 @@ annealer
 main loop for sa algorithm
 */
 float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initial_pl) {
-  double Temperature = t_0;
+  Temperature = t_0;
   int num_components = 0;
 
   vector < Node > ::iterator itNode;

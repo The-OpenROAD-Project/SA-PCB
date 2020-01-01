@@ -516,28 +516,50 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
   unordered_set < int > cell_history;
   for(size_t i = 0; i < nodes.size(); i++) {
     cell_history.insert(nodes[i]->idx);
+    if(rtree) {
+      //for(size_t j = 0; j < nodeId.size(); j++) {
+      for ( rtree_t::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
+        it != rtree.qend() ; ++it ) {
+        size_t j = it->second;
+        if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
+          continue;
+        }
+        if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)) {
+          continue;
+        } else {
+          double oa = 0.0;
+          std::deque<polygon> intersect_poly;
+          boost::geometry::intersection(nodes[i]->poly, nodeId[j].poly, intersect_poly);
 
-    //for(size_t j = 0; j < nodeId.size(); j++) {
-    for ( rtree_t::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
-      it != rtree.qend() ; ++it ) {
-      size_t j = it->second;
-      if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
-        continue;
+          BOOST_FOREACH(polygon const& p, intersect_poly) {
+              oa +=  bg::area(p);
+          }
+          if(oa < 1.0) {
+              oa = 1.0;
+          }
+          overlap +=  pow(oa,2);
+        }
       }
-      if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)) {
-        continue;
-      } else {
-        double oa = 0.0;
-        std::deque<polygon> intersect_poly;
-        boost::geometry::intersection(nodes[i]->poly, nodeId[j].poly, intersect_poly);
+    } else {
+      for(size_t j = 0; j < nodeId.size(); j++) {
+        if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
+          continue;
+        }
+        if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)) {
+          continue;
+        } else {
+          double oa = 0.0;
+          std::deque<polygon> intersect_poly;
+          boost::geometry::intersection(nodes[i]->poly, nodeId[j].poly, intersect_poly);
 
-        BOOST_FOREACH(polygon const& p, intersect_poly) {
-            oa +=  bg::area(p);
+          BOOST_FOREACH(polygon const& p, intersect_poly) {
+              oa +=  bg::area(p);
+          }
+          if(oa < 1.0) {
+              oa = 1.0;
+          }
+          overlap +=  pow(oa,2);
         }
-        if(oa < 1.0) {
-            oa = 1.0;
-        }
-        overlap +=  pow(oa,2);
       }
     }
   }

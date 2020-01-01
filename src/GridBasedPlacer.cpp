@@ -46,7 +46,7 @@ namespace bnu = boost::numeric::ublas;
 namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box2d;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
-typedef bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16>> rtree_t;
+typedef bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16> > rtree_t;
 
 vector < Node > nodeId;
 vector < Node > bestSol;

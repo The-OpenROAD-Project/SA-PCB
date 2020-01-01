@@ -3104,16 +3104,6 @@ SWIG_AsVal_double (PyObject *obj, double *val)
 }
 
 
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
-
-
 #include <float.h>
 
 
@@ -3187,6 +3177,27 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 #endif
   return SWIG_TypeError;
 }
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
+
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
 
 
 SWIGINTERN int
@@ -3530,6 +3541,36 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_GridBasedPlacer_set_rtree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GridBasedPlacer_set_rtree",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GridBasedPlacer, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GridBasedPlacer_set_rtree" "', argument " "1"" of type '" "GridBasedPlacer *""'"); 
+  }
+  arg1 = reinterpret_cast< GridBasedPlacer * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GridBasedPlacer_set_rtree" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  (arg1)->set_rtree(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_GridBasedPlacer_set_iterations_moves(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
@@ -3642,6 +3683,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"GridBasedPlacer_set_overlap_weight", _wrap_GridBasedPlacer_set_overlap_weight, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_set_wirelength_weight", _wrap_GridBasedPlacer_set_wirelength_weight, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_set_initial_move_radius", _wrap_GridBasedPlacer_set_initial_move_radius, METH_VARARGS, NULL},
+	 { (char *)"GridBasedPlacer_set_rtree", _wrap_GridBasedPlacer_set_rtree, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_set_iterations_moves", _wrap_GridBasedPlacer_set_iterations_moves, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_set_num_iterations", _wrap_GridBasedPlacer_set_num_iterations, METH_VARARGS, NULL},
 	 { (char *)"GridBasedPlacer_set_initial_temperature", _wrap_GridBasedPlacer_set_initial_temperature, METH_VARARGS, NULL},

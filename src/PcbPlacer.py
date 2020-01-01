@@ -91,6 +91,7 @@ class GridBasedPlacer(_object):
     def set_overlap_weight(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_overlap_weight(self, *args)
     def set_wirelength_weight(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_wirelength_weight(self, *args)
     def set_initial_move_radius(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_initial_move_radius(self, *args)
+    def set_rtree(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_rtree(self, *args)
     def set_iterations_moves(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_iterations_moves(self, *args)
     def set_num_iterations(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_num_iterations(self, *args)
     def set_initial_temperature(self, *args) -> "void" : return _PcbPlacer.GridBasedPlacer_set_initial_temperature(self, *args)

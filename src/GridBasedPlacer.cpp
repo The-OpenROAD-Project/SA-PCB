@@ -516,7 +516,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
   unordered_set < int > cell_history;
   for(size_t i = 0; i < nodes.size(); i++) {
     cell_history.insert(nodes[i]->idx);
-    if(rtree) {
+    if(rt) {
       //for(size_t j = 0; j < nodeId.size(); j++) {
       for ( rtree_t::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
         it != rtree.qend() ; ++it ) {

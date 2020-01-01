@@ -84,6 +84,7 @@
 //#include "readScl.h"
 #include "time.h"
 //#include "taskflow/taskflow.hpp"
+typedef boost::geometry::model::d2::point_xy<double> Point;
 
 class GridBasedPlacer
 {
@@ -127,10 +128,10 @@ private:
   double rudy(map<int, vector<pPin> > &netToCell);
   float annealer(map<int, vector<pPin> > &netToCell, string initial_pl);
   float multistart();
-  double initialize_temperature(double &Temperature, map<int, vector<pPin> > &netToCell);
-  void update_temperature(double& Temperature);
-  double initiate_move(double current_cost, double & Temperature, map<int, vector<pPin> > &netToCell);
-  bool check_move(double prevCost, double newCost, double &Temperature);
+  double initialize_temperature(double Temperature, map<int, vector<pPin> > &netToCell);
+  void update_temperature(double Temperature);
+  double initiate_move(double current_cost, double Temperature, map<int, vector<pPin> > &netToCell);
+  bool check_move(double prevCost, double newCost, double Temperature);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
   void gen_report(map<string, vector<double> > &report, vector< double > &accept_ratio_history, map<int, vector<pPin> > &netToCell);
@@ -141,8 +142,8 @@ private:
   int fact(int n);
 
 private:
-  //kicadPcbDataBase &mDb;
-  //bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
+  bool rt = false;
+  bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16>> rtree;
 
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;

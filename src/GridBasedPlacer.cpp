@@ -46,12 +46,12 @@ namespace bnu = boost::numeric::ublas;
 namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box2d;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
+typedef bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16>> rtree_t;
 
 vector < Node > nodeId;
 vector < Node > bestSol;
 double best_wl = 0.0;
 map < string, int > name2id;
-//bgi::rtree<std::pair<box, int>, bgi::quadratic<16>> rtree;
 
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     srand(time(NULL));
@@ -105,7 +105,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     }
 
     cout << "calculating boundaries..." << endl;
-    // set_boundaries();
     points_2d b = mDb.getBoardBoundary();
     mMinX = b[0].m_x;
     mMaxX = b[1].m_x;
@@ -516,14 +515,12 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
   double overlap = 0.0;
   unordered_set < int > cell_history;
   for(size_t i = 0; i < nodes.size(); i++) {
-    //if(nodes[i].terminal) { continue; }
     cell_history.insert(nodes[i]->idx);
-    for(size_t j = 0; j < nodeId.size(); j++) {
-      //if(nodeId[j].terminal) { continue; }
-      /*
-      for ( Rtree::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
-        it != rtree.qend() ; ++it ) {
-      }*/
+
+    //for(size_t j = 0; j < nodeId.size(); j++) {
+    for ( rtree_t::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
+      it != rtree.qend() ; ++it ) {
+      size_t j = it->second;
       if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
         continue;
       }
@@ -705,7 +702,7 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
 }
 
 double c = 0.0;
-double GridBasedPlacer::initiate_move(double current_cost, double & Temperature, map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initiate_move(double current_cost, double Temperature, map<int, vector<pPin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -724,7 +721,9 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
   }
   perturbed_nodes.push_back(&(*rand_node1));
 
-  //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+  if(rt) {
+    rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+  }
   double rand_node1_orig_x = rand_node1->xCoordinate;
   double rand_node1_orig_y = rand_node1->yCoordinate;
   double rand_node2_orig_x = 0.0;
@@ -751,14 +750,18 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
     perturbed_nodes.push_back(&(*rand_node2));
     prevCost = this->cost_partial(perturbed_nodes,netToCell);
 
-    //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    if(rt) {
+      rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    }
     rand_node2_orig_x = rand_node2->xCoordinate;
     rand_node2_orig_y = rand_node2->yCoordinate;
 
     validate_move(*rand_node1, rand_node2_orig_x, rand_node2_orig_y);
     validate_move(*rand_node2, rand_node1_orig_x, rand_node1_orig_y);
-    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
-    //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    if(rt) {
+      rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+      rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+    }
   } else if (i < 0.85) { // shift
     state = 1;
     if(debug > 1) {
@@ -779,7 +782,9 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
     double ry = rand_node1_orig_y + dy;
 
     this->validate_move(*rand_node1, rx, ry);
-    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    if(rt) {
+      rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    }
   } else { // rotate
     state = 2;
     if(debug > 1) {
@@ -800,7 +805,9 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
     rand_node1->setRotation(r);
     this->validate_move(*rand_node1, rand_node1_orig_x, rand_node1_orig_y);
 
-    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    if(rt) {
+      rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    }
   }
   double transition_cost = this->cost_partial(perturbed_nodes,netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
@@ -813,19 +820,27 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
       cout << "reject" << endl;
     }
     // revert state
-    //rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    if(rt) {
+      rtree.remove(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    }
     if (state == 0) {
-      //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      if(rt) {
+        rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      }
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
       rand_node2->setPos(rand_node2_orig_x,rand_node2_orig_y);
-      //rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      if(rt) {
+        rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
+      }
     } else if (state == 1) {
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     } else if (state == 2) {
       rand_node1->setRotation(8-r);
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
     }
-    //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    if(rt) {
+      rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
+    }
     return current_cost;
   }
   else {
@@ -841,7 +856,7 @@ double GridBasedPlacer::initiate_move(double current_cost, double & Temperature,
 update_Temperature
 Update the SA parameters according to annealing schedule
 */
-void GridBasedPlacer::update_temperature(double& Temperature) {
+void GridBasedPlacer::update_temperature(double Temperature) {
   vector < Node > ::iterator nodeit = nodeId.begin();
   l1 = 0.98*l1;
   if (Temperature > 50e-3) {
@@ -910,7 +925,7 @@ void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_histo
 check_move
 either accept or reject the move based on current & previous temperature & cost
 */
-bool GridBasedPlacer::check_move(double prevCost, double newCost, double & Temperature) {
+bool GridBasedPlacer::check_move(double prevCost, double newCost, double Temperature) {
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -929,7 +944,7 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost, double & Tempe
   }
 }
 
-double GridBasedPlacer::initialize_temperature(double &Temperature, map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initialize_temperature(double Temperature, map<int, vector<pPin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
@@ -1046,7 +1061,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   int idx = 0;
 
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-    //rtree.insert(std::make_pair(itNode -> envelope, idx));
+    rtree.insert(std::make_pair(itNode -> envelope, idx));
     idx+=1;
     if(!itNode -> terminal && !itNode -> fixed) {
       num_components += 1;

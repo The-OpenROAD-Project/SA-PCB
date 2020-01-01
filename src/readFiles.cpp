@@ -44,7 +44,7 @@ int readNodesFile(string fname) {
   string buf;
   int i = 0;
   vector < string > strVec;
-  int value = 2;
+  int terminal = 2;
   int idx = 0;
 
   file.open(fname, ios:: in );
@@ -59,11 +59,11 @@ int readNodesFile(string fname) {
       Node n;
 
       if (strVec.size() > 3 && (strVec[3] == "terminal" || strVec[3] == "terminal_NI")) {
-        value = 1;
+        terminal = 1;
       } else {
-        value = 0;
+        terminal = 0;
       }
-      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), value, idx); // /1000000
+      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), terminal, idx); // /1000000
       nodeId.push_back(n);
       name2id.insert(pair < string, int > (strVec[0], idx));
       idx += 1;
@@ -120,7 +120,7 @@ int readPlFile(string fname) {
   fstream file;
   string buf;
   int i = 0;
-  int value = 0;
+  int fixed = 0;
   vector < string > strVec;
 
   file.open(fname, ios:: in );
@@ -133,11 +133,11 @@ int readPlFile(string fname) {
         continue;
       }
       if (strVec.size() > 5 && (strVec[5] == "/FIXED" || strVec[5] == "/FIXED_NI")) {
-        value = 1;
+        fixed = 1;
       } else {
-        value = 0;
+        fixed = 0;
       }
-      nodeId[name2id[strVec[0]]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], value);
+      nodeId[name2id[strVec[0]]].setParameterPl(atof(strVec[1].c_str()), atof(strVec[2].c_str()), strVec[4], fixed);
     }
   }
   file.close();

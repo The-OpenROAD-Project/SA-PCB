@@ -75,8 +75,11 @@ class Node {
     int mirror;
     vector < int > Netlist;
 
+  /*
+  setParameterNodes
+  Sets parameters given an entry in Nodes file
+  */
   void setParameterNodes(string name, double width, double height, int terminal, int idx, int mirror=0) {
-    // Sets parameters given an entry in Nodes file
     this -> name = name;
     this -> xCoordinate = 0.0;
     this -> yCoordinate = 0.0;
@@ -97,21 +100,31 @@ class Node {
     }
   }
 
+  /*
+  setParameterShapes
+  Sets parameters given an entry in Shapes file
+  */
   void setParameterShapes(string wkt) {
-    // Sets parameters given an entry in Shapes file
     model::polygon< model::d2::point_xy<double> > poly;
     boost::geometry::read_wkt(wkt, poly);
     boost::geometry::correct(poly);
     this -> poly = poly;
   }
 
+  /*
+  setParameterWts
+  Sets parameters given an entry in weights file. 
+  */
   void setParameterWts(int weight) {
-    // Sets parameters given an entry in weights file.
     this -> weight = weight;
   }
 
+  /*
+  setParameterPl
+  Sets parameters given an entry in Pl file  
+  */
   void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
-    // Sets parameters given an entry in Pl file
+    // 
     this -> setPos(xCoordinate, yCoordinate);
     this -> orientation_str = orientation_str;
     this -> init_orientation = str2orient(orientation_str);
@@ -120,13 +133,19 @@ class Node {
     this -> sigma = 50.0;
   }
 
+  /*
+  setNetList
+  Sets parameters given an entry in Nets file  
+  */
   void setNetList(int NetId) {
-    // Sets parameters given an entry in Nets file
     Netlist.push_back(NetId);
   }
 
+  /*
+  setPos
+  Sets position of a node object (lower-left corner)
+  */
   void setPos(double x, double y) {
-    // Sets position of a node object (lower-left corner)
     if(!this->terminal) {
         trans::translate_transformer<double, 2, 2> translate(x - this->xCoordinate, y - this->yCoordinate);
         model::polygon<model::d2::point_xy<double> > tmp;
@@ -138,7 +157,7 @@ class Node {
         this->yCoordinate = y;
       }
   }
-
+/*
   void yFlip() {
     if(!this->terminal) {
       model::polygon<model::d2::point_xy<double> > tmp;
@@ -146,7 +165,7 @@ class Node {
       this->poly = tmp;
       updateCoordinates();  
     } 
-  }
+  }*/
 
   int wrap_orientation(int kX) {
     return kX % 8;

@@ -130,11 +130,11 @@ private:
   double rudy(map<int, vector<pPin> > &netToCell);
   float annealer(map<int, vector<pPin> > &netToCell, string initial_pl);
   float multistart();
-  double initialize_temperature(double Temperature, map<int, vector<pPin> > &netToCell);
-  void update_temperature(double Temperature);
-  void modified_lam_update(double Temperature, int i);
-  double initiate_move(double current_cost, double Temperature, map<int, vector<pPin> > &netToCell);
-  bool check_move(double prevCost, double newCost, double Temperature);
+  double initialize_temperature(map<int, vector<pPin> > &netToCell);
+  void update_temperature();
+  void modified_lam_update(int i);
+  double initiate_move(double current_cost, map<int, vector<pPin> > &netToCell);
+  bool check_move(double prevCost, double newCost);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
   void gen_report(map<string, vector<double> > &report, vector< double > &accept_ratio_history, map<int, vector<pPin> > &netToCell);

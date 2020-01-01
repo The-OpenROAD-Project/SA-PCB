@@ -723,7 +723,7 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
 }
 
 double c = 0.0;
-double GridBasedPlacer::initiate_move(double current_cost, double Temperature, map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -830,10 +830,10 @@ double GridBasedPlacer::initiate_move(double current_cost, double Temperature, m
       rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     }
   }
-  double transition_cost = this->cost_partial(perturbed_nodes,netToCell);
+  double transition_cost = cost_partial(perturbed_nodes,netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
 
-  bool accept = this->check_move(current_cost, updated_cost, Temperature);
+  bool accept = check_move(current_cost, updated_cost);
 
   if (!accept) {
     AcceptRate = 1/500 *(499*AcceptRate);
@@ -877,7 +877,7 @@ double GridBasedPlacer::initiate_move(double current_cost, double Temperature, m
 update_Temperature
 Update the SA parameters according to annealing schedule
 */
-void GridBasedPlacer::update_temperature(double Temperature) {
+void GridBasedPlacer::update_temperature() {
   vector < Node > ::iterator nodeit = nodeId.begin();
   l1 = 0.98*l1;
   if (Temperature > 50e-3) {
@@ -937,7 +937,7 @@ void GridBasedPlacer::update_temperature(double Temperature) {
 modified_lam_update
 Update the SA parameters according to modified lam schedule
 */
-void GridBasedPlacer::modified_lam_update(double Temperature, int i) {
+void GridBasedPlacer::modified_lam_update(int i) {
   vector < Node > ::iterator nodeit = nodeId.begin();
 
   if (i/outer_loop_iter < 0.15) {
@@ -973,7 +973,7 @@ void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_histo
 check_move
 either accept or reject the move based on current & previous temperature & cost
 */
-bool GridBasedPlacer::check_move(double prevCost, double newCost, double Temperature) {
+bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   double delCost = 0;
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
@@ -992,7 +992,7 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost, double Tempera
   }
 }
 
-double GridBasedPlacer::initialize_temperature(double Temperature, map<int, vector<pPin> > &netToCell) {
+double GridBasedPlacer::initialize_temperature(map<int, vector<pPin> > &netToCell) {
   double t = 0.0;
   double emax = 0.0;
   double emin = 0.0;
@@ -1002,9 +1002,9 @@ double GridBasedPlacer::initialize_temperature(double Temperature, map<int, vect
   this->random_initial_placement();
   for(int i=1; i<=10; i++){
     for(int j=1; j<=10; j++){
-      this->random_initial_placement();
+      random_initial_placement();
       emax += exp(cost(netToCell)/t);
-      this->initiate_move(0.0, Temperature, netToCell);
+      initiate_move(0.0, netToCell);
       emin += exp(cost(netToCell)/t);
     }
     xt = emax/emin;
@@ -1081,7 +1081,7 @@ annealer
 main loop for sa algorithm
 */
 float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initial_pl) {
-  double Temperature = t_0;
+  Temperature = t_0;
   int num_components = 0;
 
   vector < Node > ::iterator itNode;
@@ -1099,12 +1099,12 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   if (initial_pl != "") {
     readPlFile(initial_pl);
   } else {
-    this->random_initial_placement();
+    random_initial_placement();
   }
 
-  double cst = this->cost(netToCell,-1);
+  double cst = cost(netToCell,-1);
   if(var) {
-    Temperature = this->initialize_temperature(Temperature, netToCell);
+    Temperature = initialize_temperature(netToCell);
   }
   int idx = 0;
 
@@ -1135,7 +1135,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       //           netToCell);
     }
     while (i > 0) {
-      cst = this->initiate_move(cst, Temperature, netToCell);
+      cst = this->initiate_move(cst, netToCell);
       this->update_accept_history(accept_ratio_history, accept_ratio);
       cost_hist.push_back(cst);
 
@@ -1158,9 +1158,9 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       break;
     }
     if (lam) {
-      modified_lam_update(Temperature, ii);
+      modified_lam_update(ii);
     } else {
-      update_temperature(Temperature);
+      update_temperature();
     }
     ii += 1;
   }

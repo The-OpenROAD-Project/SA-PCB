@@ -107,6 +107,7 @@ public:
   void set_wirelength_weight(double cst) {l1 = 1-cst;}
   void set_initial_move_radius(double eps) {  }
   void set_rtree(bool _rt) { rt = _rt; }
+  void set_lam(bool _lam) { lam = _lam; }
 
   void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_num_iterations(int iter) {outer_loop_iter = iter;}
@@ -131,6 +132,7 @@ private:
   float multistart();
   double initialize_temperature(double Temperature, map<int, vector<pPin> > &netToCell);
   void update_temperature(double Temperature);
+  void modified_lam_update(double Temperature, int i);
   double initiate_move(double current_cost, double Temperature, map<int, vector<pPin> > &netToCell);
   bool check_move(double prevCost, double newCost, double Temperature);
   void project_soln();
@@ -167,6 +169,7 @@ private:
   bool var = false;
   double l1 = 0.4;
 
+  bool lam = true;
   double AcceptRate = 0.5;
   double LamRate = 0.5;
 

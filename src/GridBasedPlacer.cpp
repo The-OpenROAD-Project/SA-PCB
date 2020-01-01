@@ -516,8 +516,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
   unordered_set < int > cell_history;
   for(size_t i = 0; i < nodes.size(); i++) {
     cell_history.insert(nodes[i]->idx);
-    if(rtree) {
-      //for(size_t j = 0; j < nodeId.size(); j++) {
+    if(rt) {
       for ( rtree_t::const_query_iterator it = rtree.qbegin(index::intersects(nodeId[i].envelope)) ;
         it != rtree.qend() ; ++it ) {
         size_t j = it->second;
@@ -934,6 +933,33 @@ void GridBasedPlacer::update_temperature(double Temperature) {
   }
 }
 
+/*
+modified_lam_update
+Update the SA parameters according to modified lam schedule
+*/
+void GridBasedPlacer::modified_lam_update(double Temperature, int i) {
+  vector < Node > ::iterator nodeit = nodeId.begin();
+
+  if (i/outer_loop_iter < 0.15) {
+    LamRate = 0.44 + 0.56 * pow(560, -i/outer_loop_iter/0.15); 
+  } else if (0.15 <= i/outer_loop_iter && i/outer_loop_iter <= 0.65) {
+    LamRate = 0.44;
+  } else if (0.65 <= i/outer_loop_iter) {
+    LamRate = 0.44 * pow(440, -(i/outer_loop_iter - 0.65)/0.35); 
+  }
+
+  if (AcceptRate > LamRate) {
+    Temperature = Temperature * 0.999;
+  } else {
+    Temperature = Temperature / 0.999;
+  }
+
+  l1 = 0.98*l1;
+  for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+    nodeit->sigma =  max(0.855*nodeit->sigma,1.0);
+  }
+}
+
 void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio) {
   if (accept_history.size() > 100) {
     accept_ratio = ((accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
@@ -1099,28 +1125,30 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       high_resolution_clock::time_point t2 = high_resolution_clock::now();
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 
-      cout << "******" << ii << "******" << endl;
-      cout << "iteration: " << ii << endl;
-      cout << "time: " <<  time_span.count() << " (s)" << endl;
-      cout << "move/time: " <<  i*ii/time_span.count() << endl;
-      cout << "time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << endl;
-      cout << "temperature: " << Temperature << endl;
-      cout << "acceptance ratio: " << accept_ratio << endl;
-      if (ii % 25 == 0) {
-          this->cost(netToCell,-1);
-      }
+      cout << "=====" << ii << "=====" << endl;
+      cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " move/time: " <<  i*ii/time_span.count() << 
+      " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature <<
+      " acceptance ratio: " << accept_ratio << endl;
 
       //this->gen_report(report,
       //           accept_ratio_history,
       //           netToCell);
     }
     while (i > 0) {
-
       cst = this->initiate_move(cst, Temperature, netToCell);
       this->update_accept_history(accept_ratio_history, accept_ratio);
       cost_hist.push_back(cst);
-      wl_hist.push_back((wirelength(netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first));
-      oa_hist.push_back((cell_overlap() - area_normalization.first)/(area_normalization.second - area_normalization.first));
+
+      double wl = this->wirelength(netToCell);
+      double oa = this->cell_overlap();
+      double normalized_wl = (wl - wl_normalization.first)/(wl_normalization.second - wl_normalization.first);
+      double normalized_oa = (oa - area_normalization.first)/(area_normalization.second - area_normalization.first);
+      wl_hist.push_back(normalized_wl);
+      oa_hist.push_back(normalized_oa);
+
+      if (ii % 25 == 0 && i == 1) {
+        cout << "wirelength: " << wl << " overlap: " << oa << endl;
+      }
 
       i -= 1;
     }
@@ -1129,7 +1157,11 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }
-    this->update_temperature(Temperature);
+    if (lam) {
+      modified_lam_update(Temperature, ii);
+    } else {
+      update_temperature(Temperature);
+    }
     ii += 1;
   }
   return this->cost(netToCell);

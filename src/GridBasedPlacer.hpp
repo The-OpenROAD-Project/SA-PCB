@@ -105,7 +105,9 @@ public:
 
   void set_overlap_weight(double _cst) {l1 = _cst;}
   void set_wirelength_weight(double _cst) {l1 = 1-_cst;}
-  void set_initial_move_radius(double _eps) { for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) { nodeit->sigma = _eps; } }
+  void set_initial_move_radius(double _eps) { vector < Node > ::iterator nodeit = nodeId.begin(); 
+                                              for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) { 
+                                                nodeit->sigma = _eps; } }
   void set_rtree(bool _rt) { rt = _rt; }
   void set_lam(bool _lam) { lam = _lam; }
 

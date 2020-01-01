@@ -71,7 +71,7 @@ class Node {
     string orientation_str;
     int init_orientation;
     int orientation;
-    int layer;
+    int layer=1;
     int mirror;
     vector < int > Netlist;
 
@@ -80,22 +80,22 @@ class Node {
   Sets parameters given an entry in Nodes file
   */
   void setParameterNodes(string name, double width, double height, int terminal, int idx, int mirror=0) {
-    this -> name = name;
-    this -> xCoordinate = 0.0;
-    this -> yCoordinate = 0.0;
-    this -> orientation = 0;
-    this -> width = width;
-    this -> height = height;
-    this -> terminal = terminal;
-    this -> mirror = mirror;
-    this -> orientation_str = "N";
-    this -> idx = idx;
+    name = name;
+    xCoordinate = 0.0;
+    yCoordinate = 0.0;
+    orientation = 0;
+    width = width;
+    height = height;
+    terminal = terminal;
+    mirror = mirror;
+    orientation_str = "N";
+    idx = idx;
     if (!terminal) {
       double points[][2] = {{0.0, 0.0}, {width, 0.0}, {width, height}, {0.0, height}};
       model::polygon< model::d2::point_xy<double> > poly;
       append(poly, points);
       boost::geometry::correct(poly);
-      this -> poly = poly;
+      poly = poly;
       boost::geometry::envelope(poly, envelope);
     }
   }
@@ -108,7 +108,7 @@ class Node {
     model::polygon< model::d2::point_xy<double> > poly;
     boost::geometry::read_wkt(wkt, poly);
     boost::geometry::correct(poly);
-    this -> poly = poly;
+    poly = poly;
   }
 
   /*
@@ -116,7 +116,7 @@ class Node {
   Sets parameters given an entry in weights file. 
   */
   void setParameterWts(int weight) {
-    this -> weight = weight;
+    weight = weight;
   }
 
   /*
@@ -124,13 +124,12 @@ class Node {
   Sets parameters given an entry in Pl file  
   */
   void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
-    // 
-    this -> setPos(xCoordinate, yCoordinate);
-    this -> orientation_str = orientation_str;
-    this -> init_orientation = str2orient(orientation_str);
-    this -> setRotation(str2orient(orientation_str));
-    this -> fixed = fixed;
-    this -> sigma = 50.0;
+    setPos(xCoordinate, yCoordinate);
+    orientation_str = orientation_str;
+    init_orientation = str2orient(orientation_str);
+    setRotation(str2orient(orientation_str));
+    fixed = fixed;
+    sigma = 50.0;
   }
 
   /*
@@ -146,23 +145,24 @@ class Node {
   Sets position of a node object (lower-left corner)
   */
   void setPos(double x, double y) {
-    if(!this->terminal) {
-        trans::translate_transformer<double, 2, 2> translate(x - this->xCoordinate, y - this->yCoordinate);
+    if(!terminal) {
+        trans::translate_transformer<double, 2, 2> translate(x - xCoordinate, y - yCoordinate);
         model::polygon<model::d2::point_xy<double> > tmp;
-        boost::geometry::transform(this->poly, tmp, translate);
-        this->poly = tmp;
+        boost::geometry::transform(poly, tmp, translate);
+        poly = tmp;
         updateCoordinates();
     } else {
-        this->xCoordinate = x;
-        this->yCoordinate = y;
+        xCoordinate = x;
+        yCoordinate = y;
       }
   }
 /*
   void yFlip() {
-    if(!this->terminal) {
+    if(!terminal) {
       model::polygon<model::d2::point_xy<double> > tmp;
-      boost::geometry::transform(this->poly, tmp, translate);
-      this->poly = tmp;
+      boost::geometry::transform(poly, tmp, translate);
+      poly = tmp;
+      layer=-1*layer
       updateCoordinates();  
     } 
   }*/
@@ -177,17 +177,17 @@ class Node {
   */
   void setRotation(int r) {
     int rot_deg = 45*r;
-    double tmpx = this->xCoordinate;
-    double tmpy = this->yCoordinate;
+    double tmpx = xCoordinate;
+    double tmpy = yCoordinate;
 
-    this->setPos(-this->width/2,-this->height/2);
+    setPos(-width/2,-height/2);
     model::polygon<model::d2::point_xy<double> > tmp;
     trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
-    boost::geometry::transform(this->poly, tmp, rotate);
-    this->poly = tmp;
-    double otmp = wrap_orientation(this->orientation + r);
-    this->orientation = otmp;
-    this->setPos(tmpx, tmpy);
+    boost::geometry::transform(poly, tmp, rotate);
+    poly = tmp;
+    double otmp = wrap_orientation(orientation + r);
+    orientation = otmp;
+    setPos(tmpx, tmpy);
   }
 
   /*
@@ -195,24 +195,24 @@ class Node {
   Updates parameters of Node class from a geometry object
   */
   void updateCoordinates() {
-    if(this->terminal) {
-        this -> xBy2 = this->xCoordinate;
-        this -> yBy2 = this->yCoordinate;
+    if(terminal) {
+        xBy2 = xCoordinate;
+        yBy2 = yCoordinate;
     } else {
         boost::geometry::model::d2::point_xy<double> centroid;
-        boost::geometry::centroid(this->poly, centroid);
-        this -> xBy2 = centroid.get<0>();
-        this -> yBy2 = centroid.get<1>();
+        boost::geometry::centroid(poly, centroid);
+        xBy2 = centroid.get<0>();
+        yBy2 = centroid.get<1>();
 
         boost::geometry::model::box< model::d2::point_xy<double> > envtmp;
-        boost::geometry::envelope(this->poly, envtmp);
-        this->envelope = envtmp;
-        Point minCorner = this->envelope.min_corner();
-        Point maxCorner = this->envelope.max_corner();
-        this->width  = maxCorner.get<0>() - minCorner.get<0>();
-        this->height = maxCorner.get<1>() - minCorner.get<1>();
-        this->xCoordinate = bg::get<bg::min_corner, 0>(this->envelope);
-        this->yCoordinate = bg::get<bg::min_corner, 1>(this->envelope);
+        boost::geometry::envelope(poly, envtmp);
+        envelope = envtmp;
+        Point minCorner = envelope.min_corner();
+        Point maxCorner = envelope.max_corner();
+        width  = maxCorner.get<0>() - minCorner.get<0>();
+        height = maxCorner.get<1>() - minCorner.get<1>();
+        xCoordinate = bg::get<bg::min_corner, 0>(envelope);
+        yCoordinate = bg::get<bg::min_corner, 1>(envelope);
     }
   }
 
@@ -263,7 +263,7 @@ class Node {
   print polygon vertices
   */
   void printExterior() const{
-    for(auto it = boost::begin(boost::geometry::exterior_ring(this->poly)); it != boost::end(boost::geometry::exterior_ring(this->poly)); ++it) {
+    for(auto it = boost::begin(boost::geometry::exterior_ring(poly)); it != boost::end(boost::geometry::exterior_ring(poly)); ++it) {
         double x = bg::get<0>(*it);
         double y = bg::get<1>(*it);
         cout << x << " " << y << endl;
@@ -275,16 +275,16 @@ class Node {
   print node params
   */
   void printParameter() {
-    cout << "name      " << this -> name << endl;
-    cout << "Width         " << this -> width << endl;
-    cout << "Height        " << this -> height << endl;
-    cout << "Weight        " << this -> weight << endl;
-    cout << "X_Co-ordinate " << this -> xCoordinate << endl;
-    cout << "Y_Co-ordinate " << this -> yCoordinate << endl;
+    cout << "name      " << name << endl;
+    cout << "Width         " << width << endl;
+    cout << "Height        " << height << endl;
+    cout << "Weight        " << weight << endl;
+    cout << "X_Co-ordinate " << xCoordinate << endl;
+    cout << "Y_Co-ordinate " << yCoordinate << endl;
     cout << "X/2           " << xBy2 << endl;
     cout << "Y/2           " << yBy2 << endl;
-    cout << "Orientation   " << this -> orientation << endl;
-    cout << "terminal      " << this -> terminal << endl;
+    cout << "Orientation   " << orientation << endl;
+    cout << "terminal      " << terminal << endl;
     cout << "NetList       ";
     vector < int > ::iterator it2;
     for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {

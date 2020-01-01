@@ -103,9 +103,9 @@ public:
   double get_overlap_cost() { return cost_hist.back(); }
   double get_temperature() { return Temperature; }
 
-  void set_overlap_weight(double cst) {l1 = cst;}
-  void set_wirelength_weight(double cst) {l1 = 1-cst;}
-  void set_initial_move_radius(double eps) {  }
+  void set_overlap_weight(double _cst) {l1 = _cst;}
+  void set_wirelength_weight(double _cst) {l1 = 1-_cst;}
+  void set_initial_move_radius(double _eps) { for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) { nodeit->sigma = _eps; } }
   void set_rtree(bool _rt) { rt = _rt; }
   void set_lam(bool _lam) { lam = _lam; }
 
@@ -142,40 +142,54 @@ private:
   void update_rtree(int idx);
   vector < Node > ::iterator random_node();
 
-  int fact(int n);
-
 private:
+  // best-so-far solution variables
+  vector < Node > bestSol;
+  double best_wl = 0.0;
+
+  // rtree datastructure
   bool rt = false;
   bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16> > rtree;
 
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;
 
+  // cost histories
   vector < double > cost_hist;
   vector < double > wl_hist;
   vector < double > oa_hist;
 
+  // cost normalization terms
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
+
   map<int, vector<pPin> > *netToCell = nullptr;
   vector < vector < pPin > > *netToCellVec = nullptr;
   vector< int > accept_history;
-  double Temperature = 0.0;
+
+  // annealing parameters
+  double t_0 = 0.5;
+  double Temperature;
   int outer_loop_iter = 101;
   int inner_loop_iter = 20;
   double eps = -1.0;
-  double t_0 = 0.5;
   bool var = false;
   double l1 = 0.4;
 
+  // modified lam schedule params
   bool lam = true;
   double AcceptRate = 0.5;
   double LamRate = 0.5;
 
+  float rotate_proba = 0.05;
+  float swap_proba = 0.2;
+  float shift_proba = 0.75;
   bool rotate_flag = 0;
+
   boost::mt19937 rng;
 
+  // board boundaries
   double mMinX = std::numeric_limits<double>::max();
   double mMaxX = std::numeric_limits<double>::min();
   double mMinY = std::numeric_limits<double>::max();

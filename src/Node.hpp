@@ -71,7 +71,7 @@ class Node {
     string orientation_str;
     int init_orientation;
     int orientation;
-    int layer=1;
+    int layer=1; // 1 or -1 for 2-sided placement
     int mirror;
     vector < int > Netlist;
 
@@ -156,16 +156,18 @@ class Node {
         yCoordinate = y;
       }
   }
-/*
-  void yFlip() {
+
+  void layerChange() {
     if(!terminal) {
-      model::polygon<model::d2::point_xy<double> > tmp;
-      boost::geometry::transform(poly, tmp, translate);
-      poly = tmp;
-      layer=-1*layer
-      updateCoordinates();  
-    } 
-  }*/
+      //model::polygon<model::d2::point_xy<double> > tmp;
+      //boost::geometry::transform(poly, tmp, translate);
+      //poly = tmp;
+      layer=-1*layer;
+      //updateCoordinates();  
+    }  else {
+      layer=-1*layer;
+    }
+  }
 
   int wrap_orientation(int kX) {
     return kX % 8;

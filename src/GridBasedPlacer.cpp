@@ -128,31 +128,31 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
       netToCell.insert(pair < int, vector< pPin > > (net.getId(), pinTemp));
     }
 
-  cout << "annealing" << endl;
-  float cost = annealer(netToCell, initial_pl);
-  nodeId = bestSol; 
-  // write back to db
-  cout << "writing back to db..." << endl;
-  for (auto &inst : instances) {
-      point_2d bbox;
-      mDb.getCompBBox(inst.getComponentId(), &bbox);
+    cout << "annealing" << endl;
+    float cost = annealer(netToCell, initial_pl);
+    nodeId = bestSol; 
+    // write back to db
+    cout << "writing back to db..." << endl;
+    for (auto &inst : instances) {
+        point_2d bbox;
+        mDb.getCompBBox(inst.getComponentId(), &bbox);
 
-      int angle = nodeId[inst.getId()].orientation;
-      double ang = 0;
-      if (angle == 0) {
-          ang = 0;
-      } else if (angle == 2) {
-          ang = 90;
-      } else if (angle == 4) {
-          ang = 180;
-      } else if (angle == 6) {
-          ang = 270;
-      }
-      inst.setAngle(ang);
-      inst.setX(nodeId[inst.getId()].xBy2);
-      inst.setY(nodeId[inst.getId()].yBy2);
-  }
-  return mDb;
+        int angle = nodeId[inst.getId()].orientation;
+        double ang = 0;
+        if (angle == 0) {
+            ang = 0;
+        } else if (angle == 2) {
+            ang = 90;
+        } else if (angle == 4) {
+            ang = 180;
+        } else if (angle == 6) {
+            ang = 270;
+        }
+        inst.setAngle(ang);
+        inst.setX(nodeId[inst.getId()].xBy2);
+        inst.setY(nodeId[inst.getId()].yBy2);
+    }
+    return mDb;
 }
 
 
@@ -419,7 +419,7 @@ double GridBasedPlacer::cell_overlap() {
   for(size_t i = 0; i < nodeId.size(); i++) {
     for(size_t j = i; j < nodeId.size(); j++) {
       if (i == j) {continue;}
-      if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed)) {
+      if(!intersects(nodeId[i].poly, nodeId[j].poly) || (nodeId[i].fixed && nodeId[j].fixed) || (nodeId[i].layer != nodeId[j].layer)) {
         continue;
       } else {
         double oa = 0.0;
@@ -517,7 +517,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
         if (cell_history.find(nodeId[j].idx) != cell_history.end()) {
           continue;
         }
-        if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)) {
+        if(!intersects(nodes[i]->poly, nodeId[j].poly) || (nodes[i]->fixed && nodeId[j].fixed)  || (nodeId[i].layer != nodeId[j].layer)) {
           continue;
         } else {
           double oa = 0.0;
@@ -764,7 +764,7 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double i = uni();
 
-  if (i< swap_proba) { // swap
+  if (i < swap_proba) { // swap
     state = 0;
     if(debug > 1) {
       cout << "swap" << endl;
@@ -788,7 +788,7 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
       rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
       rtree.insert(std::make_pair(rand_node2->envelope, rand_node2->idx));
     }
-  } else if (i < shift_proba) { // shift
+  } else if (swap_proba <= i && i < shift_proba + swap_proba) { // shift
     state = 1;
     if(debug > 1) {
       cout << "shift" << endl;
@@ -811,7 +811,7 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
     if(rt) {
       rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     }
-  } else { // rotate
+  } else if(shift_proba + swap_proba <= i && i < shift_proba + swap_proba + rotate_proba) { // rotate
     state = 2;
     if(debug > 1) {
       cout << "rotate" << endl;
@@ -834,6 +834,13 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
     if(rt) {
       rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
     }
+  } else { // layer change
+    state = 3;
+    if(debug > 1) {
+      cout << "layer change" << endl;
+    }
+    prevCost = cost_partial(perturbed_nodes, netToCell);
+    rand_node1->layerChange();
   }
   double transition_cost = cost_partial(perturbed_nodes,netToCell);
   double updated_cost = current_cost - prevCost + transition_cost;
@@ -863,6 +870,8 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
     } else if (state == 2) {
       rand_node1->setRotation(8-r);
       rand_node1->setPos(rand_node1_orig_x,rand_node1_orig_y);
+    } else if (state == 3) {
+      rand_node1->layerChange();
     }
     if(rt) {
       rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));

@@ -86,8 +86,7 @@
 //#include "taskflow/taskflow.hpp"
 typedef boost::geometry::model::d2::point_xy<double> Point;
 
-class GridBasedPlacer
-{
+class GridBasedPlacer {
 public:
   //ctor
   GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
@@ -105,14 +104,15 @@ public:
 
   void set_overlap_weight(double _cst) {l1 = _cst;}
   void set_wirelength_weight(double _cst) {l1 = 1-_cst;}
+  void set_two_sided(bool _2sided) {two_sided = _2sided;}
   void set_initial_move_radius(double _eps) { vector < Node > ::iterator nodeit = nodeId.begin(); 
                                               for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) { 
                                                 nodeit->sigma = _eps; } }
   void set_rtree(bool _rt) { rt = _rt; }
   void set_lam(bool _lam) { lam = _lam; }
 
-  void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_num_iterations(int iter) {outer_loop_iter = iter;}
+  void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_initial_temperature(double tmp) {t_0 = tmp;}
 
 private:
@@ -149,7 +149,7 @@ private:
   vector < Node > bestSol;
   double best_wl = 0.0;
 
-  // rtree datastructure
+  // rtree datastructure for fast overlap check
   bool rt = false;
   bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16> > rtree;
 
@@ -179,16 +179,22 @@ private:
   bool var = false;
   double l1 = 0.4;
 
+  // annealing move parameters
+  float rotate_proba = 0.0;//0.05;
+  float layer_change_proba = 1.0;//0.1;
+  float swap_proba = 0.0;//0.25;
+  float shift_proba = 0.0;//0.6;
+  bool rotate_flag = 0;
+
+  // two-sided placement
+  bool two_sided = false;
+
   // modified lam schedule params
   bool lam = true;
   double AcceptRate = 0.5;
   double LamRate = 0.5;
 
-  float rotate_proba = 0.05;
-  float swap_proba = 0.2;
-  float shift_proba = 0.75;
-  bool rotate_flag = 0;
-
+  // boost mt random number generator
   boost::mt19937 rng;
 
   // board boundaries

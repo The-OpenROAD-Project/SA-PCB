@@ -61,7 +61,7 @@ class Node {
     double height;
     int weight;
     bool terminal;
-    bool fixed;
+    bool fixed=0;
     bool overlap;
     double sigma;
     double xCoordinate;
@@ -79,24 +79,24 @@ class Node {
   setParameterNodes
   Sets parameters given an entry in Nodes file
   */
-  void setParameterNodes(string name, double width, double height, int terminal, int idx, int mirror=0) {
-    name = name;
+  void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0) {
+    name = _name;
     xCoordinate = 0.0;
     yCoordinate = 0.0;
     orientation = 0;
-    width = width;
-    height = height;
-    terminal = terminal;
-    mirror = mirror;
+    width = _width;
+    height = _height;
+    terminal = _terminal;
+    mirror = _mirror;
     orientation_str = "N";
-    idx = idx;
+    idx = _idx;
     if (!terminal) {
-      double points[][2] = {{0.0, 0.0}, {width, 0.0}, {width, height}, {0.0, height}};
-      model::polygon< model::d2::point_xy<double> > poly;
-      append(poly, points);
-      boost::geometry::correct(poly);
-      poly = poly;
-      boost::geometry::envelope(poly, envelope);
+      double points[][2] = {{0.0, 0.0}, {_width, 0.0}, {_width, _height}, {0.0, _height}};
+      model::polygon< model::d2::point_xy<double> > _poly;
+      append(_poly, points);
+      boost::geometry::correct(_poly);
+      poly = _poly;
+      boost::geometry::envelope(_poly, envelope);
     }
   }
 
@@ -105,10 +105,10 @@ class Node {
   Sets parameters given an entry in Shapes file
   */
   void setParameterShapes(string wkt) {
-    model::polygon< model::d2::point_xy<double> > poly;
-    boost::geometry::read_wkt(wkt, poly);
-    boost::geometry::correct(poly);
-    poly = poly;
+    model::polygon< model::d2::point_xy<double> > _poly;
+    boost::geometry::read_wkt(wkt, _poly);
+    boost::geometry::correct(_poly);
+    poly = _poly;
   }
 
   /*
@@ -287,6 +287,7 @@ class Node {
     cout << "Y/2           " << yBy2 << endl;
     cout << "Orientation   " << orientation << endl;
     cout << "terminal      " << terminal << endl;
+    cout << "fixed         " << fixed << endl;
     cout << "NetList       ";
     vector < int > ::iterator it2;
     for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {

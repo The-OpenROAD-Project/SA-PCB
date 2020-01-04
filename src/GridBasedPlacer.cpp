@@ -74,12 +74,20 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     }
 
     int fixed = 0;
+    int mirror = 1;
     for (auto &inst : instances) {
         point_2d bbox;
         mDb.getCompBBox(inst.getComponentId(), &bbox); 
 
         Node n;
-        n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, 0, inst.getId());
+        int layer = inst.getLayer();
+        if(layer == 0) {
+            mirror = 1;
+        } else {
+            mirror = -1;
+        }
+       
+        n.setParameterNodes(inst.getName(), bbox.m_x, bbox.m_y, false, inst.getId(), mirror);
         nodeId[inst.getId()] = n;
         name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
 
@@ -96,7 +104,9 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
         }
        if(inst.isLocked()) {
            fixed = 1;
-       } 
+       } else {
+           fixed = 0;
+       }
       
         nodeId[name2id[inst.getName()]].setParameterPl(inst.getX() - bbox.m_x/2, inst.getY() - bbox.m_y/2, ang, fixed);
         nodeId[name2id[inst.getName()]].printParameter();
@@ -133,6 +143,8 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     nodeId = bestSol; 
     // write back to db
     cout << "writing back to db..." << endl;
+    int top = 0;
+    int bot = 31;
     for (auto &inst : instances) {
         point_2d bbox;
         mDb.getCompBBox(inst.getComponentId(), &bbox);
@@ -151,6 +163,12 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
         inst.setAngle(ang);
         inst.setX(nodeId[inst.getId()].xBy2);
         inst.setY(nodeId[inst.getId()].yBy2);
+
+        if (nodeId[inst.getId()].layer == 1) {
+          inst.setLayer(top);
+        } else {
+          inst.setLayer(bot);
+        }
     }
     return mDb;
 }
@@ -642,7 +660,7 @@ double GridBasedPlacer::rudy(map<int, vector<pPin> > &netToCell) {
 
   // write tab separated matrix to file
   /*
-  if(iii % 10 == 0) {
+ if(iii % 10 == 0) {
       ofstream dat("cache/route/"+std::to_string(iii) + ".txt");
       for (unsigned i = 0; i < D.size1() ; i++) {
           for (unsigned j = 0; j < D.size2(); j++) {
@@ -763,7 +781,7 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
   boost::uniform_real<> uni_dist(0,1);
   boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(rng, uni_dist);
   double i = uni();
-
+  cout << " i " << i << endl;
   if (i < swap_proba) { // swap
     state = 0;
     if(debug > 1) {
@@ -933,7 +951,7 @@ Update the SA parameters according to modified lam schedule
 void GridBasedPlacer::modified_lam_update(int i) {
   vector < Node > ::iterator nodeit = nodeId.begin();
 
-  if (i/outer_loop_iter < 0.15) {
+  if (i/outer_loop_iter < 0.15){
     LamRate = 0.44 + 0.56 * pow(560, -i/outer_loop_iter/0.15); 
   } else if (0.15 <= i/outer_loop_iter && i/outer_loop_iter <= 0.65) {
     LamRate = 0.44;
@@ -1108,9 +1126,6 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
     rtree.insert(std::make_pair(itNode -> envelope, idx));
     idx+=1;
-    if(!itNode -> terminal && !itNode -> fixed) {
-      num_components += 1;
-    }
   }
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -1123,7 +1138,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 
       cout << "=====" << ii << "=====" << endl;
-      cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  i*ii/time_span.count() << 
+      cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
       " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature <<
       " acceptance ratio: " << accept_ratio << endl;
 
@@ -1131,6 +1146,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       //           accept_ratio_history,
       //           netToCell);
     }
+
     while (i > 0) {
       cst = initiate_move(cst, netToCell);
       update_accept_history(accept_ratio_history, accept_ratio);

@@ -61,7 +61,7 @@ class Node {
     double height;
     int weight;
     bool terminal;
-    bool fixed=0;
+    bool fixed;
     bool overlap;
     double sigma;
     double xCoordinate;
@@ -115,21 +115,21 @@ class Node {
   setParameterWts
   Sets parameters given an entry in weights file. 
   */
-  void setParameterWts(int weight) {
-    weight = weight;
+  void setParameterWts(int _weight) {
+    weight = _weight;
   }
 
   /*
   setParameterPl
   Sets parameters given an entry in Pl file  
   */
-  void setParameterPl(double xCoordinate, double yCoordinate, string orientation_str, int fixed) {
+  void setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed) {
     setPos(xCoordinate, yCoordinate);
-    orientation_str = orientation_str;
-    init_orientation = str2orient(orientation_str);
-    setRotation(str2orient(orientation_str));
-    fixed = fixed;
-    sigma = 50.0;
+    orientation_str = _orientation_str;
+    init_orientation = str2orient(_orientation_str);
+    setRotation(str2orient(_orientation_str));
+    fixed = _fixed;
+    sigma = 10.0;
   }
 
   /*

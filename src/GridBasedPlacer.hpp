@@ -104,12 +104,13 @@ public:
 
   void set_overlap_weight(double _cst) {l1 = _cst;}
   void set_wirelength_weight(double _cst) {l1 = 1-_cst;}
-  void set_two_sided(bool _2sided) {two_sided = _2sided;}
+  void set_two_sided(bool _2sided) {two_sided = _2sided; shift_proba += layer_change_proba; layer_change_proba -= layer_change_proba; }
   void set_initial_move_radius(double _eps) { vector < Node > ::iterator nodeit = nodeId.begin(); 
                                               for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) { 
                                                 nodeit->sigma = _eps; } }
   void set_rtree(bool _rt) { rt = _rt; }
   void set_lam(bool _lam) { lam = _lam; }
+  void set_lamtemp_update(double _coef) { lamtemp_update = _coef; }
 
   void set_num_iterations(int iter) {outer_loop_iter = iter;}
   void set_iterations_moves(int iter) {inner_loop_iter = iter;}
@@ -148,6 +149,7 @@ private:
   // best-so-far solution variables
   vector < Node > bestSol;
   double best_wl = 0.0;
+  double best_overlap = std::numeric_limits<double>::max();
 
   // rtree datastructure for fast overlap check
   bool rt = false;
@@ -178,12 +180,14 @@ private:
   double eps = -1.0;
   bool var = false;
   double l1 = 0.4;
+  double shift_var = 1.0;
+  double ssamp = 0.0;
 
   // annealing move parameters
-  float rotate_proba = 0.0;//0.05;
-  float layer_change_proba = 1.0;//0.1;
-  float swap_proba = 0.0;//0.25;
-  float shift_proba = 0.0;//0.6;
+  float rotate_proba = 0.15;
+  float layer_change_proba = 0.1;
+  float swap_proba = 0.25;
+  float shift_proba = 0.5;
   bool rotate_flag = 0;
 
   // two-sided placement
@@ -193,6 +197,7 @@ private:
   bool lam = true;
   double AcceptRate = 0.5;
   double LamRate = 0.5;
+  double lamtemp_update = 0.85;
 
   // boost mt random number generator
   boost::mt19937 rng;

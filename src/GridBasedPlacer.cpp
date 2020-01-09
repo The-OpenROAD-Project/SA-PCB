@@ -116,11 +116,18 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     double pminx, pmaxx, pminy, pmaxy;
     mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
     points_2d b = mDb.getBoardBoundary();
-    mMinX = min(b[0].m_x, pminx);
-    mMaxX = max(b[1].m_x, pmaxx);
-    mMinY = min(b[0].m_y, pminy);
-    mMaxY = max(b[1].m_y, pmaxy);
+    //mMinX = min(b[0].m_x, pminx);
+    //mMaxX = max(b[1].m_x, pmaxx);
+    //mMinY = min(b[0].m_y, pminy);
+    //mMaxY = max(b[1].m_y, pmaxy);
+    mMinX = pminx;//b[0].m_x;
+    mMaxX = pmaxx;//b[1].m_x;
+    mMinY = pminy;//b[0].m_y;
+    mMaxY = pmaxy;//b[1].m_y;
     cout << mMinX << "," << mMinY << " " << mMaxX << "," << mMaxY << endl;
+    cout << b[0].m_x << "," << b[0].m_y << " " << b[1].m_x << "," << b[1].m_y << endl;
+
+
 
     for (auto &net : nets) {
       vector < pPin > pinTemp;

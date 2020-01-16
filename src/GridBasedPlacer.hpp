@@ -117,7 +117,6 @@ public:
   void set_initial_temperature(double tmp) {t_0 = tmp;}
 
 private:
-  // Utility
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
 
   void random_initial_placement();
@@ -140,8 +139,8 @@ private:
   bool check_move(double prevCost, double newCost);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
-  void gen_report(map<string, vector<double> > &report, vector< double > &accept_ratio_history, map<int, vector<pPin> > &netToCell);
-  void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
+  void gen_report(map<string, vector<double> > &report, map<int, vector<pPin> > &netToCell);
+  //void update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio);
   void update_rtree(int idx);
   vector < Node > ::iterator random_node();
 
@@ -170,7 +169,7 @@ private:
 
   map<int, vector<pPin> > *netToCell = nullptr;
   vector < vector < pPin > > *netToCellVec = nullptr;
-  vector< int > accept_history;
+  //vector< int > accept_history;
 
   // annealing parameters
   double t_0 = 0.5;

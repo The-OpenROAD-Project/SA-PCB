@@ -986,7 +986,7 @@ void GridBasedPlacer::modified_lam_update(int i) {
     nodeit->sigma =  max(0.98*nodeit->sigma,0.5);
   }
 }
-
+/*
 void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio) {
   if (accept_history.size() > 100) {
     accept_ratio = ((accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
@@ -995,7 +995,7 @@ void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_histo
   }
   accept_ratio_history.push_back(accept_ratio);
 }
-
+*/
 /*
 check_move
 either accept or reject the move based on current & previous temperature & cost
@@ -1012,10 +1012,10 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   //cout << delCost << " " << Temperature << " " << prob << " " << exp(-delCost/Temperature) << " " << -delCost << " " << Temperature << " " << -delCost/Temperature << " " << prob << " " <<(prob <= (exp(-delCost/Temperature))) << endl;
   if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
     prevCost = newCost;
-    accept_history.push_back(1);
+    //accept_history.push_back(1);
     return true;
   } else {
-    accept_history.push_back(0);
+    //accept_history.push_back(0);
     return false;
   }
 }
@@ -1050,8 +1050,7 @@ gen_report
 generates a report and outputs files to ./reports/ directory
 */
 void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
-                vector< double > &accept_ratio_history,
-                map<int, vector<pPin> > &netToCell) {
+                                 map<int, vector<pPin> > &netToCell) {
     vector < double > cost_hist = report["cost_hist"];
     vector < double > wl_hist   = report["wl_hist"];
     vector < double > oa_hist   = report["oa_hist"];
@@ -1100,12 +1099,6 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
         f3 << *i << '\n';
     }
     f3.close();
-
-    std::ofstream f4("./reports/"+buffer+"_accept_ratio.txt");
-    for(vector<double>::const_iterator i = accept_ratio_history.begin(); i != accept_ratio_history.end(); ++i) {
-        f4 << *i << '\n';
-    }
-    f4.close();
 }
 
 /*
@@ -1122,9 +1115,9 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
 
-  vector< int > accept_history;
-  float accept_ratio = 0.0;
-  vector< double > accept_ratio_history;
+  //vector< int > accept_history;
+  //float accept_ratio = 0.0;
+  //vector< double > accept_ratio_history;
 
   cout << "calculating initial params..." << endl;
   initialize_params(netToCell);
@@ -1180,7 +1173,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
 
     while (i > 0) {
       cst = initiate_move(cst, netToCell);
-      update_accept_history(accept_ratio_history, accept_ratio);
+      //update_accept_history(accept_ratio_history, accept_ratio);
       cost_hist.push_back(cst);
       i -= 1;
     }

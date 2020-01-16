@@ -81,6 +81,7 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include "readFiles.hpp"
+#include "HPlacerUtils.hpp"
 //#include "readScl.h"
 #include "time.h"
 //#include "taskflow/taskflow.hpp"
@@ -93,6 +94,7 @@ public:
   //dtor
   ~GridBasedPlacer(){}
 
+  void test_hplacer_flow();
   kicadPcbDataBase &test_placer_flow();
   kicadPcbDataBase &getDb() { return mDb; }
   kicadPcbDataBase &mDb;
@@ -117,6 +119,8 @@ public:
   void set_initial_temperature(double tmp) {t_0 = tmp;}
 
 private:
+  void hplace(map<int, vector<Pin> > &netToCell, string initial_pl);
+
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
 
   void random_initial_placement();
@@ -131,6 +135,7 @@ private:
   double wirelength_partial(vector < Node* > &nodes, map<int, vector<pPin> > &netToCell);
   double rudy(map<int, vector<pPin> > &netToCell);
   float annealer(map<int, vector<pPin> > &netToCell, string initial_pl);
+  float hannealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level=0);
   float multistart();
   double initialize_temperature(map<int, vector<pPin> > &netToCell);
   void update_temperature();
@@ -147,6 +152,9 @@ private:
 private:
   // best-so-far solution variables
   vector < Node > bestSol;
+
+  bool hierachical = false;
+
   double best_wl = 0.0;
   double best_overlap = std::numeric_limits<double>::max();
 
@@ -169,7 +177,7 @@ private:
 
   map<int, vector<pPin> > *netToCell = nullptr;
   vector < vector < pPin > > *netToCellVec = nullptr;
-  //vector< int > accept_history;
+  vector< int > accept_history;
 
   // annealing parameters
   double t_0 = 0.5;

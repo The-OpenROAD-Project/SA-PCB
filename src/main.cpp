@@ -38,42 +38,25 @@
 #include "kicadPcbDataBase.h"
 #include "GridBasedPlacer.hpp"
 #include "util.h"
-int main(int argc, char *argv[])
-{
-  /*
-  if (argc < 2)
-  {
+int main(int argc, char *argv[]) {
+/*
+  if (argc < 2)  {
     std::cout << "Please provide input testcase filename." << std::endl;
     return 0;
   }
-
 
   GlobalParam::setFolders();
   GlobalParam::setUsageStart();
 
   std::string designName = argv[1];
   std::cout << "Parsing design: " << designName << std::endl;
-  kicadPcbDataBase db(designName);
-
-  db.printLayer();
-  db.printComp();
-  db.printInst();
-  db.printNetclass();
-  db.printNet();
-  db.printFile();
-  db.printPcbRouterInfo();
-
-  GlobalParam::showCurrentUsage("Parser");
-  GlobalParam::setUsageStart();
 
   std::cout << "Starting placer..." << std::endl;
-  GridBasedPlacer placer(db);
-  
+*/
   GridBasedPlacer placer;
   placer.test_placer_flow();
 
   //GlobalParam::showCurrentUsage("GridBasedPlacer");
   //GlobalParam::showFinalUsage("End of Program");
-*/
   return 0;
 }

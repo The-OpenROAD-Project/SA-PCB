@@ -34,41 +34,74 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <string>
-#include <regex>
-#include <map>
+#define BOOST_NO_AUTO_PTR
 
+#include <cstdio>
+#include "BoardGrid.h"
+//#include "kicadPcbDataBase.h"
+#include "globalParam.h"
+#include "util.h"
+
+#include <functional>
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <ctype.h>
+#include <map>
+#include <vector>
+#include <unordered_set>
+#include <algorithm>
+#include <string>
+#include <numeric>
+#include <cmath>
+#include <unistd.h>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
+// boost version 1.69.0
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/geometry.hpp>
+#include <boost/assign.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/io/io.hpp>
+#include <boost/geometry/algorithms/area.hpp>
+#include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/adapted/c_array.hpp>
+#include <boost/random.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/foreach.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
-#include "Node.hpp"
-#include "Pin.hpp"
-//#include "readScl.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
-class Node;
-class pPin;
-class Module;
+#include "readFiles.hpp"
+//#include "readScl.h"
+#include "time.h"
+//#include "taskflow/taskflow.hpp"
 
-extern map < string, int > name2id;
-extern vector < Node > nodeId;
-extern vector < Module * > moduleId;
-extern Hierarchy H;
-
-int readNodesFile(string fname);
-int readShapesFile(string fname);
-int readWtsFile(string fname);
-int readPlFile(string fname);
-int readClstFile(string fname);
-map<int, vector<pPin> > readNetsFile(string fname);
-int writePlFile(string fname);
-int writeNodesFile(string fname);
-
+class HPlacerUtils
+{
+public:
+  void initialize_params(map<int, vector<Module *> > &netToCell);
+  void validate_move(Module *node, double rx, double ry);
+  double cost(map<int, vector<Module *> > &netToCell,
+              int temp_debug = 0);
+  double cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
+  double cell_overlap();
+  double wirelength(map<int, vector<Module *> > &netToCell);
+  double cell_overlap_partial(vector < Module * > &nodes);
+  double wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
+  double rudy(map<int, vector<Module *> > &netToCell);
+  float annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
+  double initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
+  double initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
+  void random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
+  vector < Module * > ::iterator random_node();
+};

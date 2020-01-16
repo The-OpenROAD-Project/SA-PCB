@@ -2,6 +2,7 @@
   *SA-PCB: Simulated Annealing-based Placement For PCB Layout*
 
 ## Getting Started
+  * See https://github.com/The-OpenROAD-Project/PCB-PR-App
 
 ## Installation
 

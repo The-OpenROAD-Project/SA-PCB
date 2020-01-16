@@ -51,6 +51,163 @@ typedef bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<do
 vector < Node > nodeId;
 map < string, int > name2id;
 
+void GridBasedPlacer::test_hplacer_flow() {
+  srand(time(NULL));
+  int opt;
+  string out_file;
+
+  long long int idx = -1;
+
+  string parg = "";
+  string initial_pl = "../designs/ispd2005/adaptec2/adaptec2_sol";
+
+  std::cout << "=================test_hplacer==================" << std::endl;
+  
+  parg = "../designs/ispd2005/adaptec2/adaptec2";
+  cout << "circuit: " << parg << endl;
+
+  string nodesfname  = parg + ".nodes";
+  string netsfname   = parg + ".nets";
+  string clstname = parg + ".clst";
+  string plfname     = "";
+
+  if (initial_pl != "") {
+    plfname          = initial_pl + ".pl";
+  } else {
+    plfname          = parg + ".pl";
+  }
+
+  string wtsfname    = parg + ".wts";
+
+  cout << nodesfname << endl;
+  cout << netsfname << endl;
+  cout << plfname << endl;
+  cout << clstname << endl;
+ 
+  map<int, vector<Pin> > netToCell;
+  cout << "reading nodes..." << endl;
+  readNodesFile(nodesfname);
+  cout << "# Nodes: " << nodeId.size() << endl;
+  cout << "reading pl..." << endl;
+  readPlFile(plfname);
+  cout << "reading nets..." << endl;
+  netToCell = readNetsFile(netsfname); // mapping from net ids to vectors of pins - need to add weights
+  cout << "# Nets: " << netToCell.size() << endl;
+  cout << "reading cluster heirarchy..." << endl;
+  readClstFile(clstname);
+  cout << "computing netlist heirarchy..." << endl;
+  H.set_netlist_hierarchy(netToCell);
+  cout << "composing module geometries..." << endl;
+  H.set_module_geometries(nodeId);
+
+  cout << "calculating boundaries..." << endl;
+  set_boundaries();
+
+  cout << "annealing" << endl;
+  HPlace(netToCell, initial_pl);
+}
+
+void hplace() {
+  // top down placement
+  map<int, vector<Pin> > tmp_netToCell = netToCell;
+  //H.print_param(1); 
+  int l = 0;
+  for (auto &lvl : H.levels) {
+    cout << "===== level: " << l << " =====" << endl;
+    if (l == 0){ 
+      l ++;
+      continue;
+    }
+    moduleId = lvl.modules;
+    map<int, vector<Module *> > netToCell = lvl.netToModule;
+
+    float cost = this->annealer(netToCell, initial_pl, l);
+
+    nodeId = H.update_cell_positions_at_level(nodeId, l);
+
+    // update coords
+
+    cout << "writting result" << endl;
+    writePlFile("./final_placement_"+std::to_string(l)+".pl");
+
+    std::ofstream f1("./oa_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = oa_hist.begin(); i != oa_hist.end(); ++i) {
+        f1 << *i << '\n';
+    }
+    f1.close();
+
+    std::ofstream f2("./wl_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = wl_hist.begin(); i != wl_hist.end(); ++i) {
+        f2 << *i << '\n';
+    }
+    f2.close();
+
+    std::ofstream f3("./l_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = l_hist.begin(); i != l_hist.end(); ++i) {
+        f3 << *i << '\n';
+    }
+    f3.close();
+
+    std::ofstream f4("./var_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = var_hist.begin(); i != var_hist.end(); ++i) {
+        f4 << *i << '\n';
+    }
+    f4.close();
+
+    std::ofstream f5("./temp_"+std::to_string(l)+".txt");
+    for(vector<double>::const_iterator i = temp_hist.begin(); i != temp_hist.end(); ++i) {
+        f5 << *i << '\n';
+    }
+    f5.close();
+
+    wl_hist.clear();
+    oa_hist.clear();
+    l_hist.clear();
+    density_hist.clear();
+    var_hist.clear();
+    temp_hist.clear();
+
+
+    l++;
+    initial_loop_iter = ceil(initial_loop_iter / 2);
+    t_0 = 0.01*t_0;
+
+    cout << endl;
+  } 
+/*
+  cout << "===== greedy placement =====" << endl;
+  initial_loop_iter = 1;
+  nodeId = H.update_cell_positions(nodeId);
+  vector < Module * > moduleId_tmp;
+  map<int, vector<Module *> > netToCell_tmp;
+  for (auto &node : nodeId) {
+    Module *tmp = new Module;
+    tmp->init_module(node.idx, -1, false);
+    tmp->setParameterNodes(node.width, node.height);
+    tmp->setParameterPl(node.xCoordinate, node.yCoordinate);
+    tmp->terminal = node.terminal;
+    tmp->fixed = node.fixed;
+    moduleId_tmp.push_back(tmp);
+  }
+  moduleId = moduleId_tmp;
+  int netidx = 1;
+  for (auto &net : netToCell) { 
+    int netid = net.first;
+    vector<Pin> pvec = net.second; //pvec_i.idx -> cell id
+    vector<Module *> ms; 
+    for (auto &pin : pvec) {
+      int cell_id = pin.idx;
+      Module *m = moduleId[cell_id-1];
+      m->setNetList(netidx);
+      ms.push_back(m);
+    }
+    netToCell_tmp.insert(pair < int, vector < Module * > > (netidx, ms));
+    netidx ++;
+  }
+  t_0 = 0.0;
+  float cost = this->annealer(netToCell_tmp, initial_pl);*/
+}
+
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     srand(time(NULL));
     int opt;
@@ -60,7 +217,6 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
     string parg = "";
     string initial_pl = "";
-    int bound_inc = 0;
 
     std::cout << "=================test_placer==================" << std::endl;
 
@@ -985,16 +1141,7 @@ void GridBasedPlacer::modified_lam_update(int i) {
     nodeit->sigma =  max(0.98*nodeit->sigma,0.5);
   }
 }
-/*
-void GridBasedPlacer::update_accept_history(vector< double > &accept_ratio_history, float &accept_ratio) {
-  if (accept_history.size() > 100) {
-    accept_ratio = ((accept_ratio*100) - (accept_history[accept_history.size()-101]) + accept_history[accept_history.size()-1])/100;
-  } else {
-    accept_ratio = accumulate(accept_history.begin(), accept_history.end(),0.0) / accept_history.size();
-  }
-  accept_ratio_history.push_back(accept_ratio);
-}
-*/
+
 /*
 check_move
 either accept or reject the move based on current & previous temperature & cost
@@ -1011,10 +1158,8 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   //cout << delCost << " " << Temperature << " " << prob << " " << exp(-delCost/Temperature) << " " << -delCost << " " << Temperature << " " << -delCost/Temperature << " " << prob << " " <<(prob <= (exp(-delCost/Temperature))) << endl;
   if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
     prevCost = newCost;
-    //accept_history.push_back(1);
     return true;
   } else {
-    //accept_history.push_back(0);
     return false;
   }
 }
@@ -1114,10 +1259,6 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
 
-  //vector< int > accept_history;
-  //float accept_ratio = 0.0;
-  //vector< double > accept_ratio_history;
-
   cout << "calculating initial params..." << endl;
   initialize_params(netToCell);
   if (initial_pl != "") {
@@ -1172,7 +1313,6 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
 
     while (i > 0) {
       cst = initiate_move(cst, netToCell);
-      //update_accept_history(accept_ratio_history, accept_ratio);
       cost_hist.push_back(cst);
       i -= 1;
     }
@@ -1202,6 +1342,74 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
         cst = cost(netToCell);
     }
     i -= 1;
+  }
+
+  return cost(netToCell);
+}
+
+/*
+hannealer
+main loop for hierarchical sa algorithm
+*/
+float GridBasedPlacer::hannealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level) {
+  double Temperature = t_0;
+  int num_components = 0;
+
+  vector < Module * > ::iterator itNode;
+  map < string, vector < double > > report;
+
+
+  vector< int > accept_history;
+  float accept_ratio = 0.0;
+  vector< double > accept_ratio_history;
+
+  cout << "calculating initial params..." << endl;
+  this->initialize_params(netToCell);
+
+  cout << "calculating initial cost..." << endl;  
+  double cst = this->cost(netToCell,-1);
+
+  int idx = 0;
+
+  for (itNode = moduleId.begin(); itNode != moduleId.end(); ++itNode) {
+    idx+=1;
+    if(!(*itNode) -> terminal && !(*itNode) -> fixed) {
+      num_components += 1;
+    }
+  }
+
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  long long int ii = 0; // outer loop iterator
+  int i = 0; // inner loop iterator
+  cout << "beginning optimization..." << endl;
+  while (ii < outer_loop_iter) {
+    i = inner_loop_iter*num_components; 
+
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
+
+    cout << "=====" << ii << "=====" << endl;
+    cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
+    " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
+    " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << endl;
+
+    if (ii % 10 == 0) {
+        cst = cost(netToCell);
+        nodeId = H.update_cell_positions_at_level(nodeId, level);
+        writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
+    }
+
+    while (i > 0) {
+      cst = initiate_move(cst, netToCell);
+      cost_hist.push_back(cst);
+      i -= 1;
+    }
+    if (lam) {
+      modified_lam_update(ii);
+    } else {
+      update_temperature();
+    }
+    ii += 1;
   }
 
   return cost(netToCell);

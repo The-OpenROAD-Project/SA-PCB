@@ -193,7 +193,92 @@ map<int, vector<pPin> > readNetsFile(string fname) {
   return netToCell;
 }
 
+int readClstFile(string fname) {
+  fstream file;
+  string buf;
+  int i = 0;
+  vector < string > strVec;
+  int value = 2;
+  int idx = 0;
+
+  int num_levels = 0;
+  vector < int > num_modules;
+  string Out = ""; // tmp string
+
+  file.open(fname, ios:: in);
+  while (getline(file, buf)) {
+    i++;
+    boost::trim(buf);
+    boost::algorithm::split(strVec, buf, is_any_of("\t, "), boost::token_compress_on);
+    if (i == 1) {
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        num_levels = atoi(results.at(1).c_str());
+    } else if (i == 2) {
+        std::vector<std::string> results;
+        boost::split(results, buf, [](char c){return c == ' ';});
+        results.erase (results.begin());
+        for (auto &res : results) {
+          num_modules.push_back(atoi(res.c_str()));
+        }
+        // INIT HIERARCHY
+        H.init_hierarchy(num_levels, num_modules);
+    } else {
+      idx += 1;
+      
+      std::vector<std::string> results;
+      boost::split(results, buf, [](char c){return c == '\t';});
+      string cell_name = results[0];
+      results.erase (results.begin());
+
+      vector <int> cluster_id_vec;
+      for (auto &res : results) {
+        // insert cells into hierarchy
+        cluster_id_vec.push_back(atoi(res.c_str()));
+      }
+      H.insert_cell(name2id[strVec[0]], cluster_id_vec, H.root, 0);
+    }
+  }
+
+  file.close();
+  return 0;
+}
+
 int writePlFile(string fname) {
+  vector < string > strVec;
+  fstream file;
+  string buf;
+  ofstream myfile (fname);
+  if (myfile.is_open()) {
+    myfile << "\n\n\n\n";
+    vector <Node> ::iterator itNode;
+
+    // print components
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(!itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
+        if (itNode->fixed) {
+          myfile << " /FIXED_NI\n";
+        } else {
+          myfile << "\n";
+        }
+      }
+    }
+
+    myfile << "\n";
+    // print terminals
+    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+      if(itNode->terminal) {
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation);
+        myfile << " /FIXED_NI\n";
+      }
+    }
+    myfile.close();
+    return 0;
+  } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
+}
+
+int writeNodesFile(string fname) {
   vector < string > strVec;
   fstream file;
   string buf;

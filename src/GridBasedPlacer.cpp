@@ -115,11 +115,10 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     cout << "calculating boundaries..." << endl;
     double pminx, pmaxx, pminy, pmaxy;
     mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
-    points_2d b = mDb.getBoardBoundary();
-    mMinX = min(b[0].m_x, pminx);
-    mMaxX = max(b[1].m_x, pmaxx);
-    mMinY = min(b[0].m_y, pminy);
-    mMaxY = max(b[1].m_y, pmaxy);
+    mMinX = pminx;
+    mMaxX = pmaxx;
+    mMinY = pminy;
+    mMaxY = pmaxy;
     cout << mMinX << "," << mMinY << " " << mMaxX << "," << mMaxY << endl;
 
     for (auto &net : nets) {
@@ -747,13 +746,13 @@ validate_move
 validates a shift, project within board boundary
 */
 void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
-  rx = max(rx, mMinX);
-  ry = max(ry, mMinY);
+  double validated_rx = max(rx, mMinX);
+  double validated_ry = max(ry, mMinY);
 
-  rx = min(rx, mMaxX - node.width);
-  ry = min(ry, mMaxY - node.height);
+  validated_rx = min(validated_rx, mMaxX - node.width);
+  validated_ry = min(validated_ry, mMaxY - node.height);
 
-  node.setPos(rx,ry);
+  node.setPos(validated_rx,validated_ry);
 }
 
 /*

@@ -84,7 +84,7 @@ void GridBasedPlacer::test_hplacer_flow() {
   cout << plfname << endl;
   cout << clstname << endl;
  
-  map<int, vector<Pin> > netToCell;
+  map<int, vector<pPin> > netToCell;
   cout << "reading nodes..." << endl;
   readNodesFile(nodesfname);
   cout << "# Nodes: " << nodeId.size() << endl;
@@ -109,7 +109,7 @@ void GridBasedPlacer::test_hplacer_flow() {
 
 void hplace() {
   // top down placement
-  map<int, vector<Pin> > tmp_netToCell = netToCell;
+  map<int, vector<pPin> > tmp_netToCell = netToCell;
   //H.print_param(1); 
   int l = 0;
   for (auto &lvl : H.levels) {
@@ -1397,8 +1397,7 @@ float GridBasedPlacer::hannealer(map<int, vector<Module *> > &netToCell, string 
         cst = cost(netToCell);
         nodeId = H.update_cell_positions_at_level(nodeId, level);
         writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
-    }
-
+    l
     while (i > 0) {
       cst = initiate_move(cst, netToCell);
       cost_hist.push_back(cst);

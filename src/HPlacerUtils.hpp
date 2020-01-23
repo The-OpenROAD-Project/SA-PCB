@@ -91,7 +91,7 @@ class HPlacerUtils
 public:
   void initialize_params(map<int, vector<Module *> > &netToCell);
   void validate_move(Module *node, double rx, double ry);
-  double cost(map<int, vector<Module *> > &netToCell,
+  double cost(map<int, vector <Module *> > &netToCell,
               int temp_debug = 0);
   double cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
   double cell_overlap();

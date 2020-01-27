@@ -37,7 +37,7 @@
 #define BOOST_NO_AUTO_PTR
 
 #include <cstdio>
-#include "BoardGrid.h"
+//#include "BoardGrid.h"
 //#include "kicadPcbDataBase.h"
 #include "globalParam.h"
 #include "util.h"
@@ -81,7 +81,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include "readFiles.hpp"
+//#include "readFiles.hpp"
 //#include "readScl.h"
 #include "time.h"
 //#include "taskflow/taskflow.hpp"
@@ -89,19 +89,19 @@
 class HPlacerUtils
 {
 public:
-  void initialize_params(map<int, vector<Module *> > &netToCell);
-  void validate_move(Module *node, double rx, double ry);
-  double cost(map<int, vector <Module *> > &netToCell,
+  void h_initialize_params(map<int, vector<Module *> > &netToCell);
+  void h_validate_move(Module *node, double rx, double ry);
+  double h_cost(map<int, vector <Module *> > &netToCell,
               int temp_debug = 0);
-  double cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
-  double cell_overlap();
-  double wirelength(map<int, vector<Module *> > &netToCell);
-  double cell_overlap_partial(vector < Module * > &nodes);
-  double wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
-  double rudy(map<int, vector<Module *> > &netToCell);
-  float annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
-  double initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
-  double initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
-  void random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
-  vector < Module * > ::iterator random_node();
+  double h_cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
+  double h_cell_overlap();
+  double h_wirelength(map<int, vector<Module *> > &netToCell);
+  double h_cell_overlap_partial(vector < Module * > &nodes);
+  double h_wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
+  double h_rudy(map<int, vector<Module *> > &netToCell);
+  float h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
+  double h_initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
+  double h_initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
+  void h_random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
+  vector < Module * > ::iterator h_random_node();
 };

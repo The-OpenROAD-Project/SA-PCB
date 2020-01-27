@@ -36,7 +36,7 @@ set (PCBPLACER_SRC
   src/globalParam.cpp
   src/readFiles.cpp
   src/PcbPlacer_wrapper.cpp
-  src/HPlacerUtils.cpp
+  #src/HPlacerUtils.cpp
   )
 
 set (PCBPLACER_HEADER
@@ -46,7 +46,7 @@ set (PCBPLACER_HEADER
   src/Node.hpp
   src/readFiles.hpp
   src/Pin.hpp
-  src/HPlacerUtils.hpp
+  #src/HPlacerUtils.hpp
   )
 
 set (PLACER_SWIG_FILES

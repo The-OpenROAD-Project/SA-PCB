@@ -52,6 +52,7 @@
 
 #include "Node.hpp"
 #include "Pin.hpp"
+#include "Module.hpp"
 //#include "readScl.hpp"
 
 class Node;

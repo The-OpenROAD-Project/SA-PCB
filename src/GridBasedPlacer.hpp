@@ -118,8 +118,29 @@ public:
   void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_initial_temperature(double tmp) {t_0 = tmp;}
 
+
+
+
+  double h_cellDensity();
+  void h_initialize_params(map<int, vector<Module *> > &netToCell);
+  void h_validate_move(Module *node, double rx, double ry);
+  double h_cost(map<int, vector <Module *> > &netToCell, int temp_debug = 0);
+  double h_cost_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
+  double h_cell_overlap();
+  double h_wirelength(map<int, vector<Module *> > &netToCell);
+  double h_cell_overlap_partial(vector < Module * > &nodes);
+  double h_wirelength_partial(vector < Module * > &nodes, map<int, vector<Module *> > &netToCell);
+  double h_rudy(map<int, vector<Module *> > &netToCell);
+  float h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
+  double h_initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
+  double h_initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
+  void h_random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
+  void h_random_initial_placement();
+  bool h_check_move(double prevCost, double newCost, double & Temperature);
+  vector < Module * > ::iterator h_random_node();
+
 private:
-  void hplace(map<int, vector<Pin> > &netToCell, string initial_pl);
+  void hplace(map<int, vector<pPin> > &netToCell, string initial_pl);
 
   int dbLengthToGridLength(const double dbLength) { return (int)ceil(dbLength * inputScale); }
 
@@ -150,6 +171,19 @@ private:
   vector < Node > ::iterator random_node();
 
 private:
+
+  vector < double > l_hist;
+  vector < double > density_hist;
+  vector < double > var_hist;
+  vector < double > temp_hist;
+
+  bool do_hplace = false;
+
+  std::pair <double,double> density_normalization;
+  double densityAlpha = 0.0001;
+  int densityFlag = 0;
+
+
   // best-so-far solution variables
   vector < Node > bestSol;
 
@@ -171,6 +205,7 @@ private:
   vector < double > oa_hist;
 
   // cost normalization terms
+  int initial_loop_iter = 100;
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;

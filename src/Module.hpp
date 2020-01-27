@@ -319,11 +319,11 @@ public:
   associated nets for each module (list of net ids)
   netlist-module mapping id -> list of modules
   */
-  void set_netlist_hierarchy(map<int, vector<Pin> > netToCell) {
+  void set_netlist_hierarchy(map<int, vector<pPin> > netToCell) {
     int netidx = 1;
     for (auto &net : netToCell) { 
       int netid = net.first;
-      vector<Pin> pvec = net.second; //pvec_i.idx -> cell id
+      vector<pPin> pvec = net.second; //pvec_i.idx -> cell id
       vector<Module *> ms; // convert vector of pins to vector of clusters for that net add to netToModule in leaf-level
       for (auto &pin : pvec) {
         int cell_id = pin.idx;

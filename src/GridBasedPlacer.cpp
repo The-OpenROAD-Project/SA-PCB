@@ -176,7 +176,7 @@ void GridBasedPlacer::hplace(map<int, vector<pPin> > &netToCell, string initial_
 
     cout << endl;
   } 
-
+/*
   cout << "===== greedy placement =====" << endl;
   t_0 = 0.0;
   initial_loop_iter = 1;
@@ -207,7 +207,7 @@ void GridBasedPlacer::hplace(map<int, vector<pPin> > &netToCell, string initial_
     netToCell_tmp.insert(pair < int, vector < Module * > > (netidx, ms));
     netidx ++;
   }
-  float cost = this->annealer(netToCell_tmp, initial_pl);
+  float cost = this->annealer(netToCell_tmp, initial_pl);*/
 }
 
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {

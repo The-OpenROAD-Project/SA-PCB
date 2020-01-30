@@ -94,6 +94,7 @@ public:
   //dtor
   ~GridBasedPlacer(){}
 
+  /* SWIG Methods Start */
   void test_hplacer_flow();
   kicadPcbDataBase &test_placer_flow();
   kicadPcbDataBase &getDb() { return mDb; }
@@ -118,7 +119,7 @@ public:
   void set_iterations_moves(int iter) {inner_loop_iter = iter;}
   void set_initial_temperature(double tmp) {t_0 = tmp;}
 
-
+  /* SWIG Methods End */
 
 
   double h_cellDensity();

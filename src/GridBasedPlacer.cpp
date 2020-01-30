@@ -49,6 +49,8 @@ typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<dou
 typedef bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16> > rtree_t;
 
 vector < Node > nodeId;
+vector < Module * > moduleId;
+Hierarchy H;
 map < string, int > name2id;
 
 void GridBasedPlacer::test_hplacer_flow() {
@@ -174,8 +176,9 @@ void GridBasedPlacer::hplace(map<int, vector<pPin> > &netToCell, string initial_
 
     cout << endl;
   } 
-/*
+
   cout << "===== greedy placement =====" << endl;
+  t_0 = 0.0;
   initial_loop_iter = 1;
   nodeId = H.update_cell_positions(nodeId);
   vector < Module * > moduleId_tmp;
@@ -204,8 +207,7 @@ void GridBasedPlacer::hplace(map<int, vector<pPin> > &netToCell, string initial_
     netToCell_tmp.insert(pair < int, vector < Module * > > (netidx, ms));
     netidx ++;
   }
-  t_0 = 0.0;
-  float cost = this->annealer(netToCell_tmp, initial_pl);*/
+  float cost = this->annealer(netToCell_tmp, initial_pl);
 }
 
 kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
@@ -363,6 +365,51 @@ void GridBasedPlacer::initialize_params(map<int, vector<pPin> > &netToCell) {
     random_initial_placement();
     sum_wl += wirelength(netToCell);
     sum_oa += cell_overlap();
+    sum_rn += 0.0;//rudy(netToCell);
+  }
+
+  wl.first = 0.0;
+  wl.second = sum_wl / (float)initial_loop_iter;
+
+  area.first = 0.0;
+  area.second = sum_oa / (float)initial_loop_iter;
+  area.second = max(area.second, 1.0); 
+
+  rn.first = 0.0;
+  rn.second = sum_rn / (float)initial_loop_iter;
+
+  normalization_terms.push_back(wl);
+  normalization_terms.push_back(area);
+  normalization_terms.push_back(rn);
+
+  wl_normalization = normalization_terms[0];
+  area_normalization = normalization_terms[1];
+  routability_normalization = normalization_terms[2];
+}
+
+void GridBasedPlacer::h_initialize_params(map<int, vector<Module*> > &netToCell) {
+
+  vector < std::pair <double,double> > normalization_terms;
+
+  int num_components = 0;
+  vector < Module* > ::iterator itNode;
+  for (itNode = moduleId.begin(); itNode != moduleId.end(); ++itNode) {
+    if(!(*itNode) -> terminal) {
+      num_components += 1;
+    }
+  }
+  std::pair < double, double > wl;
+  std::pair < double, double > area;
+  std::pair < double, double > rn;
+
+  double sum_wl = 0.0;
+  double sum_oa = 0.0;
+  double sum_rn = 0.0;
+
+  for (int i = 0; i<initial_loop_iter; i++) {
+    h_random_initial_placement();
+    sum_wl += h_wirelength(netToCell);
+    sum_oa += h_cell_overlap();
     sum_rn += 0.0;//rudy(netToCell);
   }
 
@@ -1115,6 +1162,10 @@ modified_lam_update
 Update the SA parameters according to modified lam schedule
 */
 void GridBasedPlacer::modified_lam_update(int i) {
+  if(do_hplace){
+    int outer_loop_iter = (H.levels.size()-1) * outer_loop_iter;
+  }
+
   if ((double)i/(double)outer_loop_iter < 0.15){
     LamRate = 0.44 + 0.56 * pow(560.0, -i/outer_loop_iter/0.15);
   } else if (0.15 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
@@ -1828,7 +1879,7 @@ void GridBasedPlacer::h_validate_move(Module *node, double rx, double ry) {
 }
 
 //double c = 0.0;
-double GridBasedPlacer::h_initiate_move(double current_cost, double & Temperature, map<int, vector<Module *> > &netToCell) {
+double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Module *> > &netToCell) {
   // Initate a transition
   int state = -1;
   double prevCost = 0.0;
@@ -1995,7 +2046,7 @@ double GridBasedPlacer::h_initialize_temperature(double &Temperature, map<int, v
     for(int j=1; j<=10; j++){
       this->random_initial_placement();
       emax += exp(h_cost(netToCell)/t);
-      this->h_initiate_move(0.0, Temperature, netToCell);
+      this->h_initiate_move(0.0, netToCell);
       emin += exp(h_cost(netToCell)/t);
     }
     xt = emax/emin;
@@ -2038,6 +2089,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     if(!(*itNode) -> terminal && !(*itNode) -> fixed) {
       num_components += 1;
     }
+    cout << (*itNode) -> width << " " << (*itNode) -> height << endl;
   }
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -2045,8 +2097,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
   int i = 0; // inner loop iterator
   cout << "beginning iterations..." << endl;
   while (ii < outer_loop_iter) {
-    i = inner_loop_iter*num_components
-    ; 
+    i = inner_loop_iter*num_components; 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     duration<double> time_span = duration_cast< duration<double> >(t2 - t1);
 
@@ -2071,7 +2122,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
         cst = h_cost(netToCell,-1);
     }
     while (i > 0) {
-      cst = this->h_initiate_move(cst, Temperature, netToCell);
+      cst = this->h_initiate_move(cst, netToCell);
       report["cost_hist"].push_back(cst);
       i -= 1;
     }
@@ -2081,7 +2132,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
       break;
     }
     if (lam) {
-      modified_lam_update(ii);
+      modified_lam_update(level*outer_loop_iter + ii);
     } else {
       update_temperature();
     }
@@ -2096,7 +2147,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
   Temperature = 0.0;
   cst = h_cost(netToCell);
   while (i > 0) {
-    cst = h_initiate_move(cst, Temperature, netToCell);
+    cst = h_initiate_move(cst, netToCell);
     if (i%10==0) {
         cst = h_cost(netToCell);
     }

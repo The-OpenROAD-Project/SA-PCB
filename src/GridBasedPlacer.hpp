@@ -91,6 +91,7 @@ class GridBasedPlacer {
 public:
   //ctor
   GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
+  GridBasedPlacer() {}
   //dtor
   ~GridBasedPlacer(){}
 
@@ -133,7 +134,7 @@ public:
   double h_rudy(map<int, vector<Module *> > &netToCell);
   float h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl,int level=0);
   double h_initialize_temperature(double &Temperature,map<int, vector<Module *> > &netToCell);
-  double h_initiate_move(double current_cost, double & Temperature,map<int, vector<Module *> > &netToCell);
+  double h_initiate_move(double current_cost, map<int, vector<Module *> > &netToCell);
   void h_random_placement(int xmin, int xmax, int ymin, int ymax, Module &n);
   void h_random_initial_placement();
   bool h_check_move(double prevCost, double newCost, double & Temperature);

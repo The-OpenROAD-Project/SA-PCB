@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Starting placer..." << std::endl;
 */
   GridBasedPlacer placer;
-  placer.test_placer_flow();
+  placer.test_hplacer_flow();
 
   //GlobalParam::showCurrentUsage("GridBasedPlacer");
   //GlobalParam::showFinalUsage("End of Program");

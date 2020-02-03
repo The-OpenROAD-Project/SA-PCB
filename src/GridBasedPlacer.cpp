@@ -1183,16 +1183,12 @@ void GridBasedPlacer::modified_lam_update(int i) {
 
   if (AcceptRate > LamRate) {
     T_update = Temperature * lamtemp_update;
-    if(i > 1) {
-      sigma_update = log(T_update)  / log(Temperature);
-    }
+    sigma_update = log(T_update)  / log(Temperature);
     Temperature = T_update;
     l1 = 0.95*l1;
   } else {
-    T_update = min(Temperature / lamtemp_update, 1.0);
-    if(i > 1) {
-      sigma_update = log(T_update) / log(Temperature);
-    }
+    T_update = min(Temperature / lamtemp_update, 1.0000001);
+    sigma_update = max(log(T_update) / log(Temperature), 1.0);
     Temperature = T_update;
     l1 = 0.96*l1;
   }

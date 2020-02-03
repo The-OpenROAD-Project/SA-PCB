@@ -189,6 +189,7 @@ private:
   double densityAlpha = 0.0001;
   int densityFlag = 0;
 
+  bool entraped = false;
   double entrapment_threshold = 0.75;
 
   // best-so-far solution variables
@@ -198,6 +199,7 @@ private:
 
   double best_wl = 0.0;
   double best_overlap = std::numeric_limits<double>::max();
+  double best_cost = std::numeric_limits<double>::max();
 
   // rtree datastructure for fast overlap check
   bool rt = false;
@@ -213,6 +215,7 @@ private:
 
   // cost normalization terms
   int initial_loop_iter = 100;
+  std::pair <double,double> cost_normalization;
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;

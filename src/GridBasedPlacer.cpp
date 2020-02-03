@@ -905,6 +905,9 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   cout << "cost: " << total_cost << " wirelength: " << wl << " " << wirelength_cost << " overlap: " << oa << " " << overlap_cost << endl;
 
+  if (cost < best_cost) {
+    best_cost = cost;
+  }
   if (oa < 1 && wl < best_wl) {
       bestSol = nodeId;
       best_wl = wl;
@@ -927,7 +930,6 @@ double GridBasedPlacer::cost_partial(vector < Node *> &nodes, map<int, vector<pP
   return l1 * (wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
          l2 * 0.85 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
          l2 * 0.15 * 0.0;//(rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
-
 }
 
 /*
@@ -1283,7 +1285,6 @@ bool  GridBasedPlacer::check_entrapment() {
       std::vector<double> x(n_s);
       std::iota(x.begin(), x.end(), 1);
       linreg(n_s,x,vec[k],m,b,r);
-      printf("m=%g b=%g r=%g\n",m,b,r);
       log_F_L.push_back(log(r));
       log_L.push_back(log(n_s));
     }
@@ -1307,7 +1308,13 @@ bool  GridBasedPlacer::check_entrapment() {
 }
 
 double h_stun(map<int, vector <Module *> > &netToCell, int temp_debug = 0) {
+  // a adjust stun parameter
+  double E = h_cost(netToCell, temp_debug);
+  double E_0 = best_cost;
+  double E_var = E - E_0;
+  double gamma = E_var / 0.05;
 
+  return exp( - E_var / gamma)
 }
 
 double h_stun_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
@@ -1451,7 +1458,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     cout << "=====" << ii << "=====" << endl;
     cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
     " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
-    " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << endl;
+    " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << " entraped: " << entraped << endl;
 
     //gen_report(report,
     //           accept_ratio_history,
@@ -1467,7 +1474,15 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       i -= 1;
     }
 
-    // convergence criterion
+    // convergence criterion & entrapment check
+    if (ii % 10 == 0) {
+      if(check_entrapment()) {
+      // local min
+        entraped = true;
+      } else {
+        entraped = false;
+      }
+    }
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }
@@ -1916,6 +1931,9 @@ double GridBasedPlacer::h_cost(map<int, vector<Module *> > &netToCell, int temp_
   double total_cost = wirelength_cost + overlap_cost;// + routability_cost;
   cout << "cost: " << total_cost << " wirelength: " << wl << " " << wirelength_cost << " overlap: " << oa << " " << overlap_cost << endl;
   
+  if (cost <  best_cost) {
+    best_cost = cost;
+  }
   if (oa < 1 && wl < best_wl) {
       bestSol = nodeId;
       best_wl = wl;
@@ -2166,13 +2184,13 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
   vector< double > accept_ratio_history;
 
   cout << "calculating initial params..." << endl;
-  this->h_initialize_params(netToCell);
+  h_initialize_params(netToCell);
 
   cout << "calculating initial cost..." << endl;  
-  double cst = this->h_cost(netToCell,-1);
+  double cst = h_cost(netToCell,-1);
   
   if(var) {
-    Temperature = this->h_initialize_temperature(Temperature, netToCell);
+    Temperature = h_initialize_temperature(Temperature, netToCell);
   }
   int idx = 0;
 
@@ -2211,16 +2229,28 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     nodeId = H.update_cell_positions_at_level(nodeId, level);
     writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
 
-    if (ii % 10 == 0) {
-        cst = h_cost(netToCell,-1);
+    //if (ii % 10 == 0) {
+    //    cst = h_cost(netToCell,-1);
+    //}
+    if (entraped) {
+      cst = h_stun(netToCell,-1);
     }
     while (i > 0) {
-      cst = this->h_initiate_move(cst, netToCell);
+      cst = h_initiate_move(cst, netToCell);
       cost_hist.push_back(cst);
       i -= 1;
     }
+    entraped = false;
 
-    // convergence criterion
+    // convergence criterion and entrapment check
+    if (ii > 1 && ii % 10 == 0) {
+      if(check_entrapment()) {
+      // local min
+        entraped = true;
+      } else {
+        entraped = false;
+      }
+    }
     if(eps > 0 && abs(cost_hist.end()[-1] - cost_hist.end()[-2]) < eps) {
       break;
     }
@@ -2246,5 +2276,5 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     }
     i -= 1;
   }
-  return this->h_cost(netToCell);
+  return h_cost(netToCell);
 }

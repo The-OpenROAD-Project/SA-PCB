@@ -1183,12 +1183,16 @@ void GridBasedPlacer::modified_lam_update(int i) {
 
   if (AcceptRate > LamRate) {
     T_update = Temperature * lamtemp_update;
-    sigma_update = log(T_update)  / log(Temperature);
+    if(i > 1) {
+      sigma_update = log(T_update)  / log(Temperature);
+    }
     Temperature = T_update;
     l1 = 0.95*l1;
   } else {
-    T_update = min(Temperature / lamtemp_update, 1.0); 
-    sigma_update = log(T_update) / log(Temperature);
+    T_update = min(Temperature / lamtemp_update, 1.0);
+    if(i > 1) {
+      sigma_update = log(T_update) / log(Temperature);
+    }
     Temperature = T_update;
     l1 = 0.96*l1;
   }
@@ -2072,7 +2076,7 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     }
 
     double sigma = (*rand_node1)->sigma;
-
+    ssamp = sigma;
     boost::normal_distribution<> nd(0.0, sigma);
     boost::variate_generator<boost::mt19937&,
                              boost::normal_distribution<> > var_nor(rng, nd);

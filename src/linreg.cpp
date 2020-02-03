@@ -56,7 +56,7 @@ int linreg(int n, const std::vector<double> x, const std::vector<double> y, doub
         sumy2 += sqr(y[i]); 
     } 
 
-    REAL denom = (n * sumx2 - sqr(sumx));
+    REAL denom = (n * sumx2 - sqr(sumx) + 0.00001);
     if (denom == 0) {
         // singular matrix. can't solve the problem.
         m = 0;
@@ -70,15 +70,13 @@ int linreg(int n, const std::vector<double> x, const std::vector<double> y, doub
     
 
     REAL rmse;
-    if(r!=NULL) {
-        for (int i=0;i<n;i++){ 
-            REAL lab = m * x[i] + b;
-            rmse += sqrt(y[i] - lab);
-        } 
-        rmse = rmse / n;
-        rmse = sqrt(rmse);
-        r = rmse;
-    }
+    for (int i=0;i<n;i++){ 
+        REAL lab = m * x[i] + b;
+        rmse += sqr(y[i] - lab);
+    } 
+    rmse = rmse / n;
+    rmse = sqrt(rmse);
+    r = rmse;
 
     return 0; 
 }

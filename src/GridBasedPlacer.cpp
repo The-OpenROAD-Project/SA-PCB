@@ -1254,7 +1254,7 @@ bool  GridBasedPlacer::check_entrapment() {
   vector < double > log_F_L;
   vector < double > log_L;
 
-  for(int i=1; i<=numL; i++){
+  for(int i=0; i<numL; i++) {
     int size = (X_t.size() - 1) / n + 1;
     // create array of vectors to store the sub-vectors
     std::vector<double> vec[size];
@@ -1282,6 +1282,11 @@ bool  GridBasedPlacer::check_entrapment() {
       // (2b) LLS fit each segment of X_t and calculate RMSE 
       REAL m,b,r;
       int n_s = vec[k].size();
+
+      if (n_s < 1) {
+        continue;
+      }
+
       std::vector<double> x(n_s);
       std::iota(x.begin(), x.end(), 1);
       int ret = linreg(n_s,x,vec[k],m,b,r);
@@ -1289,6 +1294,7 @@ bool  GridBasedPlacer::check_entrapment() {
         cout << "L singular matrix" << endl;
       }
       printf("INNER LOOP m=%g b=%g r=%g\n",m,b,r);
+      printf("INNER LOOP r=%g n_s=%g\n",log(r), log(n_s));
       log_F_L.push_back(log(r));
       log_L.push_back(log(n_s));
     }

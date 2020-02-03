@@ -905,8 +905,8 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   cout << "cost: " << total_cost << " wirelength: " << wl << " " << wirelength_cost << " overlap: " << oa << " " << overlap_cost << endl;
 
-  if (cost < best_cost) {
-    best_cost = cost;
+  if (total_cost < best_cost) {
+    best_cost = total_cost;
   }
   if (oa < 1 && wl < best_wl) {
       bestSol = nodeId;
@@ -1307,17 +1307,17 @@ bool  GridBasedPlacer::check_entrapment() {
   }
 }
 
-double h_stun(map<int, vector <Module *> > &netToCell, int temp_debug = 0) {
+double GridBasedPlacer::h_stun(map<int, vector <Module *> > &netToCell, int temp_debug) {
   // a adjust stun parameter
   double E = h_cost(netToCell, temp_debug);
   double E_0 = best_cost;
   double E_var = E - E_0;
   double gamma = E_var / 0.05;
 
-  return exp( - E_var / gamma)
+  return exp( - E_var / gamma);
 }
 
-double h_stun_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
+double GridBasedPlacer::h_stun_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
 
 }
 
@@ -1931,8 +1931,8 @@ double GridBasedPlacer::h_cost(map<int, vector<Module *> > &netToCell, int temp_
   double total_cost = wirelength_cost + overlap_cost;// + routability_cost;
   cout << "cost: " << total_cost << " wirelength: " << wl << " " << wirelength_cost << " overlap: " << oa << " " << overlap_cost << endl;
   
-  if (cost <  best_cost) {
-    best_cost = cost;
+  if (total_cost <  best_cost) {
+    best_cost = total_cost;
   }
   if (oa < 1 && wl < best_wl) {
       bestSol = nodeId;
@@ -2004,9 +2004,9 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
   vector < Module * > perturbed_nodes;
 
   int r = 0;
-  rand_node1 = this->h_random_node();
+  rand_node1 = h_random_node();
   while((*rand_node1)->terminal || (*rand_node1)->fixed) {
-    rand_node1 = this->h_random_node();
+    rand_node1 = h_random_node();
   }
   perturbed_nodes.push_back(*rand_node1);
 
@@ -2030,12 +2030,15 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     if(debug > 1) {
       cout << "swap" << endl;
     }
-    rand_node2 = this->h_random_node();
+    rand_node2 = h_random_node();
     while((*rand_node2)->terminal || (*rand_node2)->idx == (*rand_node1)->idx || (*rand_node2)->fixed) {    
-      rand_node2 = this->h_random_node();
+      rand_node2 = h_random_node();
     }
     perturbed_nodes.push_back(*rand_node2);
-    prevCost = this->h_cost_partial(perturbed_nodes,netToCell);
+
+    if (! entraped) {
+      prevCost = h_cost_partial(perturbed_nodes,netToCell);
+    }
 
     //rtree.remove(std::make_pair(rand_node2->envelope, rand_node2->idx));
     rand_node2_orig_x = (*rand_node2)->xCoordinate;
@@ -2050,7 +2053,10 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     if(debug > 1) {
       cout << "shift" << endl;
     }
-    prevCost = this->h_cost_partial(perturbed_nodes, netToCell);
+
+    if (! entraped) {
+      prevCost = h_cost_partial(perturbed_nodes, netToCell);
+    }
 
     double sigma = (*rand_node1)->sigma;
 
@@ -2071,7 +2077,10 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     if(debug > 1) {
       cout << "rotate" << endl;
     }
-    prevCost = this->h_cost_partial(perturbed_nodes, netToCell);
+
+    if (! entraped) {
+      prevCost = h_cost_partial(perturbed_nodes, netToCell);
+    }
 
     if (rotate_flag == 0) {
       boost::uniform_int<> uni_dist(0,3);
@@ -2088,10 +2097,15 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
 
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
   }
-  double transition_cost = this->h_cost_partial(perturbed_nodes,netToCell);
-  double updated_cost = current_cost - prevCost + transition_cost;
+  double updated_cost = 0.0;
+  if (! entraped) {
+    double transition_cost = h_cost_partial(perturbed_nodes,netToCell);
+    updated_cost = current_cost - prevCost + transition_cost;
+  } else {
+    updated_cost = h_stun(netToCell, -1);
+  }
 
-  bool accept = this->h_check_move(current_cost, updated_cost, Temperature);
+  bool accept = h_check_move(current_cost, updated_cost, Temperature);
   if (!accept) {
     AcceptRate = 1.0/500.0 *(499.0*AcceptRate);
     if(debug > 1) {
@@ -2107,7 +2121,6 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     } else if (state == 1) {
       (*rand_node1)->setPos(rand_node1_orig_x,rand_node1_orig_y);
     } else if (state == 2) {
-      //(*rand_node1)->setRotation(8-r);
       (*rand_node1)->setPos(rand_node1_orig_x,rand_node1_orig_y);
     }
     //rtree.insert(std::make_pair(rand_node1->envelope, rand_node1->idx));
@@ -2224,7 +2237,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     cout << "=====" << ii << "=====" << endl;
     cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
     " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
-    " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << endl;
+    " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << " entraped: " << entraped << endl;
 
     nodeId = H.update_cell_positions_at_level(nodeId, level);
     writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
@@ -2232,10 +2245,10 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     //if (ii % 10 == 0) {
     //    cst = h_cost(netToCell,-1);
     //}
-    if (entraped) {
-      cst = h_stun(netToCell,-1);
-    }
     while (i > 0) {
+      if (entraped) {
+        cst = h_stun(netToCell,-1);
+      }
       cst = h_initiate_move(cst, netToCell);
       cost_hist.push_back(cst);
       i -= 1;
@@ -2243,7 +2256,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     entraped = false;
 
     // convergence criterion and entrapment check
-    if (ii > 1 && ii % 10 == 0) {
+    if (ii > 1 && ii % 20 == 0) {
       if(check_entrapment()) {
       // local min
         entraped = true;

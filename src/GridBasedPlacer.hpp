@@ -123,7 +123,6 @@ public:
 
   /* SWIG Methods End */
 
-
   double h_cellDensity();
   void h_initialize_params(map<int, vector<Module *> > &netToCell);
   void h_validate_move(Module *node, double rx, double ry);

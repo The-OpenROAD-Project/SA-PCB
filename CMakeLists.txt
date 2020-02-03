@@ -36,6 +36,7 @@ set (PCBPLACER_SRC
   src/globalParam.cpp
   src/readFiles.cpp
   src/PcbPlacer_wrapper.cpp
+  src/linreg.cpp
   #src/HPlacerUtils.cpp
   )
 

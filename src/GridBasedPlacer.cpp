@@ -1293,8 +1293,8 @@ bool  GridBasedPlacer::check_entrapment() {
       if(ret == 1) {
         cout << "L singular matrix" << endl;
       }
-      printf("INNER LOOP m=%g b=%g r=%g\n",m,b,r);
-      printf("INNER LOOP r=%g n_s=%g\n",log(r), log(n_s));
+      //printf("INNER LOOP m=%g b=%g r=%g\n",m,b,r);
+      //printf("INNER LOOP r=%g n_s=%g\n",log(r), log(n_s));
       log_F_L.push_back(log(r));
       log_L.push_back(log(n_s));
     }
@@ -1309,7 +1309,7 @@ bool  GridBasedPlacer::check_entrapment() {
   if(ret == 1) {
     cout << "log-log singular matrix" << endl;
   }
-  printf("OUTER LOOP m=%g b=%g r=%g\n",m,b,r);
+  //printf("OUTER LOOP m=%g b=%g r=%g\n",m,b,r);
 
   alpha = m;
 

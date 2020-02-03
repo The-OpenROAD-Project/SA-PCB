@@ -1284,7 +1284,11 @@ bool  GridBasedPlacer::check_entrapment() {
       int n_s = vec[k].size();
       std::vector<double> x(n_s);
       std::iota(x.begin(), x.end(), 1);
-      linreg(n_s,x,vec[k],m,b,r);
+      int ret = linreg(n_s,x,vec[k],m,b,r);
+      if(ret == 1) {
+        cout << "L singular matrix" << endl;
+      }
+      printf("INNER LOOP m=%g b=%g r=%g\n",m,b,r);
       log_F_L.push_back(log(r));
       log_L.push_back(log(n_s));
     }
@@ -1295,8 +1299,11 @@ bool  GridBasedPlacer::check_entrapment() {
   // (4) Estimate LLS slope alpha for log-log L - RMSE. Check  threshold  & return.
   REAL m,b,r;
   int n_s = log_L.size();
-  linreg(n_s,log_L,log_F_L,m,b,r);
-  printf("m=%g b=%g r=%g\n",m,b,r);
+  int ret = linreg(n_s,log_L,log_F_L,m,b,r);
+  if(ret == 1) {
+    cout << "log-log singular matrix" << endl;
+  }
+  printf("OUTER LOOP m=%g b=%g r=%g\n",m,b,r);
 
   alpha = m;
 
@@ -2242,9 +2249,9 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     nodeId = H.update_cell_positions_at_level(nodeId, level);
     writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
 
-    //if (ii % 10 == 0) {
-    //    cst = h_cost(netToCell,-1);
-    //}
+    if (ii % 10 == 0) {
+        cst = h_cost(netToCell,-1);
+    }
     while (i > 0) {
       if (entraped) {
         cst = h_stun(netToCell,-1);

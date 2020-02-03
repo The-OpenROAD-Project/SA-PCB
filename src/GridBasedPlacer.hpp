@@ -40,6 +40,7 @@
 #include "kicadPcbDataBase.h"
 #include "globalParam.h"
 #include "util.h"
+#include "linreg.h"
 
 #include <functional>
 #include <stdlib.h>
@@ -150,6 +151,9 @@ private:
   void set_boundaries();
   void initialize_params(map<int, vector<pPin> > &netToCell);
   void validate_move(Node &node, double rx, double ry);
+  double h_stun(map<int, vector <Module *> > &netToCell, int temp_debug = 0);
+  double h_stun_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell);
+  bool check_entrapment();
   double cost(map<int, vector<pPin> > &netToCell, int temp_debug = 0);
   double cost_partial(vector < Node *> &nodes, map<int, vector<pPin> > &netToCell);
   double cell_overlap();
@@ -185,6 +189,7 @@ private:
   double densityAlpha = 0.0001;
   int densityFlag = 0;
 
+  double entrapment_threshold = 0.75;
 
   // best-so-far solution variables
   vector < Node > bestSol;
@@ -211,6 +216,7 @@ private:
   std::pair <double,double> wl_normalization;
   std::pair <double,double> area_normalization;
   std::pair <double,double> routability_normalization;
+  double sigma_update = 0.985;
 
   map<int, vector<pPin> > *netToCell = nullptr;
   vector < vector < pPin > > *netToCellVec = nullptr;

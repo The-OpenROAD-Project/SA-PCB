@@ -46,6 +46,7 @@ set (PCBPLACER_HEADER
   src/Node.hpp
   src/readFiles.hpp
   src/Pin.hpp
+  src/linreg.h
   #src/HPlacerUtils.hpp
   )
 

@@ -196,7 +196,7 @@ void GridBasedPlacer::hplace(map<int, vector<pPin> > &netToCell, string initial_
   int netidx = 1;
   for (auto &net : netToCell) { 
     int netid = net.first;
-    vector<Pin> pvec = net.second; //pvec_i.idx -> cell id
+    vector<pPin> pvec = net.second; //pvec_i.idx -> cell id
     vector<Module *> ms; 
     for (auto &pin : pvec) {
       int cell_id = pin.idx;
@@ -1162,6 +1162,7 @@ modified_lam_update
 Update the SA parameters according to modified lam schedule
 */
 void GridBasedPlacer::modified_lam_update(int i) {
+  double T_update;
   if(do_hplace){
     int outer_loop_iter = (H.levels.size()-1) * outer_loop_iter;
   }
@@ -1179,22 +1180,28 @@ void GridBasedPlacer::modified_lam_update(int i) {
   }
 
   if (AcceptRate > LamRate) {
-    Temperature = Temperature * lamtemp_update;
+    T_update = Temperature * lamtemp_update;
+    sigma_update = log(T_update)  / log(Temperature);
+    Temperature = T_update;
     l1 = 0.95*l1;
   } else {
-    Temperature = min(Temperature / lamtemp_update, 1.2);
+    T_update = min(Temperature / lamtemp_update, 1.0); 
+    sigma_update = log(T_update) / log(Temperature);
+    Temperature = T_update;
     l1 = 0.96*l1;
   }
 
   if (!do_hplace) {
     vector < Node > ::iterator nodeit = nodeId.begin();
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      nodeit->sigma =  max(0.98*nodeit->sigma,0.5);
+      //nodeit->sigma =  max(0.98*nodeit->sigma,0.5);
+      nodeit->sigma = max(sigma_update * nodeit->sigma,1.0);
     }
   } else {
     vector < Module* > ::iterator nodeit = moduleId.begin();
     for (nodeit = moduleId.begin(); nodeit != moduleId.end(); ++nodeit) {
-      (*nodeit) -> sigma =  0.2;
+      //(*nodeit) -> sigma =  0.2;
+      (*nodeit)->sigma = max(sigma_update * (*nodeit)->sigma,1.0);
     }
   }
 }
@@ -1219,6 +1226,92 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   } else {
     return false;
   }
+}
+
+/*
+Improving FPGA Placement with Dynamically Adaptive Stochastic Tunneling
+*/
+bool  GridBasedPlacer::check_entrapment() {
+  double alpha;
+
+  // (1) First define X_t
+  double mean_cost = accumulate( cost_hist.begin(), cost_hist.end(), 0.0)/cost_hist.size(); 
+  vector < double > X_t;
+  int N  = cost_hist.size();
+  for(int i=0; i<=N; i++){
+    double x_t = 0.0;
+    for(int j=0; j<=i; j++){
+      x_t += cost_hist[j] - mean_cost;
+    } 
+    X_t.push_back(x_t);
+  }
+  int numL = 4;
+
+  // (2a) split X_t into windows of length L for k L
+  int n = 10;
+  vector < double > log_F_L;
+  vector < double > log_L;
+
+  for(int i=1; i<=numL; i++){
+    int size = (X_t.size() - 1) / n + 1;
+    // create array of vectors to store the sub-vectors
+    std::vector<double> vec[size];
+
+    // each iteration of this loop process next set of n elements
+    // and store it in a vector at k'th index in vec
+    for (int k = 0; k < size; ++k) {
+      // get range for next set of n elements
+      auto start_itr = std::next(X_t.cbegin(), k*n);
+      auto end_itr = std::next(X_t.cbegin(), k*n + n);
+
+      // allocate memory for the sub-vector
+      vec[k].resize(n);
+
+      // code to handle the last sub-vector as it might
+      // contain less elements
+      if (k*n + n > X_t.size()) {
+        end_itr = X_t.cend();
+        vec[k].resize(X_t.size() - k*n);
+      }
+
+      // copy elements from the input range to the sub-vector
+      std::copy(start_itr, end_itr, vec[k].begin());
+
+      // (2b) LLS fit each segment of X_t and calculate RMSE 
+      REAL m,b,r;
+      int n_s = vec[k].size();
+      std::vector<double> x(n_s);
+      std::iota(x.begin(), x.end(), 1);
+      linreg(n_s,x,vec[k],m,b,r);
+      printf("m=%g b=%g r=%g\n",m,b,r);
+      log_F_L.push_back(log(r));
+      log_L.push_back(log(n_s));
+    }
+
+    n+=10;
+  }
+
+  // (4) Estimate LLS slope alpha for log-log L - RMSE. Check  threshold  & return.
+  REAL m,b,r;
+  int n_s = log_L.size();
+  linreg(n_s,log_L,log_F_L,m,b,r);
+  printf("m=%g b=%g r=%g\n",m,b,r);
+
+  alpha = m;
+
+  if(alpha > entrapment_threshold) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+double h_stun(map<int, vector <Module *> > &netToCell, int temp_debug = 0) {
+
+}
+
+double h_stun_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
+
 }
 
 /*
@@ -1358,7 +1451,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     cout << "=====" << ii << "=====" << endl;
     cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
     " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
-    " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << endl;
+    " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << endl;
 
     //gen_report(report,
     //           accept_ratio_history,
@@ -2123,7 +2216,7 @@ float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string
     }
     while (i > 0) {
       cst = this->h_initiate_move(cst, netToCell);
-      report["cost_hist"].push_back(cst);
+      cost_hist.push_back(cst);
       i -= 1;
     }
 

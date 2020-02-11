@@ -1,0 +1,82 @@
+\hypertarget{namespacemake__plots}{}\doxysection{make\+\_\+plots Namespace Reference}
+\label{namespacemake__plots}\index{make\_plots@{make\_plots}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacemake__plots_ab155875a957331cfb3c6b3b83835215d}{plot\+\_\+circuit}} (circuit\+\_\+name, components, comp2rot, nets, board\+\_\+dim, figname=None, ax=None)
+\item 
+def \mbox{\hyperlink{namespacemake__plots_a4b0aaf237d8de7eee3a5335dc5114b5d}{pin\+\_\+pos}} (pin\+\_\+loc, modules, comp2rot)
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a6900c9d2bec82faacb7687d5af02fe84}\label{namespacemake__plots_a6900c9d2bec82faacb7687d5af02fe84}} 
+def {\bfseries plot\+\_\+pl} (plfile, nodesfile, netsfile, figname, shapesfile=None, board\+\_\+dim=None)
+\item 
+\mbox{\Hypertarget{namespacemake__plots_abc990064fcfda9d5c36919532e75951b}\label{namespacemake__plots_abc990064fcfda9d5c36919532e75951b}} 
+def {\bfseries make\+\_\+heatmap\+\_\+anim} ()
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a31407ec9a5cc73c7d6cf9209b40b4436}\label{namespacemake__plots_a31407ec9a5cc73c7d6cf9209b40b4436}} 
+def {\bfseries make\+\_\+placement\+\_\+anim} ()
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a34003bfb3201abcb11ea3adf1873e463}\label{namespacemake__plots_a34003bfb3201abcb11ea3adf1873e463}} 
+def {\bfseries make\+\_\+graphs} (reports\+\_\+dir)
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a3abfc166daf0897af783c2eafeb15e60}\label{namespacemake__plots_a3abfc166daf0897af783c2eafeb15e60}} 
+def {\bfseries main} (brd\+\_\+name, out\+\_\+file, pl\+\_\+file=None, pl\+\_\+anim=False, heatmap\+\_\+anim=False, reports\+\_\+dir=False)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacemake__plots_af46a4418808b8a397a12519aa99e400a}\label{namespacemake__plots_af46a4418808b8a397a12519aa99e400a}} 
+{\bfseries arguments} = docopt(\+\_\+\+\_\+doc\+\_\+\+\_\+, version=\textquotesingle{}make\+\_\+plots v0.\+1\textquotesingle{})
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a2487900f4e8d8cfee0e0f4ab2df1a2b2}\label{namespacemake__plots_a2487900f4e8d8cfee0e0f4ab2df1a2b2}} 
+{\bfseries brd\+\_\+name}
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a55229bc9ace582efa24455d709ee7651}\label{namespacemake__plots_a55229bc9ace582efa24455d709ee7651}} 
+{\bfseries out\+\_\+file}
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a757bd70c56951943cbaf61767a0828d2}\label{namespacemake__plots_a757bd70c56951943cbaf61767a0828d2}} 
+{\bfseries pl\+\_\+file}
+\item 
+\mbox{\Hypertarget{namespacemake__plots_a8c39afa4f0d08fe7dc2c8bb04b1996e8}\label{namespacemake__plots_a8c39afa4f0d08fe7dc2c8bb04b1996e8}} 
+{\bfseries reports\+\_\+dir}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}make_plots.
+This program makes plots
+Usage:
+  make_plots.py -h | --help
+  make_plots.py --brd <BRD> --pl <PL> --out <OUT_NAME> --reports <reports>
+
+-h --help                      Show this message.
+-i --brd BRD                   The circuit file.
+-o --out OUT
+-p --pl PL
+-r --reports reports
+-apl --anim_pl animate_reports
+-arb --anim_rb animate_routability
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacemake__plots_a4b0aaf237d8de7eee3a5335dc5114b5d}\label{namespacemake__plots_a4b0aaf237d8de7eee3a5335dc5114b5d}} 
+\index{make\_plots@{make\_plots}!pin\_pos@{pin\_pos}}
+\index{pin\_pos@{pin\_pos}!make\_plots@{make\_plots}}
+\doxysubsubsection{\texorpdfstring{pin\_pos()}{pin\_pos()}}
+{\footnotesize\ttfamily def make\+\_\+plots.\+pin\+\_\+pos (\begin{DoxyParamCaption}\item[{}]{pin\+\_\+loc,  }\item[{}]{modules,  }\item[{}]{comp2rot }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Convert localized pin positions to position wrt
+ global coordinates
+:param pin_loc: pin location of the form [pinname, [xoffset, yoffset]]
+:param modules: list of modules
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespacemake__plots_ab155875a957331cfb3c6b3b83835215d}\label{namespacemake__plots_ab155875a957331cfb3c6b3b83835215d}} 
+\index{make\_plots@{make\_plots}!plot\_circuit@{plot\_circuit}}
+\index{plot\_circuit@{plot\_circuit}!make\_plots@{make\_plots}}
+\doxysubsubsection{\texorpdfstring{plot\_circuit()}{plot\_circuit()}}
+{\footnotesize\ttfamily def make\+\_\+plots.\+plot\+\_\+circuit (\begin{DoxyParamCaption}\item[{}]{circuit\+\_\+name,  }\item[{}]{components,  }\item[{}]{comp2rot,  }\item[{}]{nets,  }\item[{}]{board\+\_\+dim,  }\item[{}]{figname = {\ttfamily None},  }\item[{}]{ax = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}board dim: [[xs],[ys]]
+\end{DoxyVerb}
+ 

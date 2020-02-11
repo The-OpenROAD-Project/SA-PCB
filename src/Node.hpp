@@ -51,6 +51,10 @@ namespace trans = boost::geometry::strategy::transform;
 namespace bg = boost::geometry;
 typedef boost::geometry::model::d2::point_xy<double> Point;
 
+/**
+Node
+Base Node class for board components
+*/
 class Node {
   public:
     string name;
@@ -77,226 +81,19 @@ class Node {
     int mirror;
     vector < int > Netlist;
 
-  /*
-  setParameterNodes
-  Sets parameters given an entry in Nodes file
-  */
-  void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0) {
-    name = _name;
-    xCoordinate = 0.0;
-    yCoordinate = 0.0;
-    orientation = 0;
-    width = _width;
-    height = _height;
-    terminal = _terminal;
-    mirror = _mirror;
-    orientation_str = "N";
-    idx = _idx;
-    if (!terminal) {
-      double points[][2] = {{0.0, 0.0}, {_width, 0.0}, {_width, _height}, {0.0, _height}};
-      model::polygon< model::d2::point_xy<double> > _poly;
-      append(_poly, points);
-      boost::geometry::correct(_poly);
-      poly = _poly;
-      boost::geometry::envelope(_poly, envelope);
-    }
-  }
+    void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0);
+    void setParameterShapes(string wkt);
+    void setParameterWts(int _weight);
+    void setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed);
+    void setNetList(int NetId);
+    void setPos(double x, double y);
+    void layerChange();
+    int wrap_orientation(int kX);
+    void setRotation(int r);
+    void updateCoordinates();
+    int str2orient(string o) const;
+    string orient2str(int o) const;
+    void printExterior() const;
+    void printParameter();
 
-  /*
-  setParameterShapes
-  Sets parameters given an entry in Shapes file
-  */
-  void setParameterShapes(string wkt) {
-    model::polygon< model::d2::point_xy<double> > _poly;
-    boost::geometry::read_wkt(wkt, _poly);
-    boost::geometry::correct(_poly);
-    poly = _poly;
-  }
-
-  /*
-  setParameterWts
-  Sets parameters given an entry in weights file. 
-  */
-  void setParameterWts(int _weight) {
-    weight = _weight;
-  }
-
-  /*
-  setParameterPl
-  Sets parameters given an entry in Pl file  
-  */
-  void setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed) {
-    setPos(xCoordinate, yCoordinate);
-    this -> initialX = xCoordinate;
-    this -> initialY = yCoordinate;
-    orientation_str = _orientation_str;
-    init_orientation = str2orient(_orientation_str);
-    setRotation(str2orient(_orientation_str));
-    fixed = _fixed;
-    sigma = 10.0;
-  }
-
-  /*
-  setNetList
-  Sets parameters given an entry in Nets file  
-  */
-  void setNetList(int NetId) {
-    Netlist.push_back(NetId);
-  }
-
-  /*
-  setPos
-  Sets position of a node object (lower-left corner)
-  */
-  void setPos(double x, double y) {
-    if(!terminal) {
-        trans::translate_transformer<double, 2, 2> translate(x - xCoordinate, y - yCoordinate);
-        model::polygon<model::d2::point_xy<double> > tmp;
-        boost::geometry::transform(poly, tmp, translate);
-        poly = tmp;
-        updateCoordinates();
-    } else {
-        xCoordinate = x;
-        yCoordinate = y;
-      }
-  }
-
-  void layerChange() {
-    if(!terminal) {
-      //model::polygon<model::d2::point_xy<double> > tmp;
-      //boost::geometry::transform(poly, tmp, translate);
-      //poly = tmp;
-      layer=-1*layer;
-      //updateCoordinates();  
-    }  else {
-      layer=-1*layer;
-    }
-  }
-
-  int wrap_orientation(int kX) {
-    return kX % 8;
-  }
-
-  /*
-  setRotation
-  Rotate polygon about global origin and transform back to local origin
-  */
-  void setRotation(int r) {
-    int rot_deg = 45*r;
-    double tmpx = xCoordinate;
-    double tmpy = yCoordinate;
-
-    setPos(-width/2,-height/2);
-    model::polygon<model::d2::point_xy<double> > tmp;
-    trans::rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(rot_deg);
-    boost::geometry::transform(poly, tmp, rotate);
-    poly = tmp;
-    double otmp = wrap_orientation(orientation + r);
-    orientation = otmp;
-    setPos(tmpx, tmpy);
-  }
-
-  /*
-  upateCoordinates
-  Updates parameters of Node class from a geometry object
-  */
-  void updateCoordinates() {
-    if(terminal) {
-        xBy2 = xCoordinate;
-        yBy2 = yCoordinate;
-    } else {
-        boost::geometry::model::d2::point_xy<double> centroid;
-        boost::geometry::centroid(poly, centroid);
-        xBy2 = centroid.get<0>();
-        yBy2 = centroid.get<1>();
-
-        boost::geometry::model::box< model::d2::point_xy<double> > envtmp;
-        boost::geometry::envelope(poly, envtmp);
-        envelope = envtmp;
-        Point minCorner = envelope.min_corner();
-        Point maxCorner = envelope.max_corner();
-        width  = maxCorner.get<0>() - minCorner.get<0>();
-        height = maxCorner.get<1>() - minCorner.get<1>();
-        xCoordinate = bg::get<bg::min_corner, 0>(envelope);
-        yCoordinate = bg::get<bg::min_corner, 1>(envelope);
-    }
-  }
-
-  int str2orient(string o) const{
-    if(o == "N") {
-      return 0;
-    } else if(o == "NE") {
-      return 1;
-    } else if(o == "E") {
-      return 2;
-    } else if(o == "SE") {
-      return 3;
-    } else if (o == "S") {
-      return 4;
-    } else if (o == "SW") {
-      return 5;
-    } else if (o == "W") {
-      return 6;
-    } else if (o == "NW") {
-      return 7;
-    }
-    return -1;
-  }
-
-  string orient2str(int o) const{
-    if(o == 0 || o == 8) {
-      return "N";
-    } else if(o == 1) {
-      return "NE";
-    } else if(o == 2) {
-      return "E";
-    } else if(o == 3) {
-      return "SE";
-    } else if(o == 4) {
-      return "S";
-    } else if(o == 5) {
-      return "SW";
-    } else if(o == 6) {
-      return "W";
-    } else if(o == 7) {
-      return "NW";
-    }
-    return "";
-  }
-
-  /*
-  printExterior
-  print polygon vertices
-  */
-  void printExterior() const{
-    for(auto it = boost::begin(boost::geometry::exterior_ring(poly)); it != boost::end(boost::geometry::exterior_ring(poly)); ++it) {
-        double x = bg::get<0>(*it);
-        double y = bg::get<1>(*it);
-        cout << x << " " << y << endl;
-    }
-  }
-
-  /*
-  printParameter
-  print node params
-  */
-  void printParameter() {
-    cout << "name      " << name << endl;
-    cout << "Width         " << width << endl;
-    cout << "Height        " << height << endl;
-    cout << "Weight        " << weight << endl;
-    cout << "X_Co-ordinate " << xCoordinate << endl;
-    cout << "Y_Co-ordinate " << yCoordinate << endl;
-    cout << "X/2           " << xBy2 << endl;
-    cout << "Y/2           " << yBy2 << endl;
-    cout << "Orientation   " << orientation << endl;
-    cout << "terminal      " << terminal << endl;
-    cout << "fixed         " << fixed << endl;
-    cout << "NetList       ";
-    vector < int > ::iterator it2;
-    for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {
-      cout << *it2 << " ";
-    }
-    cout << "\n" << endl;
-  }
 };

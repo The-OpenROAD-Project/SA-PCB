@@ -1,0 +1,137 @@
+\hypertarget{namespaceload__bookshelf}{}\doxysection{load\+\_\+bookshelf Namespace Reference}
+\label{namespaceload__bookshelf}\index{load\_bookshelf@{load\_bookshelf}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_af362b6e78cd6c21a61e7121004012427}{read\+\_\+pl}} (fname)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_ab0ed046ff5f06efeeaf635f62102b461}{read\+\_\+pl2}} (fname, components)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_a8cfa7c1af71aaec08e6d6b3f8980448d}{read\+\_\+nets}} (fname, components, board\+\_\+pins)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_af1bd13159eab6dca26b88b86629e134b}{read\+\_\+nets2}} (fname, components, board\+\_\+pins)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_a4a6d568e82b7e2dba02198302060646c}{read\+\_\+blocks}} (fname)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_a082905057f2a5d9b7354606e03546c62}{read\+\_\+shapes}} (fname, components)
+\item 
+def \mbox{\hyperlink{namespaceload__bookshelf_a6206547e6ee76abd5eb80e0167922867}{read\+\_\+nodes}} (fname)
+\item 
+\mbox{\Hypertarget{namespaceload__bookshelf_a65ffd43c081e1cc770d6980151dd3cec}\label{namespaceload__bookshelf_a65ffd43c081e1cc770d6980151dd3cec}} 
+def {\bfseries write\+\_\+pl} (fname, components, board\+\_\+pins)
+\item 
+\mbox{\Hypertarget{namespaceload__bookshelf_a1725c1222c9f5804ddd209bc390ec53e}\label{namespaceload__bookshelf_a1725c1222c9f5804ddd209bc390ec53e}} 
+def {\bfseries write\+\_\+nodes} (fname, components, board\+\_\+pins)
+\item 
+\mbox{\Hypertarget{namespaceload__bookshelf_a8c12f5788c4500f6faa0f753c63f84e8}\label{namespaceload__bookshelf_a8c12f5788c4500f6faa0f753c63f84e8}} 
+def {\bfseries write\+\_\+newnets} (fname, nets, components)
+\item 
+\mbox{\Hypertarget{namespaceload__bookshelf_ae51de68114f96e0977ef479d41d86ff3}\label{namespaceload__bookshelf_ae51de68114f96e0977ef479d41d86ff3}} 
+def {\bfseries write\+\_\+newpl} (fname, components, board\+\_\+pins)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceload__bookshelf_a4a6d568e82b7e2dba02198302060646c}\label{namespaceload__bookshelf_a4a6d568e82b7e2dba02198302060646c}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_blocks@{read\_blocks}}
+\index{read\_blocks@{read\_blocks}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_blocks()}{read\_blocks()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+blocks (\begin{DoxyParamCaption}\item[{}]{fname }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .blocks file
+:param fname: .blocks filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_a8cfa7c1af71aaec08e6d6b3f8980448d}\label{namespaceload__bookshelf_a8cfa7c1af71aaec08e6d6b3f8980448d}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_nets@{read\_nets}}
+\index{read\_nets@{read\_nets}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_nets()}{read\_nets()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+nets (\begin{DoxyParamCaption}\item[{}]{fname,  }\item[{}]{components,  }\item[{}]{board\+\_\+pins }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .nets (netlist) file
+:param fname: .nets filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_af1bd13159eab6dca26b88b86629e134b}\label{namespaceload__bookshelf_af1bd13159eab6dca26b88b86629e134b}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_nets2@{read\_nets2}}
+\index{read\_nets2@{read\_nets2}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_nets2()}{read\_nets2()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+nets2 (\begin{DoxyParamCaption}\item[{}]{fname,  }\item[{}]{components,  }\item[{}]{board\+\_\+pins }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .nets (netlist) file
+:param fname: .nets filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_a6206547e6ee76abd5eb80e0167922867}\label{namespaceload__bookshelf_a6206547e6ee76abd5eb80e0167922867}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_nodes@{read\_nodes}}
+\index{read\_nodes@{read\_nodes}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_nodes()}{read\_nodes()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+nodes (\begin{DoxyParamCaption}\item[{}]{fname }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .nodes (blocks) file
+:param fname: .nodes filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_af362b6e78cd6c21a61e7121004012427}\label{namespaceload__bookshelf_af362b6e78cd6c21a61e7121004012427}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_pl@{read\_pl}}
+\index{read\_pl@{read\_pl}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_pl()}{read\_pl()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+pl (\begin{DoxyParamCaption}\item[{}]{fname }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .pl (placement) file
+:param fname: .pl filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_ab0ed046ff5f06efeeaf635f62102b461}\label{namespaceload__bookshelf_ab0ed046ff5f06efeeaf635f62102b461}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_pl2@{read\_pl2}}
+\index{read\_pl2@{read\_pl2}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_pl2()}{read\_pl2()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+pl2 (\begin{DoxyParamCaption}\item[{}]{fname,  }\item[{}]{components }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .pl (placement) file
+:param fname: .pl filename
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceload__bookshelf_a082905057f2a5d9b7354606e03546c62}\label{namespaceload__bookshelf_a082905057f2a5d9b7354606e03546c62}} 
+\index{load\_bookshelf@{load\_bookshelf}!read\_shapes@{read\_shapes}}
+\index{read\_shapes@{read\_shapes}!load\_bookshelf@{load\_bookshelf}}
+\doxysubsubsection{\texorpdfstring{read\_shapes()}{read\_shapes()}}
+{\footnotesize\ttfamily def load\+\_\+bookshelf.\+read\+\_\+shapes (\begin{DoxyParamCaption}\item[{}]{fname,  }\item[{}]{components }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read & parse .shapes (shapes) file
+:param fname: .shapes filename
+\end{DoxyVerb}
+ 

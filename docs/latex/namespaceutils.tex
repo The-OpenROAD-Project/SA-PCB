@@ -1,0 +1,77 @@
+\hypertarget{namespaceutils}{}\doxysection{utils Namespace Reference}
+\label{namespaceutils}\index{utils@{utils}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceutils_ab0113a029082b571a3b8b7422259c53d}\label{namespaceutils_ab0113a029082b571a3b8b7422259c53d}} 
+def {\bfseries plot\+\_\+circuit} (circuit\+\_\+name, components, nets, board\+\_\+dim, stats=None)
+\item 
+def \mbox{\hyperlink{namespaceutils_ad9867b8a97be1c7114fe6ee7bacdbefd}{pin\+\_\+pos2}} (pin\+\_\+loc, modules, comp2rot)
+\item 
+def \mbox{\hyperlink{namespaceutils_a38e80bff07e470b5dcb178ba01fb28ed}{pin\+\_\+pos}} (pin\+\_\+loc, modules)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceutils_a38e80bff07e470b5dcb178ba01fb28ed}\label{namespaceutils_a38e80bff07e470b5dcb178ba01fb28ed}} 
+\index{utils@{utils}!pin\_pos@{pin\_pos}}
+\index{pin\_pos@{pin\_pos}!utils@{utils}}
+\doxysubsubsection{\texorpdfstring{pin\_pos()}{pin\_pos()}}
+{\footnotesize\ttfamily def utils.\+pin\+\_\+pos (\begin{DoxyParamCaption}\item[{}]{pin\+\_\+loc,  }\item[{}]{modules }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Convert localized pin positions to position wrt
+ global coordinates
+:param pin_loc: pin location of the form [pinname, [%x, %y]]
+:param modules: list of modules
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceutils_ad9867b8a97be1c7114fe6ee7bacdbefd}\label{namespaceutils_ad9867b8a97be1c7114fe6ee7bacdbefd}} 
+\index{utils@{utils}!pin\_pos2@{pin\_pos2}}
+\index{pin\_pos2@{pin\_pos2}!utils@{utils}}
+\doxysubsubsection{\texorpdfstring{pin\_pos2()}{pin\_pos2()}}
+{\footnotesize\ttfamily def utils.\+pin\+\_\+pos2 (\begin{DoxyParamCaption}\item[{}]{pin\+\_\+loc,  }\item[{}]{modules,  }\item[{}]{comp2rot }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Convert localized pin positions to position wrt
+ global coordinates
+:param pin_loc: pin location of the form [pinname, [%x, %y]]
+:param modules: list of modules
+\end{DoxyVerb}
+ 

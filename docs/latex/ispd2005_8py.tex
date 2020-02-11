@@ -1,0 +1,35 @@
+\hypertarget{ispd2005_8py}{}\doxysection{designs/ispd2005.py File Reference}
+\label{ispd2005_8py}\index{designs/ispd2005.py@{designs/ispd2005.py}}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{ispd2005_8py_a81ecb84b5795dbd131d373e660e95150}\label{ispd2005_8py_a81ecb84b5795dbd131d373e660e95150}} 
+string {\bfseries ispd2005.\+base\+U\+RL} = \char`\"{}http\+://www.\+cerc.\+utexas.\+edu/$\sim$zixuan/\char`\"{}
+\item 
+\mbox{\Hypertarget{ispd2005_8py_a5fca41fedb24baeb683a5aec75e49c1a}\label{ispd2005_8py_a5fca41fedb24baeb683a5aec75e49c1a}} 
+{\bfseries ispd2005.\+target\+\_\+dir} = os.\+path.\+dirname(os.\+path.\+abspath(\+\_\+\+\_\+file\+\_\+\+\_\+))
+\item 
+\mbox{\Hypertarget{ispd2005_8py_afa7f9bf9061977b19e938f375154ff63}\label{ispd2005_8py_afa7f9bf9061977b19e938f375154ff63}} 
+string {\bfseries ispd2005.\+filename} = \char`\"{}ispd2005.\+tar.\+xz\char`\"{}
+\item 
+\mbox{\Hypertarget{ispd2005_8py_af0749af0c0618b4eb6a78336d56401b4}\label{ispd2005_8py_af0749af0c0618b4eb6a78336d56401b4}} 
+string {\bfseries ispd2005.\+file\+\_\+url} = base\+U\+RL + filename
+\item 
+\mbox{\Hypertarget{ispd2005_8py_a80c5d68c786fdb4b43b545f968ed421f}\label{ispd2005_8py_a80c5d68c786fdb4b43b545f968ed421f}} 
+{\bfseries ispd2005.\+path\+\_\+to\+\_\+file} = os.\+path.\+join(target\+\_\+dir, filename)
+\item 
+\mbox{\Hypertarget{ispd2005_8py_a0a5edb9eed2415aff2e743f822ae4c3b}\label{ispd2005_8py_a0a5edb9eed2415aff2e743f822ae4c3b}} 
+{\bfseries ispd2005.\+response} = urllib.\+urlopen(file\+\_\+url)
+\item 
+\mbox{\Hypertarget{ispd2005_8py_aa57b84323c3b8261a591f22f3be79aca}\label{ispd2005_8py_aa57b84323c3b8261a591f22f3be79aca}} 
+{\bfseries ispd2005.\+content} = response.\+read()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyAuthor}{Author}
+Yibo Lin 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+Mar 2019 
+\end{DoxyDate}

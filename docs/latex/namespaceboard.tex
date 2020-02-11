@@ -1,0 +1,117 @@
+\hypertarget{namespaceboard}{}\doxysection{board Namespace Reference}
+\label{namespaceboard}\index{board@{board}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceboard_a11900af14cd17b8099719bb4215c488f}\label{namespaceboard_a11900af14cd17b8099719bb4215c488f}} 
+def {\bfseries init} ()
+\item 
+\mbox{\Hypertarget{namespaceboard_a68017f7761a64cc4abdc69fdb0a11d48}\label{namespaceboard_a68017f7761a64cc4abdc69fdb0a11d48}} 
+def {\bfseries animate} (i)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceboard_a306aee17bb9b0214e053885fb18288da}\label{namespaceboard_a306aee17bb9b0214e053885fb18288da}} 
+{\bfseries directory} = os.\+fsencode(\textquotesingle{}./cache\+\_\+rudy/\textquotesingle{})
+\item 
+\mbox{\Hypertarget{namespaceboard_a4667dbd68dd2607c1f9db056da51c797}\label{namespaceboard_a4667dbd68dd2607c1f9db056da51c797}} 
+list {\bfseries routabilities} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceboard_ae2c5af12eff589209f221b163c68dfec}\label{namespaceboard_ae2c5af12eff589209f221b163c68dfec}} 
+list {\bfseries fnames} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceboard_ab46329dafcf204faeb6ae7d0917291d7}\label{namespaceboard_ab46329dafcf204faeb6ae7d0917291d7}} 
+{\bfseries mat} = pd.\+read\+\_\+table(\textquotesingle{}./cache\+\_\+rudy/\textquotesingle{}+str(ff),sep=\textquotesingle{}\textbackslash{}t\textquotesingle{},header=None).values\mbox{[}\+:,\+:-\/1\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceboard_a870d8a1cf634cf8831d845c3b35616b6}\label{namespaceboard_a870d8a1cf634cf8831d845c3b35616b6}} 
+{\bfseries nx}
+\item 
+\mbox{\Hypertarget{namespaceboard_aaac16905f4db89a47ce828de31859eda}\label{namespaceboard_aaac16905f4db89a47ce828de31859eda}} 
+{\bfseries ny}
+\item 
+\mbox{\Hypertarget{namespaceboard_aeb13f7e3f445c8edefcc923db552fba0}\label{namespaceboard_aeb13f7e3f445c8edefcc923db552fba0}} 
+{\bfseries nrows}
+\item 
+\mbox{\Hypertarget{namespaceboard_a7575655aaaa34b5397fb4d7f77d6efff}\label{namespaceboard_a7575655aaaa34b5397fb4d7f77d6efff}} 
+{\bfseries ncols}
+\item 
+\mbox{\Hypertarget{namespaceboard_ababe898ec04ddcc52824a998326e918c}\label{namespaceboard_ababe898ec04ddcc52824a998326e918c}} 
+{\bfseries gridspec\+\_\+kw}
+\item 
+\mbox{\Hypertarget{namespaceboard_a0fe87ca4cc9d417aa469b4a2d5d400bc}\label{namespaceboard_a0fe87ca4cc9d417aa469b4a2d5d400bc}} 
+{\bfseries anim} = animation.\+Func\+Animation(fig, animate, init\+\_\+func=init, frames=None, repeat=False)
+\item 
+\mbox{\Hypertarget{namespaceboard_adab8c8db16ead918a6e3ff35d3d709ef}\label{namespaceboard_adab8c8db16ead918a6e3ff35d3d709ef}} 
+{\bfseries wl} = open(\textquotesingle{}wl.\+txt\textquotesingle{}).read().splitlines()
+\item 
+\mbox{\Hypertarget{namespaceboard_ad62590ffe908dea4c487e3a286f8b822}\label{namespaceboard_ad62590ffe908dea4c487e3a286f8b822}} 
+{\bfseries oa} = open(\textquotesingle{}oa.\+txt\textquotesingle{}).read().splitlines()
+\item 
+\mbox{\Hypertarget{namespaceboard_a335b9b157390197a44f78943feb606b6}\label{namespaceboard_a335b9b157390197a44f78943feb606b6}} 
+{\bfseries cost} = open(\textquotesingle{}cost.\+txt\textquotesingle{}).read().splitlines()
+\item 
+\mbox{\Hypertarget{namespaceboard_aaa717f27404e2cf6a1e122d946098a76}\label{namespaceboard_aaa717f27404e2cf6a1e122d946098a76}} 
+{\bfseries ar} = open(\textquotesingle{}accept\+\_\+ratio.\+txt\textquotesingle{}).read().splitlines()
+\item 
+\mbox{\Hypertarget{namespaceboard_a0c5ee7704129debb898b775f31ada1b5}\label{namespaceboard_a0c5ee7704129debb898b775f31ada1b5}} 
+dictionary {\bfseries report\+\_\+dict} = \{\textquotesingle{}wirelength\textquotesingle{}\+:wl, \textquotesingle{}overlap\textquotesingle{}\+:oa, \textquotesingle{}cost\textquotesingle{}\+:cost, \textquotesingle{}acceptance ratio\textquotesingle{}\+:ar\}
+\item 
+\mbox{\Hypertarget{namespaceboard_a4aea7ba7e677a8fdc64042f37aee374e}\label{namespaceboard_a4aea7ba7e677a8fdc64042f37aee374e}} 
+string {\bfseries circuitname} = \textquotesingle{}./bm3\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceboard_aec341dbf9d18e85f0bd8b26417eabee2}\label{namespaceboard_aec341dbf9d18e85f0bd8b26417eabee2}} 
+string {\bfseries nodesfile} = circuitname + \textquotesingle{}.nodes\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceboard_a89c59b1f0732c62a0433cbecd0bac6ee}\label{namespaceboard_a89c59b1f0732c62a0433cbecd0bac6ee}} 
+string {\bfseries netsfile} = circuitname + \textquotesingle{}.nets\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceboard_aa98112d6d4938cf5536fffd2d7404f15}\label{namespaceboard_aa98112d6d4938cf5536fffd2d7404f15}} 
+dictionary {\bfseries board\+\_\+pins} = \{\}
+\item 
+\mbox{\Hypertarget{namespaceboard_a896923728c9df86491c1380a9e9b97bc}\label{namespaceboard_a896923728c9df86491c1380a9e9b97bc}} 
+list {\bfseries placements} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceboard_a8a7b520cb43af05b7ca11e2a8e33e83d}\label{namespaceboard_a8a7b520cb43af05b7ca11e2a8e33e83d}} 
+list {\bfseries board\+\_\+dim} = \mbox{[}\mbox{[}-\/5,60\mbox{]},\mbox{[}-\/5,50\mbox{]}\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 

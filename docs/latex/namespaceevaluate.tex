@@ -1,0 +1,111 @@
+\hypertarget{namespaceevaluate}{}\doxysection{evaluate Namespace Reference}
+\label{namespaceevaluate}\index{evaluate@{evaluate}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespaceevaluate_aee6f3311cd15709de39a07f7855b50bb}{euclidean}} (components, board\+\_\+pins, nets)
+\item 
+def \mbox{\hyperlink{namespaceevaluate_a9b06dfe1c9791adf5bbc8b6620644efe}{hpwl}} (components, board\+\_\+pins, nets)
+\item 
+def \mbox{\hyperlink{namespaceevaluate_a05279979da8133aec76961fee9b88d10}{manhattan}} (components, board\+\_\+pins, nets)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a6feeecfa29632f688e03d9969a15b673}\label{namespaceevaluate_a6feeecfa29632f688e03d9969a15b673}} 
+string {\bfseries circuitname} = \textquotesingle{}../designs/bbb\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a166273ce73fb6cac3dc1c1d90e40a79b}\label{namespaceevaluate_a166273ce73fb6cac3dc1c1d90e40a79b}} 
+string {\bfseries plfile} = \textquotesingle{}../designs/bbb.\+pl\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a98ee7354658262ab799528d6d3ba9633}\label{namespaceevaluate_a98ee7354658262ab799528d6d3ba9633}} 
+string {\bfseries nodesfile} = circuitname + \textquotesingle{}.nodes\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a56e720e7643c3149b8e393b994a4e931}\label{namespaceevaluate_a56e720e7643c3149b8e393b994a4e931}} 
+string {\bfseries netsfile} = circuitname + \textquotesingle{}.nets\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a1319c8c714e11fdfbf88b86eb5f5e486}\label{namespaceevaluate_a1319c8c714e11fdfbf88b86eb5f5e486}} 
+dictionary {\bfseries board\+\_\+pins} = \{\}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a37052da0aeafd60f940d8bfb0f0db2e3}\label{namespaceevaluate_a37052da0aeafd60f940d8bfb0f0db2e3}} 
+{\bfseries components} = \mbox{\hyperlink{namespaceload__bookshelf_a6206547e6ee76abd5eb80e0167922867}{load\+\_\+bookshelf.\+read\+\_\+nodes}}(nodesfile)
+\item 
+\mbox{\Hypertarget{namespaceevaluate_aa20bba3a3f63cb41d3ca7267b02e0d13}\label{namespaceevaluate_aa20bba3a3f63cb41d3ca7267b02e0d13}} 
+{\bfseries comp2rot}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_acc73149312ec61952959ca4299062d65}\label{namespaceevaluate_acc73149312ec61952959ca4299062d65}} 
+{\bfseries nets}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_a1032948ae9b544e2f9609577e74c4fd0}\label{namespaceevaluate_a1032948ae9b544e2f9609577e74c4fd0}} 
+{\bfseries mod2net}
+\item 
+\mbox{\Hypertarget{namespaceevaluate_ab9e691a2f2cab8cb944093eaca8d67d9}\label{namespaceevaluate_ab9e691a2f2cab8cb944093eaca8d67d9}} 
+def {\bfseries hpwl} = hpwl(components, board\+\_\+pins, nets)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceevaluate_aee6f3311cd15709de39a07f7855b50bb}\label{namespaceevaluate_aee6f3311cd15709de39a07f7855b50bb}} 
+\index{evaluate@{evaluate}!euclidean@{euclidean}}
+\index{euclidean@{euclidean}!evaluate@{evaluate}}
+\doxysubsubsection{\texorpdfstring{euclidean()}{euclidean()}}
+{\footnotesize\ttfamily def evaluate.\+euclidean (\begin{DoxyParamCaption}\item[{}]{components,  }\item[{}]{board\+\_\+pins,  }\item[{}]{nets }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Compute sum euclidean distance over all nets
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceevaluate_a9b06dfe1c9791adf5bbc8b6620644efe}\label{namespaceevaluate_a9b06dfe1c9791adf5bbc8b6620644efe}} 
+\index{evaluate@{evaluate}!hpwl@{hpwl}}
+\index{hpwl@{hpwl}!evaluate@{evaluate}}
+\doxysubsubsection{\texorpdfstring{hpwl()}{hpwl()}}
+{\footnotesize\ttfamily def evaluate.\+hpwl (\begin{DoxyParamCaption}\item[{}]{components,  }\item[{}]{board\+\_\+pins,  }\item[{}]{nets }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Compute sum half-perimeter wirelength over all nets
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceevaluate_a05279979da8133aec76961fee9b88d10}\label{namespaceevaluate_a05279979da8133aec76961fee9b88d10}} 
+\index{evaluate@{evaluate}!manhattan@{manhattan}}
+\index{manhattan@{manhattan}!evaluate@{evaluate}}
+\doxysubsubsection{\texorpdfstring{manhattan()}{manhattan()}}
+{\footnotesize\ttfamily def evaluate.\+manhattan (\begin{DoxyParamCaption}\item[{}]{components,  }\item[{}]{board\+\_\+pins,  }\item[{}]{nets }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Compute sum manhattan distance over all nets
+\end{DoxyVerb}
+ 

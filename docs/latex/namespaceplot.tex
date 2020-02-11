@@ -1,0 +1,141 @@
+\hypertarget{namespaceplot}{}\doxysection{plot Namespace Reference}
+\label{namespaceplot}\index{plot@{plot}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespaceplot_a321ca4124dd2907a8abb8ae20978119f}{plot\+\_\+circuit}} (circuit\+\_\+name, components, comp2rot, nets, board\+\_\+dim, figname=None, stats=None, ax=None)
+\item 
+def \mbox{\hyperlink{namespaceplot_a3c60d2501cec54913be5a32d5e91b792}{pin\+\_\+pos2}} (pin\+\_\+loc, modules, comp2rot)
+\item 
+def \mbox{\hyperlink{namespaceplot_a0ce9d55be487a7cfa6448d7577e0ed9a}{pin\+\_\+pos}} (pin\+\_\+loc, modules)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespaceplot_ab8074dd7080e67f67c6415263a7c5522}\label{namespaceplot_ab8074dd7080e67f67c6415263a7c5522}} 
+{\bfseries circuitname} = sys.\+argv\mbox{[}1\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceplot_a4d00ee35cbd28040d860caf35ad446bf}\label{namespaceplot_a4d00ee35cbd28040d860caf35ad446bf}} 
+string {\bfseries plfile} = circuitname + \textquotesingle{}.pl\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceplot_a1b0f3aa5b2ac486612742f0de27c8344}\label{namespaceplot_a1b0f3aa5b2ac486612742f0de27c8344}} 
+string {\bfseries nodesfile} = circuitname + \textquotesingle{}.nodes\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceplot_a939b30a93f87e237460572350197ef7e}\label{namespaceplot_a939b30a93f87e237460572350197ef7e}} 
+string {\bfseries netsfile} = circuitname + \textquotesingle{}.nets\textquotesingle{}
+\item 
+\mbox{\Hypertarget{namespaceplot_a9b55ca1d467cfd5b9c09f298e6f67baa}\label{namespaceplot_a9b55ca1d467cfd5b9c09f298e6f67baa}} 
+{\bfseries figname} = sys.\+argv\mbox{[}2\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceplot_af9ac5c340bbad25086f56222e0c347f5}\label{namespaceplot_af9ac5c340bbad25086f56222e0c347f5}} 
+int {\bfseries bversion} = 1
+\item 
+\mbox{\Hypertarget{namespaceplot_ae9274ac371de77e7a6873123b2a6fe27}\label{namespaceplot_ae9274ac371de77e7a6873123b2a6fe27}} 
+{\bfseries boarddimmin} = None
+\item 
+\mbox{\Hypertarget{namespaceplot_ab33f42e4140baa8cbb3f90c87db0375f}\label{namespaceplot_ab33f42e4140baa8cbb3f90c87db0375f}} 
+{\bfseries boarddim} = None
+\item 
+\mbox{\Hypertarget{namespaceplot_a111f8240cebca4ca871279044485b911}\label{namespaceplot_a111f8240cebca4ca871279044485b911}} 
+dictionary {\bfseries board\+\_\+pins} = \{\}
+\item 
+\mbox{\Hypertarget{namespaceplot_a92428e5162a210923e5c951278c63e1e}\label{namespaceplot_a92428e5162a210923e5c951278c63e1e}} 
+list {\bfseries f} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceplot_ad1739cb59fbbc5afedb8538be0f9c0d4}\label{namespaceplot_ad1739cb59fbbc5afedb8538be0f9c0d4}} 
+{\bfseries components} = \mbox{\hyperlink{namespaceload__bookshelf_a6206547e6ee76abd5eb80e0167922867}{load\+\_\+bookshelf.\+read\+\_\+nodes}}(nodesfile)
+\item 
+\mbox{\Hypertarget{namespaceplot_acb3cf87bd8279403743675278d9a767a}\label{namespaceplot_acb3cf87bd8279403743675278d9a767a}} 
+{\bfseries comp2rot}
+\item 
+\mbox{\Hypertarget{namespaceplot_a8181a530e0b90f4eafeffcd34a70eb98}\label{namespaceplot_a8181a530e0b90f4eafeffcd34a70eb98}} 
+{\bfseries nets}
+\item 
+\mbox{\Hypertarget{namespaceplot_a95cf1393c34dbb7cacd4abf0756e2d71}\label{namespaceplot_a95cf1393c34dbb7cacd4abf0756e2d71}} 
+{\bfseries mod2net}
+\item 
+\mbox{\Hypertarget{namespaceplot_a93e182761ccd28bdacb93f472ec69493}\label{namespaceplot_a93e182761ccd28bdacb93f472ec69493}} 
+list {\bfseries board\+\_\+dim} = \mbox{[}\mbox{[}-\/5,60\mbox{]},\mbox{[}-\/5,50\mbox{]}\mbox{]}
+\item 
+\mbox{\Hypertarget{namespaceplot_a0baa2249f237ce85db466230c787ea83}\label{namespaceplot_a0baa2249f237ce85db466230c787ea83}} 
+{\bfseries mode}
+\item 
+\mbox{\Hypertarget{namespaceplot_a2c3294c86b8b6751d73e706f7a1b7275}\label{namespaceplot_a2c3294c86b8b6751d73e706f7a1b7275}} 
+string {\bfseries ff} = \textquotesingle{}./cache/img/\textquotesingle{} + ff
+\item 
+\mbox{\Hypertarget{namespaceplot_a5dc3af850dfb57bb15888c3fb1e510a5}\label{namespaceplot_a5dc3af850dfb57bb15888c3fb1e510a5}} 
+{\bfseries image} = imageio.\+imread(ff)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceplot_a0ce9d55be487a7cfa6448d7577e0ed9a}\label{namespaceplot_a0ce9d55be487a7cfa6448d7577e0ed9a}} 
+\index{plot@{plot}!pin\_pos@{pin\_pos}}
+\index{pin\_pos@{pin\_pos}!plot@{plot}}
+\doxysubsubsection{\texorpdfstring{pin\_pos()}{pin\_pos()}}
+{\footnotesize\ttfamily def plot.\+pin\+\_\+pos (\begin{DoxyParamCaption}\item[{}]{pin\+\_\+loc,  }\item[{}]{modules }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Convert localized pin positions to position wrt
+ global coordinates
+:param pin_loc: pin location of the form [pinname, [%x, %y]]
+:param modules: list of modules
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceplot_a3c60d2501cec54913be5a32d5e91b792}\label{namespaceplot_a3c60d2501cec54913be5a32d5e91b792}} 
+\index{plot@{plot}!pin\_pos2@{pin\_pos2}}
+\index{pin\_pos2@{pin\_pos2}!plot@{plot}}
+\doxysubsubsection{\texorpdfstring{pin\_pos2()}{pin\_pos2()}}
+{\footnotesize\ttfamily def plot.\+pin\+\_\+pos2 (\begin{DoxyParamCaption}\item[{}]{pin\+\_\+loc,  }\item[{}]{modules,  }\item[{}]{comp2rot }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Convert localized pin positions to position wrt
+ global coordinates
+:param pin_loc: pin location of the form [pinname, [xoffset, yoffset]]
+:param modules: list of modules
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceplot_a321ca4124dd2907a8abb8ae20978119f}\label{namespaceplot_a321ca4124dd2907a8abb8ae20978119f}} 
+\index{plot@{plot}!plot\_circuit@{plot\_circuit}}
+\index{plot\_circuit@{plot\_circuit}!plot@{plot}}
+\doxysubsubsection{\texorpdfstring{plot\_circuit()}{plot\_circuit()}}
+{\footnotesize\ttfamily def plot.\+plot\+\_\+circuit (\begin{DoxyParamCaption}\item[{}]{circuit\+\_\+name,  }\item[{}]{components,  }\item[{}]{comp2rot,  }\item[{}]{nets,  }\item[{}]{board\+\_\+dim,  }\item[{}]{figname = {\ttfamily None},  }\item[{}]{stats = {\ttfamily None},  }\item[{}]{ax = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}board dim: [[xs],[ys]]
+\end{DoxyVerb}
+ 

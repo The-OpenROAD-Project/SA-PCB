@@ -1,0 +1,132 @@
+\hypertarget{class_module}{}\doxysection{Module Class Reference}
+\label{class_module}\index{Module@{Module}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_module_a6e74f79d032549627b818e2b2dd94009}\label{class_module_a6e74f79d032549627b818e2b2dd94009}} 
+void {\bfseries set\+Net\+List} (int Net\+Id)
+\item 
+\mbox{\Hypertarget{class_module_a2eeabb6e5ab0b5e06f111d0fdec986a8}\label{class_module_a2eeabb6e5ab0b5e06f111d0fdec986a8}} 
+void {\bfseries set\+Parameter\+Nodes} (double width, double height)
+\item 
+\mbox{\Hypertarget{class_module_aab88b5806244e03e676af131f2cceb3f}\label{class_module_aab88b5806244e03e676af131f2cceb3f}} 
+void {\bfseries set\+Parameter\+Pl} (double x\+Coordinate, double y\+Coordinate)
+\item 
+\mbox{\Hypertarget{class_module_a527f19191b70eefd32eae2eb8c630f5a}\label{class_module_a527f19191b70eefd32eae2eb8c630f5a}} 
+void {\bfseries set\+Pos} (double x, double y)
+\item 
+\mbox{\Hypertarget{class_module_a9fcd0efa8294ca14f52ca4f087aa9a6b}\label{class_module_a9fcd0efa8294ca14f52ca4f087aa9a6b}} 
+void {\bfseries update\+Coordinates} ()
+\item 
+\mbox{\Hypertarget{class_module_a60a36fcf8e6e99c2b2255d599f695213}\label{class_module_a60a36fcf8e6e99c2b2255d599f695213}} 
+void {\bfseries print\+Exterior} () const
+\item 
+void \mbox{\hyperlink{class_module_acb06087e5354dc7d14f8d238915d85cb}{print\+Parameter}} ()
+\item 
+\mbox{\Hypertarget{class_module_ab4bd23ba9f151c6a0a020f00c36c7fcb}\label{class_module_ab4bd23ba9f151c6a0a020f00c36c7fcb}} 
+void {\bfseries init\+\_\+module} (int id, int lev, bool r)
+\item 
+\mbox{\Hypertarget{class_module_a5b8fef1046099cfb7c004fce77e94be1}\label{class_module_a5b8fef1046099cfb7c004fce77e94be1}} 
+void {\bfseries add\+\_\+child} (\mbox{\hyperlink{class_module}{Module}} $\ast$m)
+\item 
+\mbox{\Hypertarget{class_module_af5766d67db9d001fd5fec890d0d4e5cc}\label{class_module_af5766d67db9d001fd5fec890d0d4e5cc}} 
+void {\bfseries insert\+\_\+cell} (int i)
+\item 
+\mbox{\Hypertarget{class_module_a9ae1922cdc7ca1217ecf29a3e24a772f}\label{class_module_a9ae1922cdc7ca1217ecf29a3e24a772f}} 
+bool {\bfseries isleaf} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_module_a06c326572272c938b3f2a01ee75e56c9}\label{class_module_a06c326572272c938b3f2a01ee75e56c9}} 
+string {\bfseries name}
+\item 
+\mbox{\Hypertarget{class_module_ad8064d03ca6dd2851501f4a5a016f679}\label{class_module_ad8064d03ca6dd2851501f4a5a016f679}} 
+int {\bfseries level}
+\item 
+\mbox{\Hypertarget{class_module_a2cc84555848aa8a562cf65f0e9d68f87}\label{class_module_a2cc84555848aa8a562cf65f0e9d68f87}} 
+int {\bfseries idx}
+\item 
+\mbox{\Hypertarget{class_module_a267848414abbc41fc4a9cd9e61df48cb}\label{class_module_a267848414abbc41fc4a9cd9e61df48cb}} 
+model\+::polygon$<$ model\+::d2\+::point\+\_\+xy$<$ double $>$ $>$ {\bfseries poly}
+\item 
+\mbox{\Hypertarget{class_module_abb7203211d21cc66feb361d3a1074e9e}\label{class_module_abb7203211d21cc66feb361d3a1074e9e}} 
+boost\+::geometry\+::model\+::box$<$ model\+::d2\+::point\+\_\+xy$<$ double $>$ $>$ {\bfseries envelope}
+\item 
+\mbox{\Hypertarget{class_module_a080a925722baf289306b2518bda203bd}\label{class_module_a080a925722baf289306b2518bda203bd}} 
+double {\bfseries width}
+\item 
+\mbox{\Hypertarget{class_module_a7f25a0146f19f1d122580f9d8488498a}\label{class_module_a7f25a0146f19f1d122580f9d8488498a}} 
+double {\bfseries height}
+\item 
+\mbox{\Hypertarget{class_module_aafb3910f293129b4b71bf5d9a4b4fa38}\label{class_module_aafb3910f293129b4b71bf5d9a4b4fa38}} 
+double {\bfseries sigma}
+\item 
+\mbox{\Hypertarget{class_module_af3c803cbd852d711de13cad723b5f4f3}\label{class_module_af3c803cbd852d711de13cad723b5f4f3}} 
+double {\bfseries x\+Coordinate}
+\item 
+\mbox{\Hypertarget{class_module_a7a7abf6fc24b25233f26ea064de0a2a1}\label{class_module_a7a7abf6fc24b25233f26ea064de0a2a1}} 
+double {\bfseries y\+Coordinate}
+\item 
+\mbox{\Hypertarget{class_module_acdb2880c1a9f948ae8118d94762ea30c}\label{class_module_acdb2880c1a9f948ae8118d94762ea30c}} 
+double {\bfseries x\+By2}
+\item 
+\mbox{\Hypertarget{class_module_a2fc72b5ae475acf8dd29ad335276fee3}\label{class_module_a2fc72b5ae475acf8dd29ad335276fee3}} 
+double {\bfseries y\+By2}
+\item 
+\mbox{\Hypertarget{class_module_a13a28856a3130b066bc1e5ea9cd0cdd6}\label{class_module_a13a28856a3130b066bc1e5ea9cd0cdd6}} 
+double {\bfseries initialX}
+\item 
+\mbox{\Hypertarget{class_module_a0b58139ee7a3ae0c78d7701a96a7beab}\label{class_module_a0b58139ee7a3ae0c78d7701a96a7beab}} 
+double {\bfseries initialY}
+\item 
+\mbox{\Hypertarget{class_module_a5363301b3e614871260aa113c25f2c29}\label{class_module_a5363301b3e614871260aa113c25f2c29}} 
+int {\bfseries orientation} = 0
+\item 
+\mbox{\Hypertarget{class_module_a356bea2303b2cbc739ea0b14d0d5779c}\label{class_module_a356bea2303b2cbc739ea0b14d0d5779c}} 
+int {\bfseries terminal} = 0
+\item 
+\mbox{\Hypertarget{class_module_ac4a4c4dd53956ce09340efb50f497fae}\label{class_module_ac4a4c4dd53956ce09340efb50f497fae}} 
+double {\bfseries x\+\_\+offset} = 0.\+0
+\item 
+\mbox{\Hypertarget{class_module_a89cf0e7af9d49d33cde635e4530c2417}\label{class_module_a89cf0e7af9d49d33cde635e4530c2417}} 
+double {\bfseries y\+\_\+offset} = 0.\+0
+\item 
+\mbox{\Hypertarget{class_module_aac9b333e309916a39be77e2543ee8924}\label{class_module_aac9b333e309916a39be77e2543ee8924}} 
+vector$<$ int $>$ {\bfseries Netlist}
+\item 
+\mbox{\Hypertarget{class_module_abdd88de92302781e49cc111c3c80dca3}\label{class_module_abdd88de92302781e49cc111c3c80dca3}} 
+vector$<$ int $>$ {\bfseries cells}
+\item 
+\mbox{\Hypertarget{class_module_a8c6a113f540efa63dd47cb4ce97dea8b}\label{class_module_a8c6a113f540efa63dd47cb4ce97dea8b}} 
+vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ {\bfseries children}
+\item 
+\mbox{\Hypertarget{class_module_a2d3fe45c5c83c7e98a8cd05f32b25e79}\label{class_module_a2d3fe45c5c83c7e98a8cd05f32b25e79}} 
+\mbox{\hyperlink{class_module}{Module}} $\ast$ {\bfseries parent} = nullptr
+\item 
+\mbox{\Hypertarget{class_module_a787c5cb07edd178d38780e397a22e5be}\label{class_module_a787c5cb07edd178d38780e397a22e5be}} 
+bool {\bfseries leaf} = false
+\item 
+\mbox{\Hypertarget{class_module_a487a99901c1f4ca19277e0c1b871d038}\label{class_module_a487a99901c1f4ca19277e0c1b871d038}} 
+bool {\bfseries root} = false
+\item 
+\mbox{\Hypertarget{class_module_a7e362476a89e841a9f11be9e32184d35}\label{class_module_a7e362476a89e841a9f11be9e32184d35}} 
+bool {\bfseries macro\+Module} = false
+\item 
+\mbox{\Hypertarget{class_module_a852c508fe6e1b73a75a35c8e4c8ca76b}\label{class_module_a852c508fe6e1b73a75a35c8e4c8ca76b}} 
+int {\bfseries fixed} = 0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_module_acb06087e5354dc7d14f8d238915d85cb}\label{class_module_acb06087e5354dc7d14f8d238915d85cb}} 
+\index{Module@{Module}!printParameter@{printParameter}}
+\index{printParameter@{printParameter}!Module@{Module}}
+\doxysubsubsection{\texorpdfstring{printParameter()}{printParameter()}}
+{\footnotesize\ttfamily void Module\+::print\+Parameter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+print\+Parameter print node params 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/Module.\+hpp\end{DoxyCompactItemize}

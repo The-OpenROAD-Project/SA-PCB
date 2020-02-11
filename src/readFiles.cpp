@@ -39,6 +39,10 @@
 using namespace std;
 using boost::is_any_of;
 
+/**
+readNodesFile
+read nodes file
+*/
 int readNodesFile(string fname) {
   fstream file;
   string buf;
@@ -63,7 +67,7 @@ int readNodesFile(string fname) {
       } else {
         terminal = 0;
       }
-      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), terminal, idx); // /1000000
+      n.setParameterNodes(strVec[0], atof(strVec[1].c_str()), atof(strVec[2].c_str()), terminal, idx);
       nodeId.push_back(n);
       name2id.insert(pair < string, int > (strVec[0], idx));
       idx += 1;
@@ -73,6 +77,10 @@ int readNodesFile(string fname) {
   return 0;
 }
 
+/**
+readShapesFile
+read shapes file
+*/
 int readShapesFile(string fname) {
   fstream file;
   string buf;
@@ -96,6 +104,10 @@ int readShapesFile(string fname) {
   return 0;
 }
 
+/**
+readWtsFile
+read weights file
+*/
 int readWtsFile(string fname) {
   fstream file;
   string buf;
@@ -116,6 +128,10 @@ int readWtsFile(string fname) {
   return 0;
 }
 
+/**
+readPlFile
+read placement file
+*/
 int readPlFile(string fname) {
   fstream file;
   string buf;
@@ -144,6 +160,10 @@ int readPlFile(string fname) {
   return 0;
 }
 
+/**
+readNetsFile
+read nets file
+*/
 map<int, vector<pPin> > readNetsFile(string fname) {
   fstream file;
   string buf;
@@ -193,6 +213,10 @@ map<int, vector<pPin> > readNetsFile(string fname) {
   return netToCell;
 }
 
+/**
+readClstFile
+read cluster file
+*/
 int readClstFile(string fname) {
   fstream file;
   string buf;
@@ -244,6 +268,10 @@ int readClstFile(string fname) {
   return 0;
 }
 
+/**
+writePlFile
+read placement file
+*/
 int writePlFile(string fname) {
   vector < string > strVec;
   fstream file;
@@ -278,6 +306,10 @@ int writePlFile(string fname) {
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
 }
 
+/**
+writeNodesFile
+read nodes (modules) file
+*/
 int writeNodesFile(string fname) {
   vector < string > strVec;
   fstream file;

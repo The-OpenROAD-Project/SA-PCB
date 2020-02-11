@@ -1,0 +1,87 @@
+\hypertarget{namespacegraph}{}\doxysection{graph Namespace Reference}
+\label{namespacegraph}\index{graph@{graph}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacegraph_afb5c8a7777e805808257ef84d881fb42}\label{namespacegraph_afb5c8a7777e805808257ef84d881fb42}} 
+def {\bfseries init} ()
+\item 
+\mbox{\Hypertarget{namespacegraph_a9e24f0c5bc949c0197b20c46dfb6b7c4}\label{namespacegraph_a9e24f0c5bc949c0197b20c46dfb6b7c4}} 
+def {\bfseries animate} (i)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacegraph_a77dd7d0cdd9986122959a52220ce192b}\label{namespacegraph_a77dd7d0cdd9986122959a52220ce192b}} 
+{\bfseries directory} = os.\+fsencode(\textquotesingle{}./cache\+\_\+rudy/\textquotesingle{})
+\item 
+\mbox{\Hypertarget{namespacegraph_af85dce3de83c6dce8799ddfd68de4288}\label{namespacegraph_af85dce3de83c6dce8799ddfd68de4288}} 
+list {\bfseries routabilities} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespacegraph_a62ba1f56305c29f1a621e24a8ecb8841}\label{namespacegraph_a62ba1f56305c29f1a621e24a8ecb8841}} 
+list {\bfseries fnames} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{namespacegraph_aae8ab87f3268c391e17fc0a98d1e987c}\label{namespacegraph_aae8ab87f3268c391e17fc0a98d1e987c}} 
+{\bfseries mat} = pd.\+read\+\_\+table(\textquotesingle{}./cache\+\_\+rudy/\textquotesingle{}+str(ff),sep=\textquotesingle{}\textbackslash{}t\textquotesingle{},header=None).values\mbox{[}\+:,\+:-\/1\mbox{]}
+\item 
+\mbox{\Hypertarget{namespacegraph_ae07bab3bf5880d93f19956a2d3e63bdc}\label{namespacegraph_ae07bab3bf5880d93f19956a2d3e63bdc}} 
+{\bfseries nx}
+\item 
+\mbox{\Hypertarget{namespacegraph_a5a0f7a26220dba07252b6b6794eb59b0}\label{namespacegraph_a5a0f7a26220dba07252b6b6794eb59b0}} 
+{\bfseries ny}
+\item 
+\mbox{\Hypertarget{namespacegraph_af942791f07aa93e02cd87bb53ff11cd2}\label{namespacegraph_af942791f07aa93e02cd87bb53ff11cd2}} 
+{\bfseries fig} = plt.\+figure()
+\item 
+\mbox{\Hypertarget{namespacegraph_a4b83c3147b206480e954a74965b5a300}\label{namespacegraph_a4b83c3147b206480e954a74965b5a300}} 
+{\bfseries data} = np.\+random.\+rand(nx, ny)
+\item 
+\mbox{\Hypertarget{namespacegraph_a9aa27387d9e90fa1cd6a3a51185948fb}\label{namespacegraph_a9aa27387d9e90fa1cd6a3a51185948fb}} 
+{\bfseries vmax}
+\item 
+\mbox{\Hypertarget{namespacegraph_ae15aabc4a5163a5583a22ce0e42e693d}\label{namespacegraph_ae15aabc4a5163a5583a22ce0e42e693d}} 
+{\bfseries square}
+\item 
+\mbox{\Hypertarget{namespacegraph_af15fa247d0b327dd4b6558a008b5325c}\label{namespacegraph_af15fa247d0b327dd4b6558a008b5325c}} 
+{\bfseries anim} = animation.\+Func\+Animation(fig, animate, init\+\_\+func=init, frames=None, repeat = True)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}///////////////////////////////////////////////////////////////////////////////
+// Authors: Chester Holtz, Devon Merrill, James (Ting-Chou) Lin, Connie (Yen-Yi) Wu
+//          (respective Ph.D. advisors: Chung-Kuan Cheng, Andrew B. Kahng, Steven Swanson).
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, The Regents of the University of California
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+\end{DoxyVerb}
+ 

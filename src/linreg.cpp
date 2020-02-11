@@ -40,7 +40,10 @@ inline static REAL sqr(REAL x) {
     return x*x;
 }
 
-
+/**
+linreg
+Compute 1-d least squares
+*/
 int linreg(int n, const std::vector<double> x, const std::vector<double> y, double& m, double& b, double& r){
     REAL   sumx = 0.0;                      /* sum of x     */
     REAL   sumx2 = 0.0;                     /* sum of x**2  */

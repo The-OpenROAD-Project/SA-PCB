@@ -1,0 +1,124 @@
+\hypertarget{class_node}{}\doxysection{Node Class Reference}
+\label{class_node}\index{Node@{Node}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_a9b14fb3cc9223398782be985bae26214}\label{class_node_a9b14fb3cc9223398782be985bae26214}} 
+void {\bfseries set\+Parameter\+Nodes} (string \+\_\+name, double \+\_\+width, double \+\_\+height, bool \+\_\+terminal, int \+\_\+idx, int \+\_\+mirror=0)
+\item 
+\mbox{\Hypertarget{class_node_ade5420de0f311e2611a75f1fe4bdb179}\label{class_node_ade5420de0f311e2611a75f1fe4bdb179}} 
+void {\bfseries set\+Parameter\+Shapes} (string wkt)
+\item 
+\mbox{\Hypertarget{class_node_a32f9df14e3abe3040ac1d500f98dff9d}\label{class_node_a32f9df14e3abe3040ac1d500f98dff9d}} 
+void {\bfseries set\+Parameter\+Wts} (int \+\_\+weight)
+\item 
+\mbox{\Hypertarget{class_node_af48f20c9669a3b45efab4b76149d2734}\label{class_node_af48f20c9669a3b45efab4b76149d2734}} 
+void {\bfseries set\+Parameter\+Pl} (double x\+Coordinate, double y\+Coordinate, string \+\_\+orientation\+\_\+str, bool \+\_\+fixed)
+\item 
+\mbox{\Hypertarget{class_node_a7ffeba582fb0511ca1a2892af29fc5d7}\label{class_node_a7ffeba582fb0511ca1a2892af29fc5d7}} 
+void {\bfseries set\+Net\+List} (int Net\+Id)
+\item 
+\mbox{\Hypertarget{class_node_a133d5b2216754b86cefb126a909a06d3}\label{class_node_a133d5b2216754b86cefb126a909a06d3}} 
+void {\bfseries set\+Pos} (double x, double y)
+\item 
+\mbox{\Hypertarget{class_node_af99905510fa4439d496748b62a5c4c4a}\label{class_node_af99905510fa4439d496748b62a5c4c4a}} 
+void {\bfseries layer\+Change} ()
+\item 
+\mbox{\Hypertarget{class_node_a238471956d516469dde85af051a88436}\label{class_node_a238471956d516469dde85af051a88436}} 
+int {\bfseries wrap\+\_\+orientation} (int kX)
+\item 
+\mbox{\Hypertarget{class_node_a37ea54a1edc5416f3ea9f704377b87a1}\label{class_node_a37ea54a1edc5416f3ea9f704377b87a1}} 
+void {\bfseries set\+Rotation} (int r)
+\item 
+\mbox{\Hypertarget{class_node_aba2ea9e7d535da014557cd85f5ddaf2b}\label{class_node_aba2ea9e7d535da014557cd85f5ddaf2b}} 
+void {\bfseries update\+Coordinates} ()
+\item 
+\mbox{\Hypertarget{class_node_aacd1698a9affb6ac0336b53a71054be0}\label{class_node_aacd1698a9affb6ac0336b53a71054be0}} 
+int {\bfseries str2orient} (string o) const
+\item 
+\mbox{\Hypertarget{class_node_a5051739eecfef1a5ad88fe3ddf6ce3be}\label{class_node_a5051739eecfef1a5ad88fe3ddf6ce3be}} 
+string {\bfseries orient2str} (int o) const
+\item 
+\mbox{\Hypertarget{class_node_a88a07189b3900948b1e897d2bf923d10}\label{class_node_a88a07189b3900948b1e897d2bf923d10}} 
+void {\bfseries print\+Exterior} () const
+\item 
+\mbox{\Hypertarget{class_node_a9cc6f1f26f852c400f20ffd91c6c0444}\label{class_node_a9cc6f1f26f852c400f20ffd91c6c0444}} 
+void {\bfseries print\+Parameter} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_a4cd656d544174479df27f0759e5a3997}\label{class_node_a4cd656d544174479df27f0759e5a3997}} 
+string {\bfseries name}
+\item 
+\mbox{\Hypertarget{class_node_a6846a450c5fe695d9c247c28d851a032}\label{class_node_a6846a450c5fe695d9c247c28d851a032}} 
+model\+::polygon$<$ model\+::d2\+::point\+\_\+xy$<$ double $>$ $>$ {\bfseries poly}
+\item 
+\mbox{\Hypertarget{class_node_acb13eda65e6dc1f74174bd5296c17a74}\label{class_node_acb13eda65e6dc1f74174bd5296c17a74}} 
+boost\+::geometry\+::model\+::box$<$ model\+::d2\+::point\+\_\+xy$<$ double $>$ $>$ {\bfseries envelope}
+\item 
+\mbox{\Hypertarget{class_node_a86f72373c641da9e47460f2103bf8b3d}\label{class_node_a86f72373c641da9e47460f2103bf8b3d}} 
+int {\bfseries idx}
+\item 
+\mbox{\Hypertarget{class_node_a14e7999a00b2fccc3e205d5e4774d730}\label{class_node_a14e7999a00b2fccc3e205d5e4774d730}} 
+double {\bfseries width}
+\item 
+\mbox{\Hypertarget{class_node_aa0f22093957939b69e2872893ac6bccd}\label{class_node_aa0f22093957939b69e2872893ac6bccd}} 
+double {\bfseries height}
+\item 
+\mbox{\Hypertarget{class_node_ac2e28d6f802044a9330b8b23c21e7d94}\label{class_node_ac2e28d6f802044a9330b8b23c21e7d94}} 
+int {\bfseries weight}
+\item 
+\mbox{\Hypertarget{class_node_ac8a629c7b93f191b4e5e680a9e0aca87}\label{class_node_ac8a629c7b93f191b4e5e680a9e0aca87}} 
+bool {\bfseries terminal}
+\item 
+\mbox{\Hypertarget{class_node_a46ac195dd9b45beb2efad5ccd0d04cb5}\label{class_node_a46ac195dd9b45beb2efad5ccd0d04cb5}} 
+bool {\bfseries fixed}
+\item 
+\mbox{\Hypertarget{class_node_ac3410cba66fb089a51618dddb0fed2fe}\label{class_node_ac3410cba66fb089a51618dddb0fed2fe}} 
+bool {\bfseries overlap}
+\item 
+\mbox{\Hypertarget{class_node_a4084d1c5b58a6d34c068353884db9ebe}\label{class_node_a4084d1c5b58a6d34c068353884db9ebe}} 
+double {\bfseries sigma}
+\item 
+\mbox{\Hypertarget{class_node_ad7c6920d22cbcd726be8be6017187481}\label{class_node_ad7c6920d22cbcd726be8be6017187481}} 
+double {\bfseries x\+Coordinate}
+\item 
+\mbox{\Hypertarget{class_node_a9f048aeb8af056af5e70d394759aa2ee}\label{class_node_a9f048aeb8af056af5e70d394759aa2ee}} 
+double {\bfseries y\+Coordinate}
+\item 
+\mbox{\Hypertarget{class_node_adeec1b67d591bfed55a3845958d8fab6}\label{class_node_adeec1b67d591bfed55a3845958d8fab6}} 
+double {\bfseries initialX}
+\item 
+\mbox{\Hypertarget{class_node_afc392925a16be8df77fddc2e92e63f30}\label{class_node_afc392925a16be8df77fddc2e92e63f30}} 
+double {\bfseries initialY}
+\item 
+\mbox{\Hypertarget{class_node_a2a9dadf548054bb05df501127f594fa9}\label{class_node_a2a9dadf548054bb05df501127f594fa9}} 
+double {\bfseries x\+By2}
+\item 
+\mbox{\Hypertarget{class_node_a8c7ea94996f44aa7d3c63630a32c2846}\label{class_node_a8c7ea94996f44aa7d3c63630a32c2846}} 
+double {\bfseries y\+By2}
+\item 
+\mbox{\Hypertarget{class_node_aeac5cbffab36ac7eaf3c57385acb9491}\label{class_node_aeac5cbffab36ac7eaf3c57385acb9491}} 
+string {\bfseries orientation\+\_\+str}
+\item 
+\mbox{\Hypertarget{class_node_aea4a96c0e37a76bf8874ed1de6da5fbe}\label{class_node_aea4a96c0e37a76bf8874ed1de6da5fbe}} 
+int {\bfseries init\+\_\+orientation}
+\item 
+\mbox{\Hypertarget{class_node_a7524d80e867ea804153c6d00557bea62}\label{class_node_a7524d80e867ea804153c6d00557bea62}} 
+int {\bfseries orientation}
+\item 
+\mbox{\Hypertarget{class_node_a9578d7fa719e9e579c2fbf5921e6c8da}\label{class_node_a9578d7fa719e9e579c2fbf5921e6c8da}} 
+int {\bfseries layer} =1
+\item 
+\mbox{\Hypertarget{class_node_a9282dd6b5e7bec5f54e4d465939ac927}\label{class_node_a9282dd6b5e7bec5f54e4d465939ac927}} 
+int {\bfseries mirror}
+\item 
+\mbox{\Hypertarget{class_node_add5c7eeaf7c1f3cb6f7a43d12158c55c}\label{class_node_add5c7eeaf7c1f3cb6f7a43d12158c55c}} 
+vector$<$ int $>$ {\bfseries Netlist}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/Node.\+hpp\end{DoxyCompactItemize}

@@ -337,7 +337,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     return mDb;
 }
 
-/*
+/**
 initialize_params
 Empirically finds normalization parameters for scaling cost terms.
 Currently, we scale by 1/(f) where f is the cost of an expected placement.
@@ -432,7 +432,7 @@ void GridBasedPlacer::h_initialize_params(map<int, vector<Module*> > &netToCell)
   routability_normalization = normalization_terms[2];
 }
 
-/*
+/**
 set_boundaries
 Calculate board boundaries by finding the maximum-area
 rectangular envelope encompasing terminals & fixed modules.
@@ -472,7 +472,7 @@ void GridBasedPlacer::set_boundaries() {
   cout << "max: " << mMaxX << " " << mMaxY << endl;
 }
 
-/*
+/**
 random_placement
 Randomly place and orient a single component within a bounded region
 */
@@ -502,7 +502,7 @@ void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, N
   validate_move(n, rx, ry);
 }
 
-/*
+/**
 initial_placement
 Randomly place and orient all movable components in the board area
 */
@@ -516,7 +516,7 @@ void GridBasedPlacer::random_initial_placement() {
   }
 }
 
-/*
+/**
 project_soln
 projects the final solution to enforce 0 overlap by iteratively
 shifting overlapped components until cumulative overlap reduces below an eps.
@@ -586,7 +586,7 @@ void GridBasedPlacer::project_soln() {
   }
 }
 
-/*
+/**
 wirelength
 Computes HPWL for all nets
 */
@@ -637,7 +637,7 @@ double GridBasedPlacer::wirelength(map<int, vector<pPin> > &netToCell) {
   return wireLength;
 }
 
-/*
+/**
 cell_overlap
 Compute sum squared overlap for all components
 */
@@ -667,7 +667,7 @@ double GridBasedPlacer::cell_overlap() {
   return overlap;
 }
 
-/*
+/**
 wireLength_partial
 Compute HPWL for select nets
 */
@@ -729,7 +729,7 @@ double GridBasedPlacer::wirelength_partial(vector < Node *> &nodes, map<int, vec
   return wireLength;
 }
 
-/*
+/**
 cell_overlap_partial
 Compute sum squared overlap for select components
 */
@@ -787,7 +787,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
   return overlap;
 }
 
-/*
+/**
 rudy
 Computes a routability score
 */
@@ -883,7 +883,7 @@ double GridBasedPlacer::rudy(map<int, vector<pPin> > &netToCell) {
   return r;
 }
 
-/*
+/**
 cost
 Compute full cost over all nodes
 */
@@ -921,7 +921,7 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
   return total_cost;
 }
 
-/*
+/**
 cost_partial
 compute partial cost over subset of nodes
 */
@@ -932,7 +932,7 @@ double GridBasedPlacer::cost_partial(vector < Node *> &nodes, map<int, vector<pP
          l2 * 0.15 * 0.0;//(rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
-/*
+/**
 random_node
 Select random node from set of nodes - returns iterator
 */
@@ -946,7 +946,7 @@ vector < Node >::iterator GridBasedPlacer::random_node() {
   return itNode;
 }
 
-/*
+/**
 validate_move
 validates a shift, project within board boundary
 */
@@ -960,11 +960,10 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
   node.setPos(validated_rx,validated_ry);
 }
 
-/*
+/**
 initiate_move
 initiate a single move for annealing
 */
-//double c = 0.0;
 double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin> > &netToCell) {
   int state = -1;
   double prevCost = 0.0;
@@ -1120,7 +1119,7 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
   }
 }
 
-/*
+/**
 update_Temperature
 Update the SA parameters according to annealing schedule
 */
@@ -1159,7 +1158,7 @@ void GridBasedPlacer::update_temperature() {
   }
 }
 
-/*
+/**
 modified_lam_update
 Update the SA parameters according to modified lam schedule
 */
@@ -1183,11 +1182,11 @@ void GridBasedPlacer::modified_lam_update(int i) {
 
   if (AcceptRate > LamRate) {
     T_update = Temperature * lamtemp_update;
-    sigma_update = log(T_update)  / log(Temperature);
+    sigma_update = min(log(T_update)  / log(Temperature), 1.0);
     Temperature = T_update;
     l1 = 0.95*l1;
   } else {
-    T_update = min(Temperature / lamtemp_update, 1.0000001);
+    T_update = min(Temperature / lamtemp_update, 1.0);
     sigma_update = max(log(T_update) / log(Temperature), 1.0);
     Temperature = T_update;
     l1 = 0.96*l1;
@@ -1208,7 +1207,7 @@ void GridBasedPlacer::modified_lam_update(int i) {
   }
 }
 
-/*
+/**
 check_move
 either accept or reject the move based on current & previous temperature & cost
 */
@@ -1230,12 +1229,11 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   }
 }
 
-/*
+/**
 Improving FPGA Placement with Dynamically Adaptive Stochastic Tunneling
 */
 bool  GridBasedPlacer::check_entrapment() {
   double alpha;
-
   // (1) First define X_t
   double mean_cost = accumulate( cost_hist.begin(), cost_hist.end(), 0.0)/cost_hist.size(); 
   vector < double > X_t;
@@ -1334,7 +1332,7 @@ double GridBasedPlacer::h_stun_partial(vector < Module *> &nodes, map<int, vecto
 
 }
 
-/*
+/**
 initialize_temperature
 initialize temperature according to varanelli cahoon
 */
@@ -1359,7 +1357,7 @@ double GridBasedPlacer::initialize_temperature(map<int, vector<pPin> > &netToCel
   return t;
 }
 
-/*
+/**
 gen_report
 generates a report and outputs files to ./reports/ directory
 */
@@ -1415,7 +1413,7 @@ void GridBasedPlacer::gen_report(map<string, vector<double> > &report,
     f3.close();
 }
 
-/*
+/**
 annealer
 main loop for sa algorithm
 */
@@ -1525,7 +1523,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   return cost(netToCell);
 }
 
-/*
+/**
 hannealer
 main loop for hierarchical sa algorithm
 *//*
@@ -1596,8 +1594,8 @@ float GridBasedPlacer::hannealer(map<int, vector<Module *> > &netToCell, string 
 
 //////////////////////////////////////
 
-/*
-random_placement
+/**
+h_random_placement
 Randomly place and orient a single component within a bounded region
 */
 void GridBasedPlacer::h_random_placement(int xmin, int xmax, int ymin, int ymax, Module &n) {
@@ -1615,8 +1613,8 @@ void GridBasedPlacer::h_random_placement(int xmin, int xmax, int ymin, int ymax,
   this->h_validate_move(&n, rx, ry);
 }
 
-/*
-initial_placement
+/**
+h_initial_placement
 Randomly place and orient all movable components in the board area
 */
 void GridBasedPlacer::h_random_initial_placement() {
@@ -1628,8 +1626,8 @@ void GridBasedPlacer::h_random_initial_placement() {
   }
 }
 
-/*
-wirelength
+/**
+h_wirelength
 Computes HPWL for all nets
 */
 double GridBasedPlacer::h_wirelength(map<int, vector<Module *> > &netToCell) {
@@ -1659,8 +1657,8 @@ double GridBasedPlacer::h_wirelength(map<int, vector<Module *> > &netToCell) {
   return wireLength;
 }
 
-/*
-cell_overlap
+/**
+h_cell_overlap
 Compute sum squared overlap for all components
 */
 double GridBasedPlacer::h_cell_overlap() {
@@ -1691,8 +1689,8 @@ double GridBasedPlacer::h_cell_overlap() {
   return overlap;
 }
 
-/*
-wireLength_partial
+/**
+h_wireLength_partial
 Compute HPWL for select nets
 */
 double GridBasedPlacer::h_wirelength_partial(vector < Module *> &nodes, map<int, vector<Module *> > &netToCell) {
@@ -1734,8 +1732,8 @@ double GridBasedPlacer::h_wirelength_partial(vector < Module *> &nodes, map<int,
   return wireLength;
 }
 
-/*
-rudy
+/**
+h_rudy
 Computes a routability score
 */
 double GridBasedPlacer::h_cellDensity() {
@@ -1791,8 +1789,8 @@ double GridBasedPlacer::h_cellDensity() {
   return r;
 }
 
-/*
-cell_overlap_partial
+/**
+h_cell_overlap_partial
 Compute sum squared overlap for select components
 */
 double GridBasedPlacer::h_cell_overlap_partial(vector < Module *> &nodes) {
@@ -1830,8 +1828,8 @@ double GridBasedPlacer::h_cell_overlap_partial(vector < Module *> &nodes) {
   return overlap;
 }
 
-/*
-rudy
+/**
+h_rudy
 Computes a routability score
 */
 double GridBasedPlacer::h_rudy(map<int, vector<Module *> > &netToCell) {
@@ -1974,8 +1972,8 @@ double GridBasedPlacer::h_cost_partial(vector < Module *> &nodes, map<int, vecto
   }
 }
 
-/*
-random_node
+/**
+h_random_node
 Select random node from set of nodes
 */
 vector < Module * >::iterator GridBasedPlacer::h_random_node() {
@@ -1988,8 +1986,8 @@ vector < Module * >::iterator GridBasedPlacer::h_random_node() {
   return itNode;
 }
 
-/*
-validate_move
+/**
+h_validate_move
 validates a shift, project within board boundary
 */
 void GridBasedPlacer::h_validate_move(Module *node, double rx, double ry) {
@@ -2002,7 +2000,6 @@ void GridBasedPlacer::h_validate_move(Module *node, double rx, double ry) {
   node->setPos(rx,ry);
 }
 
-//double c = 0.0;
 double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Module *> > &netToCell) {
   // Initate a transition
   int state = -1;
@@ -2148,8 +2145,8 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
   }
 }
 
-/*
-check_move
+/**
+h_check_move
 either accept or reject the move based on current & previous temperature & cost
 */
 bool GridBasedPlacer::h_check_move(double prevCost, double newCost, double & Temperature) {
@@ -2192,11 +2189,10 @@ double GridBasedPlacer::h_initialize_temperature(double &Temperature, map<int, v
   return t;
 }
 
-/*
-annealer
-main loop for sa algorithm
+/**
+ * h_annealer
+ * fmain loop for sa algorithm
 */
-
 float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level) {
   double Temperature = t_0;
   int num_components = 0;

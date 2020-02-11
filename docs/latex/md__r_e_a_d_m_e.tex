@@ -1,0 +1,73 @@
+{\itshape S\+A-\/\+P\+CB\+: Simulated Annealing-\/based Placement For P\+CB Layout}\hypertarget{md__r_e_a_d_m_e_autotoc_md4}{}\doxysection{Getting Started}\label{md__r_e_a_d_m_e_autotoc_md4}
+
+\begin{DoxyItemize}
+\item See \href{https://github.com/The-OpenROAD-Project/PCB-PR-App}{\texttt{ https\+://github.\+com/\+The-\/\+Open\+R\+O\+A\+D-\/\+Project/\+P\+C\+B-\/\+P\+R-\/\+App}}
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md5}{}\doxysection{Installation}\label{md__r_e_a_d_m_e_autotoc_md5}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md6}{}\doxysubsection{Pre-\/requisites}\label{md__r_e_a_d_m_e_autotoc_md6}
+
+\begin{DoxyItemize}
+\item G\+CC compiler $>$= 4.\+8.\+5
+\item boost library $>$= 1.\+62
+\item cpp-\/taskflow $>$= 2.\+0
+\item Python $>$= 3.\+6
+\item shapely $>$= 1.\+6.\+4
+\item matplotlib $>$= 3.\+0.\+2
+\item docopt $>$= 0.\+6.\+2
+\item numpy $>$= 1.\+15.\+4
+\item argparse $>$= 1.\+1
+\item tqdm $>$= 4.\+30.\+0 \mbox{[}python-\/multistart\mbox{]}
+\item numba $>$= 0.\+42.\+1 \mbox{[}python-\/multistart\mbox{]}
+\item multiprocessing \mbox{[}python-\/multistart\mbox{]}
+\item yaml
+\item json
+\item Recommended OS\+: Centos6, Centos7 or Ubuntu 16.\+04
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md7}{}\doxysubsection{Clone repo and submodules}\label{md__r_e_a_d_m_e_autotoc_md7}
+\$ git clone --recursive \href{https://github.com/choltz95/c-pcb-annealer}{\texttt{ https\+://github.\+com/choltz95/c-\/pcb-\/annealer}} \$ cd $\sim$/c-\/pcbannealer \$ pip install -\/r requirements.\+txt \$ make install \$ make\hypertarget{md__r_e_a_d_m_e_autotoc_md8}{}\doxysubsection{Fix eagle2bookshelf errors}\label{md__r_e_a_d_m_e_autotoc_md8}
+You may have to fix some Swoop errors. Download D\+R\+U.\+py and place into the eagle2bookshelf directory.
+
+\$ wget \href{https://raw.githubusercontent.com/NVSL/Swoop/master/Swoop/DRU.py}{\texttt{ https\+://raw.\+githubusercontent.\+com/\+N\+V\+S\+L/\+Swoop/master/\+Swoop/\+D\+R\+U.\+py}} \$ mv D\+R\+U.\+py eagle2bookshelf\hypertarget{md__r_e_a_d_m_e_autotoc_md9}{}\doxysubsection{Check your installation}\label{md__r_e_a_d_m_e_autotoc_md9}
+To make sure your installation is correct and the current tool version is stable enough, run a Hello World application\+:
+
+\$ make test \$ open test.\+png\hypertarget{md__r_e_a_d_m_e_autotoc_md10}{}\doxysubsection{How to execute}\label{md__r_e_a_d_m_e_autotoc_md10}
+./sa parameters -\/i $<$optional, value$>$ \+: for denoting \# outer iterations P\+ER SA I\+N\+S\+T\+A\+N\+CE -\/j $<$optional, value$>$ \+: for denoting \textquotesingle{}j\textquotesingle{}$\ast$\#nodes inner iterations -\/t $<$optional, value$>$ \+: for denoting initial temperature -\/f $<$optional, str$>$ \+: for output filename -\/e $<$optional, float$>$ \+: convergence epsilon -\/v $<$optional$>$ \+: Ben-\/amur flag -\/x $<$optional, int$>$ \+: simulated annealing instance index -\/p $<$required, string$>$\+: input placement board -\/d $<$optional, \{0-\/3\}$>$ \+: debug verbosity -\/r $<$optional, \{0-\/3\}$>$ \+: rotation E\+X\+A\+M\+P\+LE\+: ./sa -\/i 20000 -\/j 20 -\/t 1 -\/p input -\/f output\hypertarget{md__r_e_a_d_m_e_autotoc_md11}{}\doxysubsection{License}\label{md__r_e_a_d_m_e_autotoc_md11}
+
+\begin{DoxyItemize}
+\item B\+S\+D-\/3-\/clause License \mbox{[}\mbox{[}Link\mbox{]}\mbox{]}(L\+I\+C\+E\+N\+SE)
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md12}{}\doxysection{Description}\label{md__r_e_a_d_m_e_autotoc_md12}
+C++ annealer for simple P\+CB placement of polygonal components. Supports the following\+:
+\begin{DoxyItemize}
+\item Analytical overlap for arbitrary polygons using boost geometries
+\item Support 90 deg., 45 deg., free rotation \mbox{[}free rotation in progress\mbox{]}
+\item H\+P\+WL cost term for wirelength
+\item B\+E\+N-\/\+A\+M\+E\+UR et al. cost-\/normalization \& automatic initial temperature
+\item Variable placement shift window, smaller displacement with temperature
+\item Geometric temperature updates (cooling schedule) based on Timberwolf schedule
+\item Bookshelf parser
+\item Bookshelf version translator
+\item Plotting \& animations
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md13}{}\doxysection{Limitations / Current issues / In development}\label{md__r_e_a_d_m_e_autotoc_md13}
+
+\begin{DoxyItemize}
+\item Parallel multistart \mbox{[}Issues with cpp-\/taskflow. Still support for multi-\/start via python script.\mbox{]}
+\item R-\/\+Tree spatial indexing for fast overlap computation
+\item Free rotation
+\item Algorithm very sensitive to parameters
+\item Broken support for weighted modules/nets
+\item Set up Dockerfile
+\item Support json configuration files for algorithm parameters
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md14}{}\doxysubsection{Authors}\label{md__r_e_a_d_m_e_autotoc_md14}
+
+\begin{DoxyItemize}
+\item Chester Holtz, Devon Merrill, James (Ting-\/\+Chou) Lin, Connie (Yen-\/\+Yi) Wu (Ph.\+D. advisor\+: Chung-\/\+Kuan Cheng, Steven Swanson).
+\item Pull requests to improve the tool are very appreciated.
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md15}{}\doxysubsection{Citations}\label{md__r_e_a_d_m_e_autotoc_md15}
+
+\begin{DoxyItemize}
+\item Sechen, C. and Sangiovanni-\/\+Vincentelli, A. L., \char`\"{}\+The Timber-\/\+Wolf placement and routing package\char`\"{}, I\+E\+EE J. Solid-\/\+State Circuits 30\+:510–522 1985.
+\item Spindler, P. and Johannes, F., \char`\"{}\+Fast and Accurate Routing Demand Estimation for Efficient Routability-\/driven Placement
+\char`\"{}, I\+E\+EE Transactions on Computer-\/\+Aided Design of Integrated Circuits and Systems, 2007.
+\item C.-\/K. Cheng, A. B. Kahng, I. Kang and L. Wang, \char`\"{}\+Re\+Pl\+Ace\+: Advancing Solution Quality and Routability Validation in Global Placement\char`\"{}, to appear in I\+E\+EE Transactions on Computer-\/\+Aided Design of Integrated Circuits and Systems, 2018. (Digital \mbox{\hyperlink{class_object}{Object}} Identifier\+: 10.\+1109/\+T\+C\+AD.2018.\+2859220)
+\item Ben-\/\+Ameur, Walid. \char`\"{}\+Computing the initial temperature of simulated annealing.\char`\"{} Computational Optimization and Applications 29, no. 3 (2004)\+: 369-\/385.
+\item James M. Varanelli and James P. Cohoon. Two-\/stage simulated annealing methodology. In Proceedings of the 5th Great Lakes Symposium on V\+L\+SI, pages 50–53, Buffalo, NY, 16.-\/18. March 1995. I\+E\+EE, Los Alamitos, CA. †\+EI M153001/95
+\item K. D. Boese A. B. Kahng and S. Muddu A new adaptive multistart technique for combinatorial global optimizations, Operations Research Letters, 16(2)\+: 101-\/113, September, 1993. 
+\end{DoxyItemize}

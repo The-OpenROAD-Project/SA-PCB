@@ -47,7 +47,7 @@ namespace bgi = boost::geometry::index;
 typedef bg::model::box< bg::model::d2::point_xy<double> > box;
 typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
 
-/*
+/**
 random_placement
 Randomly place and orient a single component within a bounded region
 */
@@ -66,7 +66,7 @@ void GridBasedPlacer::h_random_placement(int xmin, int xmax, int ymin, int ymax,
   this->h_validate_move(&n, rx, ry);
 }
 
-/*
+/**
 initial_placement
 Randomly place and orient all movable components in the board area
 */
@@ -79,7 +79,7 @@ void GridBasedPlacer::h_random_initial_placement() {
   }
 }
 
-/*
+/**
 wirelength
 Computes HPWL for all nets
 */
@@ -110,7 +110,7 @@ double GridBasedPlacer::h_wirelength(map<int, vector<Module *> > &netToCell) {
   return wireLength;
 }
 
-/*
+/**
 cell_overlap
 Compute sum squared overlap for all components
 */
@@ -142,7 +142,7 @@ double GridBasedPlacer::h_cell_overlap() {
   return overlap;
 }
 
-/*
+/**
 wireLength_partial
 Compute HPWL for select nets
 */
@@ -185,7 +185,7 @@ double GridBasedPlacer::h_wirelength_partial(vector < Module *> &nodes, map<int,
   return wireLength;
 }
 
-/*
+/**
 rudy
 Computes a routability score
 */
@@ -242,7 +242,7 @@ double GridBasedPlacer::h_cellDensity() {
   return r;
 }
 
-/*
+/**
 cell_overlap_partial
 Compute sum squared overlap for select components
 */
@@ -281,7 +281,7 @@ double GridBasedPlacer::h_cell_overlap_partial(vector < Module *> &nodes) {
   return overlap;
 }
 
-/*
+/**
 rudy
 Computes a routability score
 */
@@ -402,7 +402,7 @@ double GridBasedPlacer::h_cost_partial(vector < Module *> &nodes, map<int, vecto
   }
 }
 
-/*
+/**
 random_node
 Select random node from set of nodes
 */
@@ -416,7 +416,7 @@ vector < Module * >::iterator GridBasedPlacer::h_random_node() {
   return itNode;
 }
 
-/*
+/**
 validate_move
 validates a shift, project within board boundary
 */
@@ -561,7 +561,7 @@ double GridBasedPlacer::h_initiate_move(double current_cost, double & Temperatur
   }
 }
 
-/*
+/**
 check_move
 either accept or reject the move based on current & previous temperature & cost
 */
@@ -605,11 +605,10 @@ double GridBasedPlacer::h_initialize_temperature(double &Temperature, map<int, v
   return t;
 }
 
-/*
+/**
 annealer
 main loop for sa algorithm
 */
-
 float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level) {
   double Temperature = t_0;
   int num_components = 0;

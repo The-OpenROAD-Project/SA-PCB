@@ -1,0 +1,61 @@
+\hypertarget{class_hierarchy}{}\doxysection{Hierarchy Class Reference}
+\label{class_hierarchy}\index{Hierarchy@{Hierarchy}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_hierarchy_ad364b93d0d42586b75ba1686f4979df2}\label{class_hierarchy_ad364b93d0d42586b75ba1686f4979df2}} 
+void {\bfseries init\+\_\+hierarchy} (int nl, vector$<$ int $>$ nm)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a6dc2d14e4e377acdd12e146fa73cbf60}\label{class_hierarchy_a6dc2d14e4e377acdd12e146fa73cbf60}} 
+\mbox{\hyperlink{class_module}{Module}} $\ast$ {\bfseries create\+\_\+hierarchy} (int id, int lev, bool r)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a6d51e1e040ae1bbdfde13d3bea4baf01}\label{class_hierarchy_a6d51e1e040ae1bbdfde13d3bea4baf01}} 
+void {\bfseries print\+\_\+param} (int i)
+\item 
+\mbox{\Hypertarget{class_hierarchy_add21143ee13610e086cc3be54441c0af}\label{class_hierarchy_add21143ee13610e086cc3be54441c0af}} 
+void {\bfseries insert\+\_\+cell} (int cell\+\_\+id, vector$<$ int $>$ cluster\+\_\+id\+\_\+vec, \mbox{\hyperlink{class_module}{Module}} $\ast$m, int level)
+\item 
+\mbox{\Hypertarget{class_hierarchy_ac42650562faa23777c70c8766424106b}\label{class_hierarchy_ac42650562faa23777c70c8766424106b}} 
+\mbox{\hyperlink{class_module}{Module}} $\ast$ {\bfseries get\+\_\+leaf\+\_\+module\+\_\+from\+\_\+id} (int idx, \mbox{\hyperlink{class_module}{Module}} $\ast$m)
+\item 
+\mbox{\Hypertarget{class_hierarchy_aa0f084edec6ac5025da458c54f58ee9e}\label{class_hierarchy_aa0f084edec6ac5025da458c54f58ee9e}} 
+\mbox{\hyperlink{class_module}{Module}} $\ast$ {\bfseries get\+\_\+level\+\_\+module\+\_\+from\+\_\+id} (int idx, int level, \mbox{\hyperlink{class_module}{Module}} $\ast$m)
+\item 
+\mbox{\Hypertarget{class_hierarchy_aaf32de0a4a3187048b2f9d31482a501e}\label{class_hierarchy_aaf32de0a4a3187048b2f9d31482a501e}} 
+void {\bfseries set\+\_\+netlist\+\_\+hierarchy} (map$<$ int, vector$<$ \mbox{\hyperlink{classp_pin}{p\+Pin}} $>$ $>$ net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a367c5cece8eaf406923dbf22b04a5ef5}\label{class_hierarchy_a367c5cece8eaf406923dbf22b04a5ef5}} 
+void {\bfseries propagate\+\_\+netlist} (int lev)
+\item 
+\mbox{\Hypertarget{class_hierarchy_af0b04b3a6a1b448cc47df525ab1233a2}\label{class_hierarchy_af0b04b3a6a1b448cc47df525ab1233a2}} 
+void {\bfseries set\+\_\+module\+\_\+geometries} (vector$<$ \mbox{\hyperlink{class_node}{Node}} $>$ node\+Id)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a93a7f8d26ba9b36fb0f4319120910a97}\label{class_hierarchy_a93a7f8d26ba9b36fb0f4319120910a97}} 
+void {\bfseries propagate\+\_\+geometries} (int lev)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a856425628eadc87dad637666de0dbd3c}\label{class_hierarchy_a856425628eadc87dad637666de0dbd3c}} 
+vector$<$ \mbox{\hyperlink{class_node}{Node}} $>$ {\bfseries update\+\_\+cell\+\_\+positions\+\_\+at\+\_\+level} (vector$<$ \mbox{\hyperlink{class_node}{Node}} $>$ node\+Id, int level)
+\item 
+\mbox{\Hypertarget{class_hierarchy_a128405f5d00048eeece50206d32239f7}\label{class_hierarchy_a128405f5d00048eeece50206d32239f7}} 
+vector$<$ \mbox{\hyperlink{class_node}{Node}} $>$ {\bfseries update\+\_\+cell\+\_\+positions} (vector$<$ \mbox{\hyperlink{class_node}{Node}} $>$ node\+Id)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_hierarchy_a294ff8bf8523e63ede9b4981632b3c5d}\label{class_hierarchy_a294ff8bf8523e63ede9b4981632b3c5d}} 
+int {\bfseries num\+\_\+levels}
+\item 
+\mbox{\Hypertarget{class_hierarchy_a5a13d4e1bcc8cf03abaeecb1cf381ba4}\label{class_hierarchy_a5a13d4e1bcc8cf03abaeecb1cf381ba4}} 
+vector$<$ int $>$ {\bfseries num\+\_\+modules\+\_\+per\+\_\+layer}
+\item 
+\mbox{\Hypertarget{class_hierarchy_a4a6a39494018116c508c20978e55d13c}\label{class_hierarchy_a4a6a39494018116c508c20978e55d13c}} 
+vector$<$ \mbox{\hyperlink{class_level}{Level}} $>$ {\bfseries levels}
+\item 
+\mbox{\Hypertarget{class_hierarchy_a25e1c342c8af3e1d0276921128a48014}\label{class_hierarchy_a25e1c342c8af3e1d0276921128a48014}} 
+\mbox{\hyperlink{class_module}{Module}} $\ast$ {\bfseries root}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/Module.\+hpp\end{DoxyCompactItemize}

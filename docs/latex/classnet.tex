@@ -1,0 +1,70 @@
+\hypertarget{classnet}{}\doxysection{net Class Reference}
+\label{classnet}\index{net@{net}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classnet_a96b2a73d5aab21dc2792e1268d44faa1}\label{classnet_a96b2a73d5aab21dc2792e1268d44faa1}} 
+{\bfseries net} (const int id=-\/1, const std\+::string name=\char`\"{}default\+Name\char`\"{}, const int netclass\+\_\+id=-\/1, const std\+::pair$<$ int, int $>$ pair=std\+::make\+\_\+pair(-\/1, -\/1))
+\item 
+\mbox{\Hypertarget{classnet_ae1ab1bedc3768d4bb6665bbdc64c09a2}\label{classnet_ae1ab1bedc3768d4bb6665bbdc64c09a2}} 
+int {\bfseries get\+Id} ()
+\item 
+\mbox{\Hypertarget{classnet_a502455f6fdb8acfe3d42d6e5222ef8c8}\label{classnet_a502455f6fdb8acfe3d42d6e5222ef8c8}} 
+std\+::string \& {\bfseries get\+Name} ()
+\item 
+\mbox{\Hypertarget{classnet_ad5f3e976b6f8a5936fb9eb5769240145}\label{classnet_ad5f3e976b6f8a5936fb9eb5769240145}} 
+int {\bfseries get\+Netclass\+Id} ()
+\item 
+\mbox{\Hypertarget{classnet_a046ebab35aa066cd77763dad878a0b93}\label{classnet_a046ebab35aa066cd77763dad878a0b93}} 
+void {\bfseries add\+Pin} (const \mbox{\hyperlink{class_pin}{Pin}} \&\+\_\+pin)
+\item 
+\mbox{\Hypertarget{classnet_ab7636bb3c9dea1e22ca5d2f412c08ac5}\label{classnet_ab7636bb3c9dea1e22ca5d2f412c08ac5}} 
+std\+::vector$<$ \mbox{\hyperlink{class_pin}{Pin}} $>$ \& {\bfseries get\+Pins} ()
+\item 
+\mbox{\Hypertarget{classnet_af0080041b860eb83532bdaa6e7064f86}\label{classnet_af0080041b860eb83532bdaa6e7064f86}} 
+std\+::vector$<$ \mbox{\hyperlink{class_segment}{Segment}} $>$ \& {\bfseries get\+Segments} ()
+\item 
+\mbox{\Hypertarget{classnet_a9d6f376dc2a4bc1653347a919150e10d}\label{classnet_a9d6f376dc2a4bc1653347a919150e10d}} 
+std\+::vector$<$ \mbox{\hyperlink{class_via}{Via}} $>$ \& {\bfseries get\+Vias} ()
+\item 
+\mbox{\Hypertarget{classnet_a7a16cbc2899ce5dcb238fe0e98eed83d}\label{classnet_a7a16cbc2899ce5dcb238fe0e98eed83d}} 
+\mbox{\hyperlink{class_segment}{Segment}} \& {\bfseries get\+Segment} (int \&\+\_\+id)
+\item 
+\mbox{\Hypertarget{classnet_a188f981a645051dcfd0a37d232931d41}\label{classnet_a188f981a645051dcfd0a37d232931d41}} 
+\mbox{\hyperlink{class_via}{Via}} \& {\bfseries get\+Via} (int \&\+\_\+id)
+\item 
+\mbox{\Hypertarget{classnet_aac64a709241b73aea775a024d7600796}\label{classnet_aac64a709241b73aea775a024d7600796}} 
+void {\bfseries clear\+Segments} ()
+\item 
+\mbox{\Hypertarget{classnet_ab821f4c40c3df632c90fb4677a8efdfd}\label{classnet_ab821f4c40c3df632c90fb4677a8efdfd}} 
+void {\bfseries clear\+Vias} ()
+\item 
+\mbox{\Hypertarget{classnet_a2a35c5b82245e5ffbdde3fce49ac6ffd}\label{classnet_a2a35c5b82245e5ffbdde3fce49ac6ffd}} 
+int {\bfseries get\+Segment\+Count} ()
+\item 
+\mbox{\Hypertarget{classnet_a89681bec40dee084c3eb36d362111ea0}\label{classnet_a89681bec40dee084c3eb36d362111ea0}} 
+void {\bfseries add\+Segment} (const \mbox{\hyperlink{class_segment}{Segment}} \&\+\_\+segment)
+\item 
+\mbox{\Hypertarget{classnet_a7eb6b5793433cc33d8d7a6f8029d3fb4}\label{classnet_a7eb6b5793433cc33d8d7a6f8029d3fb4}} 
+int {\bfseries get\+Via\+Count} ()
+\item 
+\mbox{\Hypertarget{classnet_a599c572e172badd34d826c1193d296c0}\label{classnet_a599c572e172badd34d826c1193d296c0}} 
+void {\bfseries add\+Via} (const \mbox{\hyperlink{class_via}{Via}} \&\+\_\+via)
+\item 
+\mbox{\Hypertarget{classnet_ad40820730a290309a4d4a489a39cd383}\label{classnet_ad40820730a290309a4d4a489a39cd383}} 
+bool {\bfseries is\+Diff\+Pair} ()
+\item 
+\mbox{\Hypertarget{classnet_a5df911eaae4287e1dc61f7fef8da0a69}\label{classnet_a5df911eaae4287e1dc61f7fef8da0a69}} 
+int {\bfseries get\+Diff\+Pair\+Id} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classnet_a90fcdfdc164655891e84977ce5fc6fd0}\label{classnet_a90fcdfdc164655891e84977ce5fc6fd0}} 
+class {\bfseries kicad\+Pcb\+Data\+Base}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+module/\+Kicad\+Parser/src/net.\+h\end{DoxyCompactItemize}

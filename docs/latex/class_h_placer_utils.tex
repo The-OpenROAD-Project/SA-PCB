@@ -1,0 +1,52 @@
+\hypertarget{class_h_placer_utils}{}\doxysection{H\+Placer\+Utils Class Reference}
+\label{class_h_placer_utils}\index{HPlacerUtils@{HPlacerUtils}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_add1dec5286c82edc7987fa7cfcdd9e02}\label{class_h_placer_utils_add1dec5286c82edc7987fa7cfcdd9e02}} 
+void {\bfseries h\+\_\+initialize\+\_\+params} (map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a0d0ee35bd8fce9c8fff69e4ab761906a}\label{class_h_placer_utils_a0d0ee35bd8fce9c8fff69e4ab761906a}} 
+void {\bfseries h\+\_\+validate\+\_\+move} (\mbox{\hyperlink{class_module}{Module}} $\ast$node, double rx, double ry)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a18a2647078b1812b003144643a5c7377}\label{class_h_placer_utils_a18a2647078b1812b003144643a5c7377}} 
+double {\bfseries h\+\_\+cost} (map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell, int temp\+\_\+debug=0)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a44763c88114ac523dc73a0ea1092e504}\label{class_h_placer_utils_a44763c88114ac523dc73a0ea1092e504}} 
+double {\bfseries h\+\_\+cost\+\_\+partial} (vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ \&nodes, map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a1afb29961e757b38f0ec9f1b9e3f7bc4}\label{class_h_placer_utils_a1afb29961e757b38f0ec9f1b9e3f7bc4}} 
+double {\bfseries h\+\_\+cell\+\_\+overlap} ()
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a3f0fb718e605fee6f4f4897465bcb334}\label{class_h_placer_utils_a3f0fb718e605fee6f4f4897465bcb334}} 
+double {\bfseries h\+\_\+wirelength} (map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a16f45c6c66571c8adeea7657029b64c3}\label{class_h_placer_utils_a16f45c6c66571c8adeea7657029b64c3}} 
+double {\bfseries h\+\_\+cell\+\_\+overlap\+\_\+partial} (vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ \&nodes)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a7276317e230972d0c891bc2026406fa9}\label{class_h_placer_utils_a7276317e230972d0c891bc2026406fa9}} 
+double {\bfseries h\+\_\+wirelength\+\_\+partial} (vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ \&nodes, map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a6104b528a267e2549c31b74a8541aa58}\label{class_h_placer_utils_a6104b528a267e2549c31b74a8541aa58}} 
+double {\bfseries h\+\_\+rudy} (map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a63826f2e66c912fc72f5ccd4ab8fb846}\label{class_h_placer_utils_a63826f2e66c912fc72f5ccd4ab8fb846}} 
+float {\bfseries h\+\_\+annealer} (map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell, string initial\+\_\+pl, int level=0)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_af975bb22dd10283142f76b531642243e}\label{class_h_placer_utils_af975bb22dd10283142f76b531642243e}} 
+double {\bfseries h\+\_\+initialize\+\_\+temperature} (double \&Temperature, map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a222e46bf03bb6ff575baca945e08212d}\label{class_h_placer_utils_a222e46bf03bb6ff575baca945e08212d}} 
+double {\bfseries h\+\_\+initiate\+\_\+move} (double current\+\_\+cost, double \&Temperature, map$<$ int, vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$ $>$ \&net\+To\+Cell)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a8b295d613b613e9247b3966dacef0b4d}\label{class_h_placer_utils_a8b295d613b613e9247b3966dacef0b4d}} 
+void {\bfseries h\+\_\+random\+\_\+placement} (int xmin, int xmax, int ymin, int ymax, \mbox{\hyperlink{class_module}{Module}} \&n)
+\item 
+\mbox{\Hypertarget{class_h_placer_utils_a64db22fbbd87e9c8dbe60986d0aab069}\label{class_h_placer_utils_a64db22fbbd87e9c8dbe60986d0aab069}} 
+vector$<$ \mbox{\hyperlink{class_module}{Module}} $\ast$ $>$\+::iterator {\bfseries h\+\_\+random\+\_\+node} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/H\+Placer\+Utils.\+hpp\end{DoxyCompactItemize}

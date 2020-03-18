@@ -52,7 +52,8 @@
 
 //#include "Node.hpp"
 //#include "Pin.hpp"
-#include "Module.hpp"
+//#include "Module.hpp"
+#include "Hierarchy.hpp"
 //#include "readScl.hpp"
 
 class Node;

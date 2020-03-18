@@ -2194,7 +2194,7 @@ double GridBasedPlacer::h_initialize_temperature(double &Temperature, map<int, v
  * fmain loop for sa algorithm
 */
 float GridBasedPlacer::h_annealer(map<int, vector<Module *> > &netToCell, string initial_pl, int level) {
-  double Temperature = t_0;
+  Temperature = t_0;
   int num_components = 0;
 
   vector < Module * > ::iterator itNode;

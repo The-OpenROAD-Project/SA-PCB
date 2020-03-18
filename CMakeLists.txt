@@ -38,6 +38,7 @@ set (PCBPLACER_SRC
   src/PcbPlacer_wrapper.cpp
   src/linreg.cpp
   src/Module.cpp
+  src/Hierarchy.cpp
   #src/HPlacerUtils.cpp
   )
 
@@ -46,6 +47,7 @@ set (PCBPLACER_HEADER
   src/globalParam.h
   src/util.h
   src/Node.hpp
+  src/Hierarchy.hpp
   src/Module.hpp
   src/readFiles.hpp
   src/Pin.hpp

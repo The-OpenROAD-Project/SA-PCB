@@ -118,18 +118,18 @@ class Module {
 Level
 contains an instance/level of the hierarchal board representation to place
 */
-class Level {
+/*class Level {
 public:
 vector <Module *> modules; // mapping from module id to module pointer
 map<int, vector<Module *> > netToModule; // mapping from netid to vpin/module
 int level;
 };
-
+*/
 /**
 Hierarchy
 Hierarchical tree datastructure
 */
-class Hierarchy {
+/*class Hierarchy {
 public:
 int num_levels;
 vector < int > num_modules_per_layer;
@@ -150,4 +150,4 @@ void set_module_geometries(vector < Node > nodeId);
 void propagate_geometries(int lev);
 vector <Node> update_cell_positions_at_level(vector < Node > nodeId, int level);
 vector <Node> update_cell_positions(vector < Node > nodeId);
-};
+};*/

@@ -74,6 +74,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/foreach.hpp>
 #include <boost/geometry/index/rtree.hpp>

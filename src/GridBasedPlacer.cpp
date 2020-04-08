@@ -250,7 +250,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 	if (bbox.m_y > 1000 || bbox.m_y < 0.001) {
             bbox.m_y = 3;
         }
-        n.setParameterNodes(inst.getName(), bbox.m_x + 0.2, bbox.m_y + 0.2, false, inst.getId(), mirror);
+        n.setParameterNodes(inst.getName(), bbox.m_x + 1.0, bbox.m_y + 1.0, false, inst.getId(), mirror);
         nodeId[inst.getId()] = n;
         name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
 
@@ -479,7 +479,7 @@ void GridBasedPlacer::set_boundaries() {
 }
 
 /**
-random_placement
+random_placement    print(ff)
 Randomly place and orient a single component within a bounded region
 */
 void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, Node &n) {
@@ -1037,9 +1037,10 @@ double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin>
 
     double sigma = rand_node1->sigma;
     ssamp = sigma;
-    boost::normal_distribution<> nd(sigma, shift_var);
+    //boost::normal_distribution<> nd(sigma, shift_var);
+    boost::uniform_real<> nd(0.0,sigma);
     boost::variate_generator<boost::mt19937&,
-                             boost::normal_distribution<> > var_nor(rng, nd);
+                             boost::uniform_real<> > var_nor(rng, nd);
 
     double dx = var_nor();
     double dy = var_nor();
@@ -1174,9 +1175,9 @@ void GridBasedPlacer::modified_lam_update(int i) {
     int outer_loop_iter = (H.levels.size()-1) * outer_loop_iter;
   }
 
-  if ((double)i/(double)outer_loop_iter < 0.15){
-    LamRate = 0.44 + 0.56 * pow(560.0, -i/outer_loop_iter/0.15);
-  } else if (0.15 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
+  if ((double)i/(double)outer_loop_iter < 0.10){
+    LamRate = 0.44 + 0.56 * pow(560.0, -(double)i/(double)outer_loop_iter/0.15);
+  } else if (0.10 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
     LamRate = 0.44;
     //wl_normalization.second = wl_hist.back();
     //area_normalization.second = oa_hist.back();
@@ -1426,7 +1427,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   report["cost_hist"] = cost_hist;
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
-  writeNodesFile("./cache/nodes.nodes");
+  writeNodesFile("./cache2/nodes.nodes");
   cout << "calculating initial params..." << endl;
   initialize_params(netToCell);
   if (initial_pl != "") {
@@ -1470,8 +1471,8 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
     " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
     " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << " entraped: " << entraped << endl;
-    writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
-    writeRadFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".rad");
+    writePlFile("./cache2/"+std::to_string( ii )+".pl");
+    writeRadFile("./cache2/"+std::to_string( ii )+".rad");
     //gen_report(report,
     //           accept_ratio_history,
     //           netToCell);
@@ -2071,9 +2072,10 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
 
     double sigma = (*rand_node1)->sigma;
     ssamp = sigma;
-    boost::normal_distribution<> nd(0.0, sigma);
+    //boost::normal_distribution<> nd(0.0, sigma);
+    boost::uniform_real<> nd(0.0, sigma);
     boost::variate_generator<boost::mt19937&,
-                             boost::normal_distribution<> > var_nor(rng, nd);
+                             boost::uniform_real<> > var_nor(rng, nd);
 
     double dx = var_nor();
     double dy = var_nor();

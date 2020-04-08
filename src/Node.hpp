@@ -79,6 +79,7 @@ class Node {
     int orientation;
     int layer=1; // 1 or -1 for 2-sided placement
     int mirror;
+    int flipped=-1;
     vector < int > Netlist;
 /*
     void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0);
@@ -109,6 +110,9 @@ void Node::setParameterNodes(string _name, double _width, double _height, bool _
   height = _height;
   terminal = _terminal;
   mirror = _mirror;
+  if (_mirror == -1) {
+    layer = -1;
+  }
   orientation_str = "N";
   idx = _idx;
   if (!terminal) {
@@ -152,7 +156,7 @@ void Node::setParameterPl(double xCoordinate, double yCoordinate, string _orient
   init_orientation = str2orient(_orientation_str);
   setRotation(str2orient(_orientation_str));
   fixed = _fixed;
-  sigma = 10.0;
+  sigma = 20.0;
 }
 
 /**
@@ -190,6 +194,7 @@ void Node::layerChange() {
   }  else {
     layer=-1*layer;
   }
+  flipped = -1 * flipped;
 }
 
 int Node::wrap_orientation(int kX) {
@@ -311,6 +316,7 @@ void Node::printParameter() {
   cout << "Orientation   " << orientation << endl;
   cout << "terminal      " << terminal << endl;
   cout << "fixed         " << fixed << endl;
+  cout << "layer         " << layer << endl;
   cout << "NetList       ";
   vector < int > ::iterator it2;
   for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {

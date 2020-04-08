@@ -343,3 +343,20 @@ int writeNodesFile(string fname) {
     return 0;
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
 }
+
+int writeFlippedFile(string fname) {
+    fstream file;
+    string buf;
+    ofstream myfile (fname);
+
+    vector < Node > ::iterator itModule;
+    if (myfile.is_open()) {
+        for (itModule = nodeId.begin(); itModule != nodeId.end(); ++itModule) {
+            if (itModule->flipped == 1) {
+                myfile << itModule->name << "\n";
+            }
+        }
+    }
+    myfile.close();
+    return 0;
+}

@@ -237,9 +237,9 @@ private:
 
   // annealing move parameters
   float rotate_proba = 0.15;
-  float layer_change_proba = 0.1;
+  float layer_change_proba = 0.0;
   float swap_proba = 0.25;
-  float shift_proba = 0.5;
+  float shift_proba = 0.6;
   bool rotate_flag = 0;
 
   // two-sided placement

@@ -251,6 +251,7 @@ void Node::printParameter() {
   cout << "Orientation   " << orientation << endl;
   cout << "terminal      " << terminal << endl;
   cout << "fixed         " << fixed << endl;
+  couot<< "layer         " << layer << endl;
   cout << "NetList       ";
   vector < int > ::iterator it2;
   for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {

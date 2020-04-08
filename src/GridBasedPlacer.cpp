@@ -244,7 +244,12 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
         } else {
             mirror = -1;
         }
-       
+        if (bbox.m_x > 1000 || bbox.m_x < 0.001) {
+            bbox.m_x = 3;
+        }
+	if (bbox.m_y > 1000 || bbox.m_y < 0.001) {
+            bbox.m_y = 3;
+        }
         n.setParameterNodes(inst.getName(), bbox.m_x + 0.2, bbox.m_y + 0.2, false, inst.getId(), mirror);
         nodeId[inst.getId()] = n;
         name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
@@ -334,6 +339,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
           inst.setLayer(bot);
         }
     }
+    writeFlippedFile("./flipped_components.rad"); 
     return mDb;
 }
 
@@ -1185,25 +1191,16 @@ void GridBasedPlacer::modified_lam_update(int i) {
     sigma_update = min(log(T_update)  / log(Temperature), 1.0);
     Temperature = T_update;
     l1 = 0.95*l1;
+    vector <Node>::iterator nodeit = nodeId.begin();
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      sigma_update = 0.985;
+      nodeit->sigma = max(sigma_update * nodeit->sigma, 1.0);
+    } 
   } else {
     T_update = min(Temperature / lamtemp_update, 1.0);
     sigma_update = max(log(T_update) / log(Temperature), 1.0);
     Temperature = T_update;
     l1 = 0.96*l1;
-  }
-
-  if (!do_hplace) {
-    vector < Node > ::iterator nodeit = nodeId.begin();
-    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      //nodeit->sigma =  max(0.98*nodeit->sigma,0.5);
-      nodeit->sigma = max(sigma_update * nodeit->sigma,1.0);
-    }
-  } else {
-    vector < Module* > ::iterator nodeit = moduleId.begin();
-    for (nodeit = moduleId.begin(); nodeit != moduleId.end(); ++nodeit) {
-      //(*nodeit) -> sigma =  0.2;
-      (*nodeit)->sigma = max(sigma_update * (*nodeit)->sigma,1.0);
-    }
   }
 }
 
@@ -1318,6 +1315,9 @@ bool  GridBasedPlacer::check_entrapment() {
   }
 }
 
+/**
+apply stun transformation to cost
+*/
 double GridBasedPlacer::h_stun(map<int, vector <Module *> > &netToCell, int temp_debug) {
   // a adjust stun parameter
   double E = h_cost(netToCell, temp_debug);
@@ -1509,7 +1509,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     nodeit->sigma =  0.2;
   }
 
-  i = 5 * inner_loop_iter * num_components;
+  i = 10 * inner_loop_iter * num_components;
   Temperature = 0.0;
   cst = cost(netToCell);
   while (i > 0) {

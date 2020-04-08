@@ -1426,7 +1426,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
   report["cost_hist"] = cost_hist;
   report["wl_hist"] = wl_hist;
   report["oa_hist"] = oa_hist;
-
+  writeNodesFile("./cache/nodes.nodes");
   cout << "calculating initial params..." << endl;
   initialize_params(netToCell);
   if (initial_pl != "") {
@@ -1470,7 +1470,8 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     cout << "iteration: " << ii << " time: " <<  time_span.count() << " (s)" << " updates/time: " <<  ii/time_span.count() << 
     " time remaining: " <<  time_span.count()/ii * (outer_loop_iter-ii) << " (s)" << " temperature: " << Temperature << " wl weight: " << l1 << " s samp: " << ssamp <<
     " sigma update: " << sigma_update << " acceptance rate: " << AcceptRate << " lam rate: " << LamRate << " entraped: " << entraped << endl;
-
+    writePlFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".pl");
+    writeRadFile("./cache/"+std::to_string( level )+"_"+std::to_string( ii )+".rad");
     //gen_report(report,
     //           accept_ratio_history,
     //           netToCell);

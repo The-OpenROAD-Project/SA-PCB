@@ -306,6 +306,21 @@ int writePlFile(string fname) {
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}
 }
 
+int writeRadFile(string fname) {
+    fstream file;
+    string buf;
+    ofstream myfile (fname);
+    myfile << "\n\n\n\n";
+    vector < Node > ::iterator itNode;
+    if (myfile.is_open()) {
+        for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
+            myfile << itNode->idx << " " << itNode->sigma << "\n";
+        }
+    }
+    myfile.close();
+    return 0;
+}
+
 /**
 writeNodesFile
 read nodes (modules) file

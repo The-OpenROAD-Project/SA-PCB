@@ -116,10 +116,19 @@ void Node::setParameterNodes(string _name, double _width, double _height, bool _
   orientation_str = "N";
   idx = _idx;
   if (!terminal) {
-    double points[][2] = {{0.0, 0.0}, {_width, 0.0}, {_width, _height}, {0.0, _height}};
+    //double points[][2] = {{0.0, 0.0}, {_width, 0.0}, {_width, _height}, {0.0, _height}};
+    std::vector<Point> points;
+    points.push_back(Point(0.0,0.0));
+      points.push_back(Point(0.0,_height));
+      points.push_back(Point(_width,_height));
+      points.push_back(Point(_width,0.0));
+      points.push_back(Point(0.0,0.0));
+
     model::polygon< model::d2::point_xy<double> > _poly;
-    append(_poly, points);
+    //append(_poly, points);
+    assign_points(_poly, points);
     boost::geometry::correct(_poly);
+
     poly = _poly;
     boost::geometry::envelope(_poly, envelope);
   }
@@ -150,13 +159,14 @@ Sets parameters given an entry in Pl file
 */
 void Node::setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed) {
   setPos(xCoordinate, yCoordinate);
-  this -> initialX = xCoordinate;
-  this -> initialY = yCoordinate;
+  initialX = xCoordinate;
+  initialY = yCoordinate;
   orientation_str = _orientation_str;
   init_orientation = str2orient(_orientation_str);
   setRotation(str2orient(_orientation_str));
   fixed = _fixed;
-  sigma = 20.0;
+  sigma = 50.0 * max(10/((double)(width * height)), 1.0);
+  //sigma = 20.0;
 }
 
 /**
@@ -306,6 +316,7 @@ print node params
 */
 void Node::printParameter() {
   cout << "name      " << name << endl;
+  cout << "idx           " << idx << endl;
   cout << "Width         " << width << endl;
   cout << "Height        " << height << endl;
   cout << "Weight        " << weight << endl;

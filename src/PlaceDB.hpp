@@ -37,15 +37,9 @@
 #include "Node.hpp"
 #include "Pin.hpp"
 
-class Board {
+class PlaceDB {
 public:
   int idx;
-  string nodesfname;
-  string shapesfname;
-  string netsfname;
-  string plfname;
-  string outfname;
-
   double t_0;
   double temp;
   double convergence_epsilon;
@@ -53,10 +47,35 @@ public:
   int outer_loop_iter;
 
   bool initial_placement;
-  bool ben_amur;
   int rotate_flag;
 
   boundaries board_boundary;
+
+  void cell_overlap() {
+
+  }
+
+  void overlap_incremental() {
+
+  }
+
+  void net_hpwl() {
+
+  }
+
+  void hpwl() {
+
+  }
+
+  void density_map() {
+
+  }
+
+  void congestion_map() {
+
+  }
+
+
 
 };
 

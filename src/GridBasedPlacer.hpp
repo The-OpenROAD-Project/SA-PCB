@@ -74,6 +74,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/foreach.hpp>
 #include <boost/geometry/index/rtree.hpp>
@@ -90,6 +91,7 @@ typedef boost::geometry::model::d2::point_xy<double> Point;
 
 class GridBasedPlacer {
 public:
+  int iii = 0;
   //ctor
   GridBasedPlacer(kicadPcbDataBase &db) : mDb(db) {}
   //GridBasedPlacer() {}
@@ -166,7 +168,7 @@ private:
   double initialize_temperature(map<int, vector<pPin> > &netToCell);
   void update_temperature();
   void modified_lam_update(int i);
-  double initiate_move(double current_cost, map<int, vector<pPin> > &netToCell);
+  vector<double> initiate_move(vector<double> current_cost, map<int, vector<pPin> > &netToCell);
   bool check_move(double prevCost, double newCost);
   void project_soln();
   void random_placement(int xmin, int xmax, int ymin, int ymax, Node &n);
@@ -231,15 +233,15 @@ private:
   int inner_loop_iter = 20;
   double eps = -1.0;
   bool var = false;
-  double l1 = 0.4;
+  double l1 = 0.0;
   double shift_var = 1.0;
   double ssamp = 0.0;
 
   // annealing move parameters
   float rotate_proba = 0.15;
-  float layer_change_proba = 0.0;
+  float layer_change_proba = 0.1;
   float swap_proba = 0.25;
-  float shift_proba = 0.6;
+  float shift_proba =  0.5;
   bool rotate_flag = 0;
 
   // two-sided placement

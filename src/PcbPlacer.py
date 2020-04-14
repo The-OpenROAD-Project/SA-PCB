@@ -101,6 +101,10 @@ class GridBasedPlacer(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, GridBasedPlacer, name)
     __repr__ = _swig_repr
+    __swig_setmethods__["iii"] = _PcbPlacer.GridBasedPlacer_iii_set
+    __swig_getmethods__["iii"] = _PcbPlacer.GridBasedPlacer_iii_get
+    if _newclass:
+        iii = _swig_property(_PcbPlacer.GridBasedPlacer_iii_get, _PcbPlacer.GridBasedPlacer_iii_set)
 
     def __init__(self, db: 'kicadPcbDataBase &'):
         this = _PcbPlacer.new_GridBasedPlacer(db)

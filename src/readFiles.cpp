@@ -284,7 +284,7 @@ int writePlFile(string fname) {
     // print components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(!itNode->terminal) {
-        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation) << " " << itNode->layer;
         if (itNode->fixed) {
           myfile << " /FIXED_NI\n";
         } else {
@@ -297,7 +297,7 @@ int writePlFile(string fname) {
     // print terminals
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(itNode->terminal) {
-        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation);
+        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation) << " " << itNode->layer;
         myfile << " /FIXED_NI\n";
       }
     }
@@ -314,7 +314,7 @@ int writeRadFile(string fname) {
     vector < Node > ::iterator itNode;
     if (myfile.is_open()) {
         for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-            myfile << itNode->idx << " " << itNode->sigma << "\n";
+            myfile << itNode->name << " " << itNode->sigma << "\n";
         }
     }
     myfile.close();
@@ -337,21 +337,7 @@ int writeNodesFile(string fname) {
     // print components
     for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
       if(!itNode->terminal) {
-        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate <<  " : " << itNode->orient2str(itNode->orientation);
-        if (itNode->fixed) {
-          myfile << " /FIXED_NI\n";
-        } else {
-          myfile << "\n";
-        }
-      }
-    }
-
-    myfile << "\n";
-    // print terminals
-    for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
-      if(itNode->terminal) {
-        myfile << itNode->name << " " << itNode->xCoordinate << " " << itNode->yCoordinate << " : " << itNode->orient2str(itNode->orientation);
-        myfile << " /FIXED_NI\n";
+        myfile << itNode->name << " " << itNode->width << " " << itNode->height << "\n";
       }
     }
     myfile.close();

@@ -165,6 +165,7 @@ void Node::setParameterPl(double xCoordinate, double yCoordinate, string _orient
   init_orientation = str2orient(_orientation_str);
   setRotation(str2orient(_orientation_str));
   fixed = _fixed;
+
   sigma = 50.0 * max(10/((double)(width * height)), 1.0);
   //sigma = 20.0;
 }

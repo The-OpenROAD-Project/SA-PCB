@@ -1054,6 +1054,7 @@ vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, m
     ssamp = sigma;
     //boost::normal_distribution<> nd(sigma, shift_var);
     boost::uniform_real<> nd(-1*sigma,sigma);
+
     boost::variate_generator<boost::mt19937&,
                              boost::uniform_real<> > var_nor(rng, nd);
 
@@ -1215,11 +1216,23 @@ void GridBasedPlacer::modified_lam_update(int i) {
   }
 
   if ((double)i/(double)outer_loop_iter < 0.10){
+<<<<<<< HEAD
     LamRate = 0.35 + 0.65 * pow(560.0, -(double)i/(double)outer_loop_iter/0.15);
   } else if (0.11 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.6) {
     LamRate = 0.35;
   } else if (0.6 <= (double)i/(double)outer_loop_iter) {
     LamRate = 0.35 * pow(440.0, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
+=======
+    LamRate = 0.44 + 0.56 * pow(560.0, -(double)i/(double)outer_loop_iter/0.15);
+  } else if (0.10 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
+    LamRate = 0.44;
+    //wl_normalization.second = wl_hist.back();
+    //area_normalization.second = oa_hist.back();
+  } else if (0.65 <= (double)i/(double)outer_loop_iter) {
+    LamRate = 0.44 * pow(440.0, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
+    //wl_normalization.second = wl_hist.back();
+    //area_normalization.second = oa_hist.back();
+>>>>>>> 4d0a9940d58e6332557a90726b0352ee5df518e4
   }
 
   if (AcceptRate > LamRate) {
@@ -2129,7 +2142,11 @@ double GridBasedPlacer::h_initiate_move(double current_cost, map<int, vector<Mod
     double sigma = (*rand_node1)->sigma;
     ssamp = sigma;
     //boost::normal_distribution<> nd(0.0, sigma);
+<<<<<<< HEAD
     boost::uniform_real<> nd(-1*sigma, sigma);
+=======
+    boost::uniform_real<> nd(0.0, sigma);
+>>>>>>> 4d0a9940d58e6332557a90726b0352ee5df518e4
     boost::variate_generator<boost::mt19937&,
                              boost::uniform_real<> > var_nor(rng, nd);
 

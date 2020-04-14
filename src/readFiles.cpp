@@ -340,6 +340,7 @@ int writeNodesFile(string fname) {
         myfile << itNode->name << " " << itNode->width << " " << itNode->height << "\n";
       }
     }
+
     myfile.close();
     return 0;
   } else{ cout << "[ERR] Unable to open cache dir" <<endl; return 1;}

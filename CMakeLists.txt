@@ -39,6 +39,7 @@ set (PCBPLACER_SRC
   src/linreg.cpp
   src/Module.cpp
   src/Hierarchy.cpp
+  src/Node.cpp
   #src/HPlacerUtils.cpp
   )
 
@@ -52,6 +53,7 @@ set (PCBPLACER_HEADER
   src/readFiles.hpp
   src/Pin.hpp
   src/linreg.h
+  src/Logger.hpp
   #src/HPlacerUtils.hpp
   )
 

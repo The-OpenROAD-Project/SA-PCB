@@ -84,6 +84,7 @@
 
 #include "readFiles.hpp"
 #include "HPlacerUtils.hpp"
+#include "Logger.hpp"
 //#include "readScl.h"
 #include "time.h"
 //#include "taskflow/taskflow.hpp"
@@ -180,6 +181,8 @@ private:
 
 private:
 
+  Logger logger;
+  
   vector < double > l_hist;
   vector < double > density_hist;
   vector < double > var_hist;
@@ -234,7 +237,7 @@ private:
   int inner_loop_iter = 20;
   double eps = -1.0;
   bool var = false;
-  double l1 = 0.1;
+  double l1 = 0.4;
   double shift_var = 1.0;
   double ssamp = 0.0;
 

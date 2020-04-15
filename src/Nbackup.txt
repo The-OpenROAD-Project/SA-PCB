@@ -34,7 +34,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Node.hpp"
+#include <string>
+
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim_all.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace std;
 using namespace boost::geometry;
@@ -42,6 +51,57 @@ namespace trans = boost::geometry::strategy::transform;
 namespace bg = boost::geometry;
 typedef boost::geometry::model::d2::point_xy<double> Point;
 
+/**
+Node
+Base Node class for board components
+*/
+class Node {
+  public:
+    string name;
+    model::polygon<model::d2::point_xy<double> > poly;
+    //boost::geometry::model::box< model::d2::point_xy<double> > envelope;
+   boost::geometry::model::box< model::d2::point_xy<double> > envelope_d;
+ boost::geometry::model::box< model::d2::point_xy<int> > envelope;
+
+
+ 
+    int idx;
+    double width;
+    double height;
+    int weight;
+    bool terminal;
+    bool fixed;
+    bool overlap;
+    double sigma;
+    double xCoordinate;
+    double yCoordinate;
+    double initialX;
+    double initialY;
+    double xBy2;
+    double yBy2;
+    string orientation_str;
+    int init_orientation;
+    int orientation;
+    int layer=1; // 1 or -1 for 2-sided placement
+    int mirror;
+    int flipped=-1;
+    vector < int > Netlist;
+/*
+    void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0);
+    void setParameterShapes(string wkt);
+    void setParameterWts(int _weight);
+    void setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed);
+    void setNetList(int NetId);
+    void setPos(double x, double y);
+    void layerChange();
+    int wrap_orientation(int kX);
+    void setRotation(int r);
+    void updateCoordinates();
+    int str2orient(string o) const;
+    string orient2str(int o) const;
+    void printExterior() const;
+    void printParameter();
+*/
 /**
 setParameterNodes
 Sets parameters given an entry in Nodes file
@@ -291,3 +351,4 @@ void Node::printParameter() {
   }
   cout << "\n" << endl;
 }
+};

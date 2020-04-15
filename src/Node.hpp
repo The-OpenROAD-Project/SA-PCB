@@ -59,7 +59,12 @@ class Node {
   public:
     string name;
     model::polygon<model::d2::point_xy<double> > poly;
-    boost::geometry::model::box< model::d2::point_xy<double> > envelope;
+    //boost::geometry::model::box< model::d2::point_xy<double> > envelope;
+   boost::geometry::model::box< model::d2::point_xy<double> > envelope_d;
+ boost::geometry::model::box< model::d2::point_xy<int> > envelope;
+
+
+ 
     int idx;
     double width;
     double height;
@@ -131,6 +136,7 @@ void Node::setParameterNodes(string _name, double _width, double _height, bool _
 
     poly = _poly;
     boost::geometry::envelope(_poly, envelope);
+    boost::geometry::envelope(_poly, envelope_d);
   }
 }
 
@@ -246,14 +252,23 @@ void Node::updateCoordinates() {
       yBy2 = centroid.get<1>();
 
       boost::geometry::model::box< model::d2::point_xy<double> > envtmp;
+      boost::geometry::model::box< model::d2::point_xy<int> > envtmp2;
       boost::geometry::envelope(poly, envtmp);
-      envelope = envtmp;
-      Point minCorner = envelope.min_corner();
-      Point maxCorner = envelope.max_corner();
+      envelope_d=envtmp;
+
+      Point minCorner = envelope_d.min_corner();
+      Point maxCorner = envelope_d.max_corner();
       width  = maxCorner.get<0>() - minCorner.get<0>();
       height = maxCorner.get<1>() - minCorner.get<1>();
-      xCoordinate = bg::get<bg::min_corner, 0>(envelope);
-      yCoordinate = bg::get<bg::min_corner, 1>(envelope);
+      xCoordinate = bg::get<bg::min_corner, 0>(envelope_d);
+      yCoordinate = bg::get<bg::min_corner, 1>(envelope_d);
+
+      envtmp2.max_corner().set<0>(ceil(maxCorner.x()));
+      envtmp2.max_corner().set<1>(ceil(maxCorner.y()));
+      envtmp2.min_corner().set<0>(floor(minCorner.x()));
+      envtmp2.min_corner().set<1>(floor(minCorner.y()));
+      //boost::geometry::convert(envtmp, envtmp2);
+      envelope = envtmp2;
   }
 }
 

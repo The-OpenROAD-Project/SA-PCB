@@ -34,8 +34,56 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Node.hpp"
-#include "Pin.hpp"
+#define BOOST_NO_AUTO_PTR
+
+#include <cstdio>
+#include "BoardGrid.h"
+//#include "kicadPcbDataBase.h"
+#include "globalParam.h"
+#include "util.h"
+
+#include <functional>
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <ctype.h>
+#include <map>
+#include <vector>
+#include <unordered_set>
+#include <algorithm>
+#include <string>
+#include <numeric>
+#include <cmath>
+#include <unistd.h>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
+// boost version 1.69.0
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/geometry.hpp>
+#include <boost/assign.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/io/io.hpp>
+#include <boost/geometry/algorithms/area.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/random.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/foreach.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
+#include "readFiles.hpp"
+//#include "readScl.h"
+#include "time.h"
 
 class PlaceDB {
 public:

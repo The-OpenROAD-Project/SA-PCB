@@ -177,6 +177,7 @@ private:
   void update_rtree(int idx);
   vector < Node > ::iterator random_node();
 
+
 private:
 
   vector < double > l_hist;
@@ -204,7 +205,7 @@ private:
 
   // rtree datastructure for fast overlap check
   bool rt = false;
-  bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<double> >, int>, bgi::quadratic<16> > rtree;
+  bgi::rtree<std::pair<boost::geometry::model::box< model::d2::point_xy<int> >, int>, bgi::quadratic<16> > rtree;
 
   std::vector<std::string> mGridLayerToName;
   std::unordered_map<std::string, int> mLayerNameToGrid;
@@ -233,7 +234,7 @@ private:
   int inner_loop_iter = 20;
   double eps = -1.0;
   bool var = false;
-  double l1 = 0.0;
+  double l1 = 0.1;
   double shift_var = 1.0;
   double ssamp = 0.0;
 

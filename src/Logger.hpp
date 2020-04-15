@@ -137,7 +137,7 @@ class Logger {
 			}
 			mdolog.close();
                         std::ofstream mmlog(logdir+"micro_movement");
-                        for(vector<double>::const_iterator i = micro_movement_window.begin(); i!= micro_movvement_window.end(); ++i) {
+                        for(vector<double>::const_iterator i = micro_movement_window.begin(); i!= micro_movement_window.end(); ++i) {
 				mmlog << *i << '\n';
 			}
 			mmlog.close();

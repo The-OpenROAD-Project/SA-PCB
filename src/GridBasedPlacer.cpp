@@ -284,6 +284,9 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 
     for (auto &net : nets) {
       vector < pPin > pinTemp;
+      //if(net.getPins().size() > 5) {
+      //    continue;
+      //}
       for (auto &pin : net.getPins()) {
           pPin p;
           auto &inst = mDb.getInstance(pin.getInstId());
@@ -301,6 +304,8 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     }
 
     rudy(netToCell);
+    cout << "initial cost: "<< endl;
+    cost(netToCell);
     iii = 1;
 
     cout << "annealing" << endl;
@@ -341,6 +346,8 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
         }
     }
     writeFlippedFile("./flipped_components.rad"); 
+    iii = 0;
+    rudy(netToCell);
     logger.print_log();
     return mDb;
 }
@@ -481,7 +488,7 @@ void GridBasedPlacer::set_boundaries() {
 }
 
 /**
-random_placement    print(ff)
+random_placement
 Randomly place and orient a single component within a bounded region
 */
 void GridBasedPlacer::random_placement(int xmin, int xmax, int ymin, int ymax, Node &n) {
@@ -671,6 +678,7 @@ double GridBasedPlacer::cell_overlap() {
             oa = 0.0;
 	}
         overlap +=  pow(oa,2);
+	//overlap += oa;
       }
     }
   }
@@ -771,6 +779,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
              oa = 0.0;
           }
           overlap +=  pow(oa,2);
+	  //overlap += oa;
         }
       }
     } else {
@@ -794,6 +803,7 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
               oa = 0.0;
           }
           overlap +=  pow(oa,2);
+	  //overlap += oa;
         }
       }
       //cout <<"nonrt: " << overlap << endl;
@@ -1132,6 +1142,13 @@ vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, m
   double updated_cost = l1*normalized_updated_wl + 0.85*(1-l1)*normalized_updated_oa + 0.15*(1-l1)*normalized_updated_rudy;
   //cout << "updated cost " << updated_cost << " prev cost " << current_cost << endl;
 
+  if (boost::iequals(rand_node1->name, logger.micro_name)) {
+	double dcost = updated_cost - current_cost;
+	double dhpwl = updated_wl - current_wl;
+	double doverlap = updated_oa - current_oa;
+	logger.update_micro_histories(dcost, dhpwl, doverlap, 0, rand_node1->sigma);
+  }
+
   vector <double> updated_cost_vec;
   updated_cost_vec.push_back(updated_cost);
   updated_cost_vec.push_back(updated_wl);
@@ -1243,32 +1260,32 @@ void GridBasedPlacer::modified_lam_update(int i) {
   if(do_hplace){
     int outer_loop_iter = (H.levels.size()-1) * outer_loop_iter;
   }
-
-  if ((double)i/(double)outer_loop_iter < 0.10){
-    LamRate = 0.44 + 0.56 * pow(560.0, -(double)i/(double)outer_loop_iter/0.15);
-  } else if (0.10 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
-    LamRate = 0.44;
+  double base_rate = 0.44;
+  if ((double)i/(double)outer_loop_iter < 0.15){
+    LamRate = base_rate + (1-base_rate) * pow(10*(1-base_rate), -(double)i/(double)outer_loop_iter/0.15);
+  } else if (0.15 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
+    LamRate = base_rate;
     //wl_normalization.second = wl_hist.back();
     //area_normalization.second = oa_hist.back();
   } else if (0.65 <= (double)i/(double)outer_loop_iter) {
-    LamRate = 0.44 * pow(440.0, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
+    LamRate = base_rate * pow(10*base_rate, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
     //wl_normalization.second = wl_hist.back();
     //area_normalization.second = oa_hist.back();
   }
 
   if (AcceptRate > LamRate) {
     T_update = Temperature * lamtemp_update;
-    sigma_update = min(log(T_update)  / log(Temperature), 1.0);
+    sigma_update = min(log(T_update)  / log(Temperature), 0.99);
     Temperature = T_update;
-    l1 = 0.95*l1;
+    l1 = 0.955*l1;
     vector <Node>::iterator nodeit = nodeId.begin();
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
       //sigma_update = 0.982;
-      nodeit->sigma = max(sigma_update * nodeit->sigma, 0.98);
+      nodeit->sigma = max(sigma_update * nodeit->sigma, 2.0);
     } 
   } else {
     T_update = min(Temperature / lamtemp_update, 1.0);
-    sigma_update = max(log(T_update) / log(Temperature), 1.01);
+    sigma_update = max(log(T_update) / log(Temperature), 1.0001);
     Temperature = T_update;
   }
 
@@ -1289,7 +1306,14 @@ bool GridBasedPlacer::check_move(double prevCost, double newCost) {
   }
   delCost = newCost - prevCost;
   //cout << delCost << " " << Temperature << " " << prob << " " << exp(-delCost/Temperature) << " " << -delCost << " " << Temperature << " " << -delCost/Temperature << " " << prob << " " <<(prob <= (exp(-delCost/Temperature))) << endl;
-  if (delCost <= 0 || prob <= (exp(-delCost/Temperature))) {
+  errno = 0;
+  double p_thresh = exp(-delCost/Temperature);
+  logger.update_accept_probs(-delCost/Temperature);
+  if (errno == ERANGE) {
+      //cout << "[ERR]" << " overflow: " << -delCost/Temperature << endl;
+      p_thresh = 0.0;
+  } 
+  if (delCost <= 0 || prob <=p_thresh) {
     prevCost = newCost;
     return true;
   } else {
@@ -1607,7 +1631,8 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     nodeit->sigma =  8;
   }
 
-  i = inner_loop_iter * num_components;
+  //i = inner_loop_iter * num_components;
+  i = 0;
   Temperature = 10e-20;
   cst = cost(netToCell);
   while (i > 0) {

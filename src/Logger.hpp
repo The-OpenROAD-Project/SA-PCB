@@ -72,6 +72,8 @@ class Logger {
 		vector<double> micro_movement_window;
 		vector<double> micro_dcongestion;
 
+		vector<double> accept_probabilities;
+
 		void Logger::print_log(string logdir="./cache/") {
 			std::ofstream clog(logdir+"cost_history");
 			for(vector<double>::const_iterator i = cost_history.begin(); i!= cost_history.end(); ++i) {
@@ -137,7 +139,7 @@ class Logger {
 			}
 			mdolog.close();
                         std::ofstream mmlog(logdir+"micro_movement");
-                        for(vector<double>::const_iterator i = micro_movement_window.begin(); i!= micro_movvement_window.end(); ++i) {
+                        for(vector<double>::const_iterator i = micro_movement_window.begin(); i!= micro_movement_window.end(); ++i) {
 				mmlog << *i << '\n';
 			}
 			mmlog.close();
@@ -146,6 +148,15 @@ class Logger {
 				mdcolog << *i << '\n';
 			}
 			mdcolog.close();
+
+			std::ofstream mplog(logdir+"micro_accept_probs");
+                        for(vector<double>::const_iterator i = accept_probabilities.begin(); i!= accept_probabilities.end(); ++i) {
+				mplog << *i << '\n';
+			}
+			mplog.close();
+		}
+		void Logger::update_accept_probs(double prob) {
+		    accept_probabilities.push_back(prob);
 		}
 		void Logger::update_micro_histories(double d_cost, double d_hpwl, double d_overlap, double d_congestion, double window) {
                     micro_dcost.push_back(d_cost);

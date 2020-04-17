@@ -60,6 +60,7 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+#include <errno.h>
 
 // boost version 1.69.0
 #include <boost/algorithm/string/split.hpp>
@@ -233,11 +234,11 @@ private:
   // annealing parameters
   double t_0 = 0.5;
   double Temperature;
-  int outer_loop_iter = 101;
-  int inner_loop_iter = 20;
+  int outer_loop_iter = 1001;
+  int inner_loop_iter = 25;
   double eps = -1.0;
   bool var = false;
-  double l1 = 0.4;
+  double l1 = 0.5;
   double shift_var = 1.0;
   double ssamp = 0.0;
 

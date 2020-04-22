@@ -111,6 +111,7 @@ public:
   double get_overlap_cost() { return cost_hist.back(); }
   double get_temperature() { return Temperature; }
 
+  void set_base_lam(double _lam) {base_lam = _lam;}
   void set_overlap_weight(double _cst) {l1 = _cst;}
   void set_wirelength_weight(double _cst) {l1 = 1-_cst;}
   void set_two_sided(bool _2sided) {two_sided = _2sided; shift_proba += layer_change_proba; layer_change_proba -= layer_change_proba; }
@@ -257,6 +258,7 @@ private:
   double AcceptRate = 0.5;
   double LamRate = 0.5;
   double lamtemp_update = 0.85;
+  double base_lam = 0.44;
 
   // boost mt random number generator
   boost::mt19937 rng;

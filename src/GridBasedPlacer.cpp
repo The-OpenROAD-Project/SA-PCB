@@ -1260,15 +1260,15 @@ void GridBasedPlacer::modified_lam_update(int i) {
   if(do_hplace){
     int outer_loop_iter = (H.levels.size()-1) * outer_loop_iter;
   }
-  double base_rate = 0.44;
+
   if ((double)i/(double)outer_loop_iter < 0.15){
-    LamRate = base_rate + (1-base_rate) * pow(10*(1-base_rate), -(double)i/(double)outer_loop_iter/0.15);
+    LamRate = base_lam + (1-base_lam) * pow(1000*(1-base_lam), -((double)i/(double)outer_loop_iter)/0.15);
   } else if (0.15 <= (double)i/(double)outer_loop_iter && (double)i/(double)outer_loop_iter <= 0.65) {
-    LamRate = base_rate;
+    LamRate = base_lam;
     //wl_normalization.second = wl_hist.back();
     //area_normalization.second = oa_hist.back();
   } else if (0.65 <= (double)i/(double)outer_loop_iter) {
-    LamRate = base_rate * pow(10*base_rate, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
+    LamRate = base_lam * pow(1000*base_lam, -((double)i/(double)outer_loop_iter - 0.65)/0.35);
     //wl_normalization.second = wl_hist.back();
     //area_normalization.second = oa_hist.back();
   }

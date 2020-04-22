@@ -94,6 +94,7 @@ class Node {
     void setNetList(int NetId);
     void setPos(double x, double y);
     void layerChange();
+    static void local_flip(Point &p);
     int wrap_orientation(int kX);
     void setRotation(int r);
     void updateCoordinates();

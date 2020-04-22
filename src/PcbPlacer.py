@@ -140,6 +140,9 @@ class GridBasedPlacer(_object):
     def get_temperature(self) -> "double":
         return _PcbPlacer.GridBasedPlacer_get_temperature(self)
 
+    def set_base_lam(self, _lam: 'double') -> "void":
+        return _PcbPlacer.GridBasedPlacer_set_base_lam(self, _lam)
+
     def set_overlap_weight(self, _cst: 'double') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_overlap_weight(self, _cst)
 

@@ -3640,6 +3640,36 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_GridBasedPlacer_set_base_lam(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GridBasedPlacer_set_base_lam",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GridBasedPlacer, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GridBasedPlacer_set_base_lam" "', argument " "1"" of type '" "GridBasedPlacer *""'"); 
+  }
+  arg1 = reinterpret_cast< GridBasedPlacer * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GridBasedPlacer_set_base_lam" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  (arg1)->set_base_lam(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_GridBasedPlacer_set_overlap_weight(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   GridBasedPlacer *arg1 = (GridBasedPlacer *) 0 ;
@@ -4842,6 +4872,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "GridBasedPlacer_get_wirelength_cost", _wrap_GridBasedPlacer_get_wirelength_cost, METH_VARARGS, NULL},
 	 { "GridBasedPlacer_get_overlap_cost", _wrap_GridBasedPlacer_get_overlap_cost, METH_VARARGS, NULL},
 	 { "GridBasedPlacer_get_temperature", _wrap_GridBasedPlacer_get_temperature, METH_VARARGS, NULL},
+	 { "GridBasedPlacer_set_base_lam", _wrap_GridBasedPlacer_set_base_lam, METH_VARARGS, NULL},
 	 { "GridBasedPlacer_set_overlap_weight", _wrap_GridBasedPlacer_set_overlap_weight, METH_VARARGS, NULL},
 	 { "GridBasedPlacer_set_wirelength_weight", _wrap_GridBasedPlacer_set_wirelength_weight, METH_VARARGS, NULL},
 	 { "GridBasedPlacer_set_two_sided", _wrap_GridBasedPlacer_set_two_sided, METH_VARARGS, NULL},

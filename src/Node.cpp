@@ -141,8 +141,19 @@ void Node::setPos(double x, double y) {
     }
 }
 
+static void Node::local_flip(Point& p) {
+//    double dy = yBy2 - get<1>(p);
+//    set<1>(p, get<1>(p)+2*dy);
+}
+
 void Node::layerChange() {
   if(!terminal) {
+//    boost::geometry::model::d2::point_xy<double> centroid;
+//    boost::geometry::centroid(poly, centroid);
+    //cx = centroid.get<0>();
+    //cy = centroid.get<1>();
+//    boost::geometry::for_each_point(poly, local_flip);
+//    updateCoordinates();
     //model::polygon<model::d2::point_xy<double> > tmp;
     //boost::geometry::transform(poly, tmp, translate);
     //poly = tmp;

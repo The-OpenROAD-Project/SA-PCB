@@ -35,6 +35,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <string>
+#include <iostream>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/split.hpp>

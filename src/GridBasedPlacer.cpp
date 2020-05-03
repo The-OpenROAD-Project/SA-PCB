@@ -249,7 +249,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
 	if (bbox.m_y > 1000 || bbox.m_y < 0.001) {
             bbox.m_y = 3;
         }
-        n.setParameterNodes(inst.getName(), bbox.m_x + 1.0, bbox.m_y + 1.0, false, inst.getId(), mirror);
+        n.setParameterNodes(inst.getName(), bbox.m_x + 0.1, bbox.m_y + 0.1, false, inst.getId(), mirror);
         nodeId[inst.getId()] = n;
         name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
 
@@ -275,7 +275,8 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     }
     cout << "calculating boundaries..." << endl;
     double pminx, pmaxx, pminy, pmaxy;
-    mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
+    //mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
+    mDb.getBoardBoundaryByEdgeCuts(pminx, pmaxx, pminy ,pmaxy);
     mMinX = pminx;
     mMaxX = pmaxx;
     mMinY = pminy;
@@ -297,7 +298,35 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
           mDb.getPinPosition(pin, &pos);
 
           auto &pad = comp.getPadstack(pin.getPadstackId());
-          p.set_params(inst.getName(), pos.m_x - nodeId[name2id[inst.getName()]].xBy2, pos.m_y - nodeId[name2id[inst.getName()]].yBy2, nodeId[name2id[inst.getName()]].idx);
+
+          // Fix for pad rotation problem here:
+          Point_2D<double> offset(
+                pos.m_x - nodeId[name2id[inst.getName()]].xBy2,
+                pos.m_y - nodeId[name2id[inst.getName()]].yBy2
+          );
+          Point_2D<double> r_offset;
+          double orient = inst.getAngle();
+
+	  if(orient == 0) { // 0
+                  r_offset.m_x = offset.m_x;
+                  r_offset.m_y = offset.m_y;
+          } else if(orient == 90) { // 90
+                  r_offset.m_x = -offset.m_y;
+                  r_offset.m_y = offset.m_x;
+          } else if(orient == 180) { // 180
+                  r_offset.m_x = -offset.m_x;
+                  r_offset.m_y = -offset.m_y;
+          } else if(orient == 270) { // 270
+                  r_offset.m_x = offset.m_y;
+                  r_offset.m_y = -offset.m_x;
+          }
+
+          p.set_params(
+                inst.getName(),
+                r_offset.m_x,
+                r_offset.m_y,
+                nodeId[name2id[inst.getName()]].idx
+          );
           pinTemp.push_back(p);
       }
       netToCell.insert(pair < int, vector< pPin > > (net.getId(), pinTemp));
@@ -998,6 +1027,9 @@ initiate a single move for annealing
 */
 //double GridBasedPlacer::initiate_move(double current_cost, map<int, vector<pPin> > &netToCell) {
 vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, map<int, vector<pPin> > &netToCell) {
+	
+  // TODO: PLEASE put a comment here about the format of current_cost_vec
+  //
   //cout << "input size: " << rtree.size() << " ";
   double current_cost = current_cost_vec[0];
   double current_wl = current_cost_vec[1];
@@ -1069,7 +1101,7 @@ vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, m
     prev_wl = wirelength_partial(perturbed_nodes, netToCell);
     prev_oa = cell_overlap_partial(perturbed_nodes);
 
-    double sigma = rand_node1->sigma;
+    double sigma = 2.0;//rand_node1->sigma;
     ssamp = sigma;
     //boost::normal_distribution<> nd(sigma, shift_var);
     boost::uniform_real<> nd(-1*sigma,sigma);
@@ -1591,6 +1623,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       }
 
     while (i > 0) {
+      Temperature = 10e-20;
       cost_vec = initiate_move(cost_vec, netToCell);
       cst = cost_vec[0];
       logger.update_cost_histories(cost_vec[0], cost_vec[1], cost_vec[2], cost_vec[3]);

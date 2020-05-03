@@ -1623,7 +1623,7 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
       }
 
     while (i > 0) {
-      Temperature = 10e-20;
+      //Temperature = 10e-20;
       cost_vec = initiate_move(cost_vec, netToCell);
       cst = cost_vec[0];
       logger.update_cost_histories(cost_vec[0], cost_vec[1], cost_vec[2], cost_vec[3]);

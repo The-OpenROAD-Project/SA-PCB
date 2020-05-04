@@ -244,12 +244,12 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
             mirror = -1;
         }
         if (bbox.m_x > 1000 || bbox.m_x < 0.001) {
-            bbox.m_x = 3;
+            bbox.m_x = 5;
         }
 	if (bbox.m_y > 1000 || bbox.m_y < 0.001) {
-            bbox.m_y = 3;
+            bbox.m_y = 5;
         }
-        n.setParameterNodes(inst.getName(), bbox.m_x + 1.0, bbox.m_y + 1.0, false, inst.getId(), mirror);
+        n.setParameterNodes(inst.getName(), bbox.m_x + 1, bbox.m_y + 1, false, inst.getId(), mirror);
         nodeId[inst.getId()] = n;
         name2id.insert(pair < string, int > (inst.getName(), inst.getId()));
 
@@ -276,10 +276,10 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     cout << "calculating boundaries..." << endl;
     double pminx, pmaxx, pminy, pmaxy;
     mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
-    mMinX = pminx;
-    mMaxX = pmaxx;
-    mMinY = pminy;
-    mMaxY = pmaxy;
+    mMinX = pminx + 10;
+    mMaxX = pmaxx + 10;
+    mMinY = pminy + 10;
+    mMaxY = pmaxy + 10;
     cout << mMinX << "," << mMinY << " " << mMaxX << "," << mMaxY << endl;
 
     for (auto &net : nets) {
@@ -306,6 +306,7 @@ kicadPcbDataBase &GridBasedPlacer::test_placer_flow() {
     rudy(netToCell);
     cout << "initial cost: "<< endl;
     cost(netToCell);
+    writePlFile("initial_pl.pl");
     iii = 1;
 
     cout << "annealing" << endl;
@@ -617,27 +618,47 @@ double GridBasedPlacer::wirelength(map<int, vector<pPin> > &netToCell) {
         continue;
       }
       int orient = nodeId[itCellList->idx].orientation;
+      int layer = nodeId[itCellList->idx].layer;
       xVal = nodeId[itCellList->idx].xBy2;
       yVal = nodeId[itCellList->idx].yBy2;
-
-      if(orient == 0) { // 0
-        xVal = xVal + itCellList->x_offset;
-        yVal = yVal + itCellList->y_offset;
-      } else if(orient == 2) { // 90
-        xVal = xVal + itCellList->y_offset;
-        yVal = yVal - itCellList->x_offset;
-      } else if(orient == 4) { // 180
-        xVal = xVal - itCellList->x_offset;
-        yVal = yVal - itCellList->y_offset;
-      } else if(orient == 6) { // 270
-        xVal = xVal - itCellList->y_offset;
-        yVal = yVal + itCellList->x_offset;
+      
+      if (layer == 1) {
+	      if(orient == 0) { // 0
+		xVal = xVal + itCellList->x_offset;
+		yVal = yVal + itCellList->y_offset;
+	      } else if(orient == 2) { // 90
+		xVal = xVal + itCellList->y_offset;
+		yVal = yVal - itCellList->x_offset;
+	      } else if(orient == 4) { // 180
+		xVal = xVal - itCellList->x_offset;
+		yVal = yVal - itCellList->y_offset;
+	      } else if(orient == 6) { // 270
+		xVal = xVal - itCellList->y_offset;
+		yVal = yVal + itCellList->x_offset;
+	      } else {
+		double rad = (orient*45.0*PI/180.0);
+		xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
+		yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
+	      }
       } else {
-        double rad = (orient*45.0*PI/180.0);
-        xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
-        yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
+	      if(orient == 0) { // 0
+		xVal = xVal + itCellList->x_offset;
+		yVal = yVal + itCellList->y_offset;
+	      } else if(orient == 2) { // 90
+		xVal = xVal + itCellList->y_offset;
+		yVal = yVal - itCellList->x_offset;
+	      } else if(orient == 4) { // 180
+		xVal = xVal - itCellList->x_offset;
+		yVal = yVal - itCellList->y_offset;
+	      } else if(orient == 6) { // 270
+		xVal = xVal - itCellList->y_offset;
+		yVal = yVal + itCellList->x_offset;
+	      } else {
+		double rad = (orient*45.0*PI/180.0);
+		xVal = itCellList->y_offset*sin(rad) + itCellList->x_offset*cos(rad) + xVal;
+		yVal = itCellList->y_offset*cos(rad) - itCellList->x_offset*sin(rad) + yVal;
+	      }
       }
-
       if (xVal < minXW)
         minXW = xVal;
       if (xVal > maxXW)
@@ -667,17 +688,23 @@ double GridBasedPlacer::cell_overlap() {
       } else {
         double oa = 0.0;
         std::deque<polygon> intersect_poly;
+
+	double center_dist = abs(nodeId[i].xBy2 - nodeId[j].xBy2) + abs(nodeId[i].yBy2 - nodeId[j].yBy2);
         boost::geometry::intersection(nodeId[i].poly, nodeId[j].poly, intersect_poly);
 
         BOOST_FOREACH(polygon const& p, intersect_poly) {
             oa +=  bg::area(p);
         }
+	if (oa < 0.00001) {
+		continue;
+	}
+	/*
         if(0.0 < oa && oa < 1.0) {
             oa = 1.0;
         } else if(oa < 0.0) {
             oa = 0.0;
-	}
-        overlap +=  pow(oa,2);
+	}*/
+        overlap +=  pow(oa,2) + oa+ 1.0/(1.0+center_dist);
 	//overlap += oa;
       }
     }
@@ -767,18 +794,24 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
           continue;
         } else {
           double oa = 0.0;
+	  double center_dist = abs(nodes[i]->xBy2 - nodeId[j].xBy2) + abs(nodes[i]->yBy2 - nodeId[j].yBy2);
+ 
           std::deque<polygon> intersect_poly;
           boost::geometry::intersection(nodes[i]->poly, nodeId[j].poly, intersect_poly);
 
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
           }
+	  if (oa < 0.00001) {
+		  continue;
+	  }
+	  /*
           if(0.0 < oa && oa < 1.0) {
               oa = 1.0;
           } else if (oa < 0.0) {
              oa = 0.0;
-          }
-          overlap +=  pow(oa,2);
+          }*/
+          overlap +=  pow(oa,2) + oa + 1.0/(1.0 + center_dist);
 	  //overlap += oa;
         }
       }
@@ -797,12 +830,13 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
           }
+	  /*
           if(0.0 < oa && oa < 1.0) {
               oa = 1.0;
           } else if (oa < 0.0) {
               oa = 0.0;
-          }
-          overlap +=  pow(oa,2);
+          }*/
+          overlap +=  pow(oa,2) + oa;
 	  //overlap += oa;
         }
       }
@@ -810,6 +844,10 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
     }
   }
   return overlap;
+}
+
+double GridBasedPlacer::rudy_partial(map<int, vector<pPin> > &netToCell, vector <Node *> &nodes) {
+double rudy = 0.0;
 }
 
 /**
@@ -924,8 +962,8 @@ double GridBasedPlacer::cost(map<int, vector<pPin> > &netToCell, int temp_debug)
   oa_hist.push_back(normalized_oa);
 
   double wirelength_cost = l1 * normalized_wl;
-  double overlap_cost = l2 * 0.85 * normalized_oa;
-  double routability_cost = l2 * 0.15 * normalized_rd;
+  double overlap_cost = l2 * (1-cong_coef) * normalized_oa;
+  double routability_cost = l2 * cong_coef * normalized_rd;
   double total_cost = wirelength_cost + overlap_cost + routability_cost;
   cout << "cost: " << total_cost << " wirelength: " << wl << " " << wirelength_cost << " overlap: " << oa << " " << overlap_cost << " congestion: " << rd << " " << routability_cost << endl;
 
@@ -960,8 +998,8 @@ double GridBasedPlacer::cost_partial(double wl, double oa) {
 double GridBasedPlacer::cost_partial(vector < Node *> &nodes, map<int, vector<pPin> > &netToCell) {
   double l2 = 1-l1;
   return l1 * (wirelength_partial(nodes, netToCell) - wl_normalization.first)/(wl_normalization.second - wl_normalization.first) +
-         l2 * 0.85 * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
-         l2 * 0.15 * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
+         l2 * (1-cong_coef) * (cell_overlap_partial(nodes) - area_normalization.first)/(area_normalization.second - area_normalization.first) +
+         l2 * cong_coef * (rudy(netToCell) - routability_normalization.first)/(routability_normalization.second - routability_normalization.first);
 }
 
 /**
@@ -1275,18 +1313,22 @@ void GridBasedPlacer::modified_lam_update(int i) {
 
   if (AcceptRate > LamRate) {
     T_update = Temperature * lamtemp_update;
-    sigma_update = min(log(T_update)  / log(Temperature), 0.99);
+    sigma_update = max(0.99, log(Temperature)  / log(T_update));
     Temperature = T_update;
-    l1 = 0.955*l1;
+    l1 = lambda_schedule*l1;
     vector <Node>::iterator nodeit = nodeId.begin();
     for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-      //sigma_update = 0.982;
       nodeit->sigma = max(sigma_update * nodeit->sigma, 2.0);
     } 
   } else {
-    T_update = min(Temperature / lamtemp_update, 1.0);
-    sigma_update = max(log(T_update) / log(Temperature), 1.0001);
+    T_update = Temperature / lamtemp_update;
+    sigma_update = min(1.01, log(Temperature) / log(T_update));
+    vector <Node>::iterator nodeit = nodeId.begin();
+    for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
+      nodeit->sigma = max(sigma_update * nodeit->sigma, 2.0);
+    }
     Temperature = T_update;
+    l1 = lambda_schedule*l1;
   }
 
   logger.update_annealer_param_histories(AcceptRate, sigma_update, Temperature, l1, LamRate);
@@ -1580,6 +1622,8 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     if (ii % 100 == 0) {
 	  if (bestSol.size() > 0) {
 	      nodeId = bestSol;
+	      area_normalization.second = best_overlap;
+	      wl_normalization.second = best_wl;
               if(rt) {
                   rtree.clear();
                   for (itNode = nodeId.begin(); itNode != nodeId.end(); ++itNode) {
@@ -1628,11 +1672,11 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
               }
   vector < Node > ::iterator nodeit;
   for (nodeit = nodeId.begin(); nodeit != nodeId.end(); ++nodeit) {
-    nodeit->sigma =  8;
+    nodeit->sigma =  4;
   }
 
-  //i = inner_loop_iter * num_components;
-  i = 0;
+  i = inner_loop_iter * num_components;
+  //i = 0;
   Temperature = 10e-20;
   cst = cost(netToCell);
   while (i > 0) {

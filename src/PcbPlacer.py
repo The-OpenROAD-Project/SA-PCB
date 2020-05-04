@@ -143,11 +143,11 @@ class GridBasedPlacer(_object):
     def set_base_lam(self, _lam: 'double') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_base_lam(self, _lam)
 
-    def set_overlap_weight(self, _cst: 'double') -> "void":
-        return _PcbPlacer.GridBasedPlacer_set_overlap_weight(self, _cst)
-
     def set_wirelength_weight(self, _cst: 'double') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_wirelength_weight(self, _cst)
+
+    def set_lambda_schedule(self, _lsched: 'double') -> "void":
+        return _PcbPlacer.GridBasedPlacer_set_lambda_schedule(self, _lsched)
 
     def set_two_sided(self, _2sided: 'bool') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_two_sided(self, _2sided)

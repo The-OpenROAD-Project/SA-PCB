@@ -55,12 +55,4 @@ typedef boost::geometry::model::d2::point_xy<double> Point;
 PlaceObj
 */
 class PlaceObj {
-  public:
-	  double wirelength_weight;
-	  double overlap_weight;
-	  double congestion_weight;
-	  double iteration = 0;
-	  double best_overlap = 0.0;
-
-	  double obj_fn();
 };

@@ -226,8 +226,11 @@ double GridBasedPlacer::test_placer_flow() {
     cout << "calculating boundaries..." << endl;
     double pminx, pmaxx, pminy, pmaxy;
 
-    mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
-    //mDb.getBoardBoundaryByEdgeCuts(pminx, pmaxx, pminy ,pmaxy);
+    if (bb_ec) {
+      mDb.getBoardBoundaryByEdgeCuts(pminx, pmaxx, pminy ,pmaxy);
+    } else {
+      mDb.getBoardBoundaryByPinLocation(pminx, pmaxx, pminy ,pmaxy);
+    }
     mMinX = pminx;
     mMaxX = pmaxx;
     mMinY = pminy;
@@ -270,7 +273,6 @@ double GridBasedPlacer::test_placer_flow() {
         if (comp.hasFrontCrtyd() && comp.hasBottomCrtyd()) {
 		throughhole = true;
 	}
-
         n.setParameterNodes(inst.getName(), bbox.m_x + 0.2, bbox.m_y + 0.2, false, inst.getId(), mirror, throughhole);
 
         nodeId[inst.getId()] = n;
@@ -1072,6 +1074,10 @@ void GridBasedPlacer::validate_move(Node &node, double rx, double ry) {
   validated_rx = min(validated_rx, mMaxX - node.width);
   validated_ry = min(validated_ry, mMaxY - node.height);
 
+  if (node.terminal || node.fixed) {
+      validated_rx = rx;
+      validated_ry = ry;
+  }
   node.setPos(validated_rx,validated_ry);
 }
 
@@ -1243,7 +1249,7 @@ vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, m
 
   bool accept = check_move(current_cost, updated_cost);
 
-  if (!accept || doverlap > 0) {
+  if (!accept) {
     AcceptRate = 1.0/500.0 *(499.0*AcceptRate);
     if(debug > 1) { 
       cout << "reject" << endl;
@@ -1739,8 +1745,8 @@ float GridBasedPlacer::annealer(map<int, vector<pPin> > &netToCell, string initi
     nodeit->sigma =  4;
   }
 
-  //i = inner_loop_iter * num_components;
-  i = 0;
+  i = inner_loop_iter * num_components;
+  //i = 0;
   Temperature = 10e-20;
   cst = cost(netToCell);
   while (i > 0) {

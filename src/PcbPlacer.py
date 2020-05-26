@@ -143,6 +143,9 @@ class GridBasedPlacer(_object):
     def set_base_lam(self, _lam: 'double') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_base_lam(self, _lam)
 
+    def set_bb_ec(self, _bb: 'bool') -> "void":
+        return _PcbPlacer.GridBasedPlacer_set_bb_ec(self, _bb)
+
     def set_wirelength_weight(self, _cst: 'double') -> "void":
         return _PcbPlacer.GridBasedPlacer_set_wirelength_weight(self, _cst)
 

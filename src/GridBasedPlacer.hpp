@@ -112,6 +112,8 @@ public:
   double get_temperature() { return Temperature; }
 
   void set_base_lam(double _lam) {base_lam = _lam;}
+  void set_bb_ec(bool _bb) {bb_ec = _bb;}
+
 //  void set_overlap_weight(double _cst) {l1 = 1-_cst;}
   void set_wirelength_weight(double _cst) {l1 = _cst;}
   void set_lambda_schedule(double _lsched) {lambda_schedule = _lsched;}
@@ -256,6 +258,8 @@ private:
   double cong_coef = 0.0;
   double shift_var = 1.0;
   double ssamp = 0.0;
+
+  bool bb_ec  = true;
 
   // annealing move parameters
   float rotate_proba = 0.15;

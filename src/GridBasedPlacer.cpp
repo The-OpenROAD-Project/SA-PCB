@@ -1243,7 +1243,7 @@ vector<double> GridBasedPlacer::initiate_move(vector<double> current_cost_vec, m
 
   bool accept = check_move(current_cost, updated_cost);
 
-  if (!accept) {
+  if (!accept || doverlap > 0) {
     AcceptRate = 1.0/500.0 *(499.0*AcceptRate);
     if(debug > 1) { 
       cout << "reject" << endl;

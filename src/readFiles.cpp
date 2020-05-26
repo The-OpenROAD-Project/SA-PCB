@@ -214,6 +214,49 @@ map<int, vector<pPin> > readNetsFile(string fname) {
 }
 
 /**
+readConstriantsFile
+read constraints file
+*/
+map<int, vector<pPin> > readConstraintsFile(string fname, map<int, vector<pPin>> & netToCell, kicadPcbDataBase& mdb) {
+  fstream file;
+  string buf;
+  int i = 0, a = 0, j = 0, NetId = netToCell.size();
+  vector < string > strVec;
+  //num_nets = netToCell.size();
+
+  string Out;
+
+  file.open(fname, ios:: in );
+  while (getline(file, buf)) {
+    i++;
+
+      vector < string > strTemp;
+      vector < pPin > pinTemp;
+
+	getline(file, buf);
+	boost::trim_all(buf);
+	boost::algorithm::split(strVec, buf, is_any_of("(, (,) (,))"), boost::token_compress_on);
+
+	strTemp.push_back(strVec[2]);
+	nodeId[name2id[strVec[2]]].setNetList(NetId);
+
+	pPin p;
+	// todo pads
+	//p.set_params(strVec[1].c_str(), atof(strVec[3].c_str()), atof(strVec[4].c_str()), nodeId[name2id[strVec[0]]].idx);
+	p.set_params(strVec[2].c_str(), 0, 0, -1);
+	pinTemp.push_back(p);
+
+	pPin p2;
+	p.set_params(strVec[5].c_str(), 0, 0, -1);
+	pinTemp.push_back(p2);
+
+      netToCell.insert(pair < int, vector< pPin > > (NetId, pinTemp));
+      NetId++;
+  }
+  return netToCell;
+}
+
+/**
 readClstFile
 read cluster file
 */

@@ -46,7 +46,7 @@ typedef boost::geometry::model::d2::point_xy<double> Point;
 setParameterNodes
 Sets parameters given an entry in Nodes file
 */
-void Node::setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0) {
+void Node::setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0, bool _throughhole=false) {
   name = _name;
   xCoordinate = 0.0;
   yCoordinate = 0.0;
@@ -60,6 +60,7 @@ void Node::setParameterNodes(string _name, double _width, double _height, bool _
   }
   orientation_str = "N";
   idx = _idx;
+  throughhole=_throughhole;
   if (!terminal) {
     //double points[][2] = {{0.0, 0.0}, {_width, 0.0}, {_width, _height}, {0.0, _height}};
     std::vector<Point> points;
@@ -163,6 +164,7 @@ void Node::layerChange() {
     layer=-1*layer;
   }
   flipped = -1 * flipped;
+  setRotation(4);
 }
 
 int Node::wrap_orientation(int kX) {
@@ -282,7 +284,7 @@ printParameter
 print node params
 */
 void Node::printParameter() {
-  cout << "name      " << name << endl;
+  cout << "name          " << name << endl;
   cout << "idx           " << idx << endl;
   cout << "Width         " << width << endl;
   cout << "Height        " << height << endl;
@@ -295,6 +297,7 @@ void Node::printParameter() {
   cout << "terminal      " << terminal << endl;
   cout << "fixed         " << fixed << endl;
   cout << "layer         " << layer << endl;
+  cout << "throughhole   " << throughhole << endl;
   cout << "NetList       ";
   vector < int > ::iterator it2;
   for (it2 = Netlist.begin(); it2 != Netlist.end(); ++it2) {

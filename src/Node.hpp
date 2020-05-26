@@ -35,6 +35,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <string>
+#include <iostream>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -83,11 +84,13 @@ class Node {
     int init_orientation;
     int orientation;
     int layer=1; // 1 or -1 for 2-sided placement
+    bool throughhole; //throughhole
     int mirror;
     int flipped=-1;
     vector < int > Netlist;
 
-    void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0);
+    void setParameterNodes(string _name, double _width, double _height, bool _terminal, int _idx, int _mirror=0, bool throughhole=false);
+
     void setParameterShapes(string wkt);
     void setParameterWts(int _weight);
     void setParameterPl(double xCoordinate, double yCoordinate, string _orientation_str, bool _fixed);

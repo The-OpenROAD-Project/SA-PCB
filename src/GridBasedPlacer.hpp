@@ -37,7 +37,6 @@
 #define BOOST_NO_AUTO_PTR
 
 #include <cstdio>
-#include "kicadPcbDataBase.h"
 #include "globalParam.h"
 #include "util.h"
 #include "linreg.h"
@@ -102,7 +101,8 @@ public:
 
   /* SWIG Methods Start */
   void test_hplacer_flow();
-  kicadPcbDataBase &test_placer_flow();
+  //kicadPcbDataBase &test_placer_flow();
+  double test_placer_flow();
   kicadPcbDataBase &getDb() { return mDb; }
   kicadPcbDataBase &mDb;
 
@@ -192,6 +192,13 @@ private:
   vector < double > var_hist;
   vector < double > temp_hist;
 
+  double micro_overlap_x;
+  double micro_overlap_x2;
+  double micro_cdist;
+  double overlap_x;
+  double overlap_x2;
+  double  cdist;
+
   bool do_hplace = false;
 
   std::pair <double,double> density_normalization;
@@ -233,6 +240,9 @@ private:
   map<int, vector<pPin> > *netToCell = nullptr;
   vector < vector < pPin > > *netToCellVec = nullptr;
   vector< int > accept_history;
+
+  int num_nets;
+  vector< double > net_weights;
 
   // annealing parameters
   double t_0 = 0.5;

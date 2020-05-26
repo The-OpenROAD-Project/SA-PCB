@@ -118,7 +118,7 @@ class GridBasedPlacer(_object):
     def test_hplacer_flow(self) -> "void":
         return _PcbPlacer.GridBasedPlacer_test_hplacer_flow(self)
 
-    def test_placer_flow(self) -> "kicadPcbDataBase &":
+    def test_placer_flow(self) -> "double":
         return _PcbPlacer.GridBasedPlacer_test_placer_flow(self)
 
     def getDb(self) -> "kicadPcbDataBase &":

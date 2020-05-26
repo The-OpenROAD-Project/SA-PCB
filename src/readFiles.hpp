@@ -49,6 +49,7 @@
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
+#include "kicadPcbDataBase.h"
 
 //#include "Node.hpp"
 //#include "Pin.hpp"
@@ -71,6 +72,7 @@ int readWtsFile(string fname);
 int readPlFile(string fname);
 int readClstFile(string fname);
 map<int, vector<pPin> > readNetsFile(string fname);
+map<int, vector<pPin> > readConstraintsFile(string fname, map<int, vector<pPin> > & netToCell, kicadPcbDataBase& db);
 int writePlFile(string fname);
 int writeRadFile(string fname);
 int writeNodesFile(string fname);

@@ -61,6 +61,9 @@ class Logger {
 		vector<double> cost_history;
 		vector<double> hpwl_history;
 		vector<double> overlap_history;
+		vector<double> overlap_x_history;
+                vector<double> overlap_x2_history;
+	        vector<double> cdist_history;	
 		vector<double> congestion_history;
 		vector<double> lambda_history;
 		vector<double> lamrate_history;
@@ -71,6 +74,10 @@ class Logger {
 		vector<double> micro_doverlap;
 		vector<double> micro_movement_window;
 		vector<double> micro_dcongestion;
+		vector<double> micro_overlap_history;
+		vector<double> micro_overlap_x_history;
+                vector<double> micro_overlap_x2_history;
+		vector<double> micro_cdist_history;
 
 		vector<double> accept_probabilities;
 
@@ -89,6 +96,18 @@ class Logger {
 			std::ofstream olog(logdir+"overlap_history");
 			for(vector<double>::const_iterator i = overlap_history.begin(); i!= overlap_history.end(); ++i) {
 				olog << *i << '\n';
+			}
+			std::ofstream xlog(logdir+"overlap_x_history");
+			for(vector<double>::const_iterator i = overlap_x_history.begin(); i!= overlap_x_history.end(); ++i) {
+				xlog << *i << '\n';
+			}
+			std::ofstream x2log(logdir+"overlap_x2_history");
+			for(vector<double>::const_iterator i = overlap_x2_history.begin(); i!= overlap_x2_history.end(); ++i) {
+				x2log << *i << '\n';
+			}
+			std::ofstream cdlog(logdir+"cdist_history");
+			for(vector<double>::const_iterator i = cdist_history.begin(); i!= cdist_history.end(); ++i) {
+				cdlog << *i << '\n';
 			}
 			olog.close();
 			std::ofstream colog(logdir+"congestion_history");
@@ -148,6 +167,18 @@ class Logger {
 				mdcolog << *i << '\n';
 			}
 			mdcolog.close();
+			std::ofstream mxlog(logdir+"micro_overlap_x_history");
+			for(vector<double>::const_iterator i = micro_overlap_x_history.begin(); i!= micro_overlap_x_history.end(); ++i) {
+				mxlog << *i << '\n';
+			}
+			std::ofstream mx2log(logdir+"micro_overlap_x2_history");
+			for(vector<double>::const_iterator i = micro_overlap_x2_history.begin(); i!= micro_overlap_x2_history.end(); ++i) {
+				mx2log << *i << '\n';
+			}
+			std::ofstream mcdlog(logdir+"micro_cdist_history");
+			for(vector<double>::const_iterator i = micro_cdist_history.begin(); i!= micro_cdist_history.end(); ++i) {
+				mcdlog << *i << '\n';
+			}
 
 			std::ofstream mplog(logdir+"micro_accept_probs");
                         for(vector<double>::const_iterator i = accept_probabilities.begin(); i!= accept_probabilities.end(); ++i) {
@@ -164,6 +195,18 @@ class Logger {
 		    micro_doverlap.push_back(d_overlap);
 		    micro_movement_window.push_back(window);
 		    micro_dcongestion.push_back(d_congestion);
+		}
+		void Logger::update_micro_overlap_histories(double overlap_x, double overlap_x2, double cdist) {
+                    micro_overlap_x_history.push_back(overlap_x);
+		    micro_overlap_x2_history.push_back(overlap_x2);
+		    micro_cdist_history.push_back(cdist);
+
+		}
+                void Logger::update_overlap_histories(double overlap_x, double overlap_x2, double cdist) {
+                    overlap_x_history.push_back(overlap_x);
+		    overlap_x2_history.push_back(overlap_x2);
+		    cdist_history.push_back(cdist);
+
 		}
 		void Logger::update_cost_histories(double cost, double hpwl, double overlap, double congestion) {
 			cost_history.push_back(cost);

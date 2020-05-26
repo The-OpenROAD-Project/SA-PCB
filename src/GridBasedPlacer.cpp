@@ -750,8 +750,8 @@ double GridBasedPlacer::cell_overlap() {
         } else if(oa < 0.0) {
             oa = 0.0;
 	}*/
-        //overlap +=  pow(oa,2) + oa + 1.0/(1.0+center_dist);
-	overlap += oa + 1.0/(1.0 + center_dist);
+        overlap +=  pow(oa,2) + oa + 1.0/(1.0+center_dist);
+	//overlap += oa + 1.0/(1.0 + center_dist);
 	//overlap += oa;
       }
     }
@@ -852,8 +852,8 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
 	  if (oa < 0.00001) {
 		  continue;
 	  }
-          //overlap +=  pow(oa,2) + oa + 1.0/(1.0 + center_dist);
-	  overlap += oa + 1.0/(1.0 + center_dist);
+          overlap +=  pow(oa,2) + oa + 1.0/(1.0 + center_dist);
+	  //overlap += oa + 1.0/(1.0 + center_dist);
           cdist += 1.0/(1.0+center_dist);
 	  overlap_x2 += pow(oa,2);
 	  overlap_x += oa;
@@ -881,8 +881,8 @@ double GridBasedPlacer::cell_overlap_partial(vector < Node *> &nodes) {
           BOOST_FOREACH(polygon const& p, intersect_poly) {
               oa +=  bg::area(p);
           }
-          //overlap +=  pow(oa,2) + oa + 1.0/(1.0+center_dist);
-	  overlap += oa + 1.0/(1.0+center_dist); 
+          overlap +=  pow(oa,2) + oa + 1.0/(1.0+center_dist);
+	  //overlap += oa + 1.0/(1.0+center_dist); 
         }
       }
       //cout <<"nonrt: " << overlap << endl;
